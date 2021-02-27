@@ -1,0 +1,17 @@
+###################   架構   ###################
+[語言] C++
+[讀檔] 
+    > input 檔: 
+        // Vehicle Property //
+        - .txt檔 (手刻測資, 型如: 0, 0, ,0 , 0, yellow \n 1, 1, 4, 1, green)
+        - 輸入五個參數分別為: (vehicle_id, priority, depart_time, route_id, vehicle_color), 我用class包在main_runner.h
+[檔案內容]
+    > makefile: 執行main檔
+    > bin
+        - runner: 為執行makefile後輸出的binary檔
+    > src
+        - main_runner.cpp: 
+            -- 讀測資檔 
+                (1) 還沒寫完, 我卡在vehicle_color在class中是用'string'存取, 但讀檔我只會用char*, 還沒把每一行變數存到class中
+                (2) 我設一個全域變數'<Class> All_Vehicle'去存取每個車車的class
+        - main_runner.h: 宣告class去存取vehicle的property
