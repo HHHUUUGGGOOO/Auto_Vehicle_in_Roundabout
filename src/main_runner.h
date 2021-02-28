@@ -22,14 +22,19 @@ using namespace std;
 class Vehicle
 {
     public:
-                            Vehicle() {}; // constructor
+                            Vehicle() {}; // Default constructor
+        /* Get vehicle Property, initialize with custom dimensions */
+        Vehicle(int v_id, int v_priority, int v_depart_time, int v_route_id, string v_color)
+          : vehicle_id(v_id), vehicle_priority(v_priority), depart_time(v_depart_time), route_id(v_route_id), vehicle_color(v_color)
+        {}
+
     private:
         /* Vehicle Property */
-        int                 vehicle_id;
-        int                 vehicle_priority;
-        int                 deparrt_time;
-        int                 route_id;
-        string              vehicle_color;
+        int                 vehicle_id { 0 };
+        int                 vehicle_priority { 0 };
+        int                 depart_time { 0 };
+        int                 route_id { 0 };
+        string              vehicle_color { "" }; // optional property
 };
 
 #endif

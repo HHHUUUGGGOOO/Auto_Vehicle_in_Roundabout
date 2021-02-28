@@ -12,6 +12,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
+#include <cstring>
 #include <vector>
 #include <stdlib.h>
 #include "main_runner.h"
@@ -44,7 +46,15 @@ int main(int argc, char* argv[])
     return 0;
   }
   // Read the input file 
+  char buffer[100];
   fstream fin(argv[1]);
-  
+  fin.getline(buffer, 25);
+  // parsing parameters & store each vehicle's property
+  int v_id, v_priority, v_depart_time, v_route_id;
+  string v_color;
+  while (fin >> v_id >> v_priority >> v_depart_time >> v_route_id >> v_color){
+    Vehicle vehicle { v_id, v_priority, v_depart_time, v_route_id, v_color };
+    All_Vehicle.push_back(vehicle);
+  }
 
 }
