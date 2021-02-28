@@ -35,17 +35,9 @@ void help_message()
   cout << "Please enter correct file path" << endl;
 }
 
-//----------------------------------------------------------------------------------------
-//    Main Function
-//----------------------------------------------------------------------------------------
-int main(int argc, char* argv[])
+// Read file and set vehicle's property
+void read_file(char* argv[])
 {
-  // Openfile error
-  if (argc != 3){
-    help_message();
-    return 0;
-  }
-  // Read the input file 
   char buffer[100];
   fstream fin(argv[1]);
   // Parsing parameters & store each vehicle's property
@@ -63,5 +55,19 @@ int main(int argc, char* argv[])
     cout << "car color: " << v_color << endl;
   }
   fin.close();
+}
+
+//----------------------------------------------------------------------------------------
+//    Main Function
+//----------------------------------------------------------------------------------------
+int main(int argc, char* argv[])
+{
+  // Openfile error
+  if (argc != 3){
+    help_message();
+    return 0;
+  }
+  // Read the input file 
+  read_file(argv);
   return 0;
 }
