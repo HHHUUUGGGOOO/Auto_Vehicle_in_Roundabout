@@ -3,9 +3,11 @@
 [讀檔] 
     > input 檔: 
         // Vehicle Property //
-        - .txt檔 (手刻測資, 型如: 0, 0, ,0 , 0, yellow \n 1, 1, 4, 1, green, 其中'vehicle_color'是optional, 預設='')
+        - input = (int, int, float, int, string)
         - 輸入五個參數分別為: (vehicle_id, priority, depart_time, route_id, vehicle_color), 我用class包在main_runner.h
-        - 建一個'input data'的資料夾, 所有測資.txt都放裡面, 讀檔的時候讀整個目錄讓他iteration運行
+        - .in檔 (手刻測資, 型如: 0, 0, 0.0, 0, yellow \n 1, 1, 4.0, 1, green, 其中'vehicle_color'預設='green')
+        - vehicle_id 從 1 開始
+        - 建一個'input data'的資料夾, 所有測資.in都放裡面, 讀檔的時候讀整個目錄讓他iteration運行
 [檔案內容]
     > makefile: 執行main檔
     > bin
@@ -16,7 +18,11 @@
                 --- 我設一個全域變數'<Class> All_Vehicle'去存取每個車車的class
         - main_runner.h: 宣告class去存取vehicle的property
     > input
-        - 1.txt 
-        - 2.txt
-        - 4cars.txt
-        - full_roundabout.txt
+        - 1.in
+        - 2.in
+        - 4.in
+        - full_roundabout.in
+    > output
+        - 暫存資料夾, compile的時候不知道為甚麼需要output資料夾才會過, 不然他會叫我'please enter correct path'
+    > README.md
+        - compile步驟寫在這

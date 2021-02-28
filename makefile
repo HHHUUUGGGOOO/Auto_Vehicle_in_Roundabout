@@ -6,7 +6,7 @@ ARFLAGS = rcv
 # -c option ask g++ to compile the source files, but do not link.
 # -g option is for debugging version
 # -O2 option is for optimized version
-OPTFLAGS = -O3
+OPTFLAGS = -O2
 
 all	: bin/runner
 	@echo -n ""

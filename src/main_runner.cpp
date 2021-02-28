@@ -48,13 +48,20 @@ int main(int argc, char* argv[])
   // Read the input file 
   char buffer[100];
   fstream fin(argv[1]);
-  fin.getline(buffer, 25);
-  // parsing parameters & store each vehicle's property
-  int v_id, v_priority, v_depart_time, v_route_id;
+  // Parsing parameters & store each vehicle's property
+  int v_id, v_priority, v_route_id;
+  float v_depart_time;
   string v_color;
   while (fin >> v_id >> v_priority >> v_depart_time >> v_route_id >> v_color){
-    Vehicle vehicle { v_id, v_priority, v_depart_time, v_route_id, v_color };
+    Vehicle vehicle(v_id, v_priority, v_depart_time, v_route_id, v_color);
     All_Vehicle.push_back(vehicle);
+    // cout debug
+    cout << "car id: " << v_id << endl;
+    cout << "car priority: " << v_priority << endl;
+    cout << "depart time: " << v_depart_time << endl;
+    cout << "car route id: " << v_route_id << endl;
+    cout << "car color: " << v_color << endl;
   }
-
+  fin.close();
+  return 0;
 }
