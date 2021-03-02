@@ -36,6 +36,13 @@ class Vehicle
         float               depart_time;
         int                 route_id;
         string              vehicle_color; // optional property
+        float               earliest_arrival_time;
+        float               source_angle;
+        float               destination_angle;
+
+        /* Decision Varible */
+        bool                in_roundabout;
+
 };
 
 #endif
