@@ -2,9 +2,7 @@
 [讀檔] 
     > input 檔: 
         // Vehicle Property //
-        - input = (int, int, float, int, string)
-        - 輸入五個參數分別為: (vehicle_id, priority, depart_time, route_id, vehicle_color), 我用class包在main_runner.h
-        - .in檔 (手刻測資, 型如: 0, 0, 0.0, 0, yellow \n 1, 1, 4.0, 1, green, 其中'vehicle_color'預設='green')
+        - 輸入參數為: 
         - vehicle_id 從 1 開始
         - 建一個'input data'的資料夾, 所有測資.in都放裡面, 讀檔的時候讀整個目錄讓他iteration運行
 [檔案內容]
@@ -12,16 +10,29 @@
     > bin
         - runner: 為執行makefile後輸出的binary檔
     > src
-        - main_runner.cpp: 
-            -- 讀測資檔 
-                --- 我設一個全域變數'<Class> All_Vehicle'去存取每個車車的class
-        - main_runner.h: 宣告class去存取vehicle的property
-    > input
+        - old_version
+            -- 放暫時用不到的舊檔案
+        - main.cpp
+        - ra_mgr.cpp
+        - ra_mgr.h
+        - ra_info.h
+        - vehicle.h
+    > input (待修改)
         - 1.in
         - 2.in
         - 4.in
         - full_roundabout.in
     > output
         - 暫存資料夾, compile的時候不知道為甚麼需要output資料夾才會過, 不然他會叫我'please enter correct path'
+        - 要存所有車子的解, for each vehicle: < (angle, t), (), ... >
+    > schema
+        - 放討論結果的照片
     > README.md
         - compile步驟寫在這
+    > note.txt
+        - 記錄每個檔案的用途
+
+[待處理]
+    > 按照新參數修改.in檔
+    > 在 ra_info.h 中有變數要賦初始值
+
