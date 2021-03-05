@@ -16,7 +16,6 @@
 #include <string>
 #include <iostream>
 #include "vehicle.h"
-#include "ra_info.h"
 
 using namespace std;
 
