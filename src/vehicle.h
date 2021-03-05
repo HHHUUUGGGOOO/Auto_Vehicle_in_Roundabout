@@ -32,13 +32,13 @@ class Vehicle
 {
   typedef vector< pair<float, float> > my_pair;
     public:
-        /* Default constructor */
+        /* Constructor */
         Vehicle(int v_id, float eat, float sa, float da)
         : id(v_id), earliest_arrival_time(eat), source_angle(sa), destination_angle(da) {
           priority = da-sa;
           status = WAIT;
         };
-        /* Vehicle status, [ WAIT / IN / OUT ] */
+        /* Vehicle status[ WAIT / IN / OUT ] */
         Vehicle_status              status;
         /* Roundabout variable, need to set value by other functions */
         int                         id;

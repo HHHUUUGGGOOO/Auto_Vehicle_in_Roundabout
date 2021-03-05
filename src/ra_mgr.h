@@ -23,6 +23,8 @@ using namespace std;
 class ra_mgr;
 extern ra_mgr* raMgr;
 
+
+
 //----------------------------------------------------------------------------------------
 //    Function
 //----------------------------------------------------------------------------------------
@@ -34,13 +36,16 @@ class ra_mgr
     virtual ~ra_mgr() {}
 
     /* Define function: read_file() */
-    bool                check_vehicle_angle();
-    bool                read_vehicle(const string& infile);
-    // bool                read_ra_info(const string& rafile);
+    bool                read_vehicle(const string&);
+    bool                read_ra_info(const string&);
+
+    // utility //
+    bool                verify_capacity();
+    bool                verify_angle(float, float);
 
     /* Define function: schedule() */
-    bool                check_constraint();
-    bool                do_scheduling();
+    void                do_scheduling();
+    void                greedy_without_safetymargin();
 
     /* Define function: output_file() */
     void                do_output_file();
@@ -48,6 +53,15 @@ class ra_mgr
     /* Define variables */
     int                 num_v_in_ra; // number of vehicles in the roundabout now
     vector<Vehicle>     total_v_info; // store each vehicle's properties
+    
+    // roundabout information //
+    float           radius;
+    float           safety_velocity;
+    float           safety_margin;
+    int             max_capacity;
+
+    vector<float>   valid_source_angle; // 0 <= angle < 2*pi
+    vector<float>   valid_destination_angle; // 0 <= angle < 2*pi
     
 };
 
