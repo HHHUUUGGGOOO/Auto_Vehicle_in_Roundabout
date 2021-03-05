@@ -11,22 +11,37 @@
 //----------------------------------------------------------------------------------------
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <sstream>
 #include <cstring>
 #include <vector>
-#include <stdlib.h>
+#include <cstdlib>
+#include <cmath>
 #include "vehicle.h"
-#include "ra_info.h"
+// #include "ra_info.h"
 #include "ra_mgr.h"
 
 using namespace std;
 
-//----------------------------------------------------------------------------------------
-//    Global Variable
-//----------------------------------------------------------------------------------------
+bool
+ra_mgr::read_vehicle(const string& infile)
+{
+  char buffer[100];
+  fstream fin(infile);
+  // Parsing parameters & store each vehicle's property
+  int v_id=0;
+  float eat=5;
+  float sa =0.5*M_PI;
+  float da =1.5*M_PI;
 
+  while (fin >> v_id >> eat >> sa >> da){
+    Vehicle vehicle(v_id, eat, sa, da);
+    total_v_info.push_back(vehicle);  
+  }
+  fin.close();
+  return true;
+}
 
-//----------------------------------------------------------------------------------------
-//    Main Function
-//----------------------------------------------------------------------------------------
+bool
+ra_mgr::do_scheduling()
+{
+  return false;
+}
