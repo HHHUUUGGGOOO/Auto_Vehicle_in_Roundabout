@@ -34,7 +34,9 @@ class ra_mgr
 
   public:
     /* Default constructor */
-    ra_mgr() {}
+    ra_mgr() {
+      num_v_in_ra=0;
+    }
     virtual ~ra_mgr() {}
 
     /* Define function: read_file() */

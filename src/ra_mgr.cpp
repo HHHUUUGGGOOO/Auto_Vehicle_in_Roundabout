@@ -117,6 +117,7 @@ ra_mgr::read_ra_info(const string& rafile)
  return true;
 }
 
+
 void                
 ra_mgr::greedy_without_safetymargin()
 {
@@ -154,7 +155,10 @@ ra_mgr::greedy_without_safetymargin()
         total_v[i].now_angle+=angle_unit;
         // leave //
         if (total_v[i].now_angle==total_v[i].destination_angle)
+        {
           total_v[i].status = OUT;
+          num_v_in_ra--;
+        }
         // conflict and has lower priority // 
         else if (check_intersection(total_v[i].now_angle) && check_conflict(i, trying_in))
           total_v[i].now_angle-=angle_unit;
@@ -165,12 +169,18 @@ ra_mgr::greedy_without_safetymargin()
     }
 
     for (int i=0; i<trying_in.size(); i++)
-    { 
+    {
+      if (num_v_in_ra >= max_capacity) 
+      {
+        cerr << "Capacity violation !!" << endl;
+        break;
+      }
       if (trying_in[i].first != -1)
       {
         total_v[trying_in[i].first].position.push_back(make_pair(total_v[trying_in[i].first].source_angle,t));
         total_v[trying_in[i].first].status=IN;
         total_v[trying_in[i].first].now_angle=total_v[trying_in[i].first].source_angle;
+        num_v_in_ra ++;
       }
     }
     t+=100;
@@ -243,6 +253,8 @@ ra_mgr::current_situation()
   for (int i=0; i< out.size(); i++)
     cerr << out[i] << " ";
   cerr << endl;
+  
+  cerr << "Number of vehicles in roundabout now:" << num_v_in_ra << "/" << max_capacity << endl;
   cerr << "------------------------------------------------------------" << endl;
 }
 
