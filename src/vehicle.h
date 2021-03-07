@@ -30,13 +30,13 @@ enum Vehicle_status
 
 class Vehicle
 {
-  typedef vector< pair<float, float> > my_pair;
+  typedef pair<float, float> my_pair;
     public:
         /* Constructor */
         Vehicle(int v_id, float eat, float sa, float da)
         : id(v_id), earliest_arrival_time(eat), source_angle(sa), destination_angle(da) {
-          priority = da-sa;
           status = WAIT;
+          now_angle = -1;
         };
         /* Vehicle status[ WAIT / IN / OUT ] */
         Vehicle_status              status;
@@ -47,7 +47,9 @@ class Vehicle
         float                       destination_angle;
         float                       priority;
         /* output answer type, < <angle_1, t_1>, <angle_2, t_2>, ... > */
-        my_pair                     position;
+        vector<my_pair>             position;
+
+        float                       now_angle;  
 };
 
 #endif

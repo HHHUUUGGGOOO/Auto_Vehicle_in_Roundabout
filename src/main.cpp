@@ -29,20 +29,20 @@ int main(int argc, char** argv)
   ////// read input file //////
   if (argc == 4) {
     if (!raMgr->read_ra_info(argv[2])) {
-      cerr << "Error: cannot open roundabout information file \"" << argv[2] << "\"!!\n";
+      cerr << "Error: cannot open roundabout information input file \"" << argv[2] << "\"!!\n";
     }
     if (!raMgr->read_vehicle(argv[1])) {
-      cerr << "Error: cannot open input file \"" << argv[1] << "\"!!\n";
+      cerr << "Error: cannot open vehicle information input file \"" << argv[1] << "\"!!\n";
     }
   }
   else {
     cerr << "Error: illegal number of argument (" << argc << ")!!\n";
   }
 
-  
+  raMgr->Roundabout_information();
 
   ////// schedule //////
-  raMgr->do_scheduling();
+  raMgr->greedy_without_safetymargin();
 
   ////// write output file //////
 

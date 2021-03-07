@@ -5,5 +5,5 @@ Solve the automatic vehicles' scheduling in roundabout
 - make clean
 - make
 - cd Auto_Vehicle_in_Roundabout
-- ./bin/runner input/<input_file_name> output/<output_file_name>
+- ./bin/runner input/<input_file_name> input_ra/<roundabout_infomation_file_name> output/<output_file_name>
 

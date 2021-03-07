@@ -15,6 +15,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <utility>
 #include "vehicle.h"
 
 using namespace std;
@@ -29,6 +30,8 @@ extern ra_mgr* raMgr;
 //----------------------------------------------------------------------------------------
 class ra_mgr
 {
+  // typedef map<const int, Vehicle*>   VehicleMap;
+
   public:
     /* Default constructor */
     ra_mgr() {}
@@ -41,6 +44,10 @@ class ra_mgr
     // utility //
     bool                verify_capacity();
     bool                verify_angle(float, float);
+    void                Roundabout_information();
+    void                current_situation();   
+    bool                check_intersection(float); 
+    bool                check_conflict(int, vector< pair<int, float> >&);     
 
     /* Define function: schedule() */
     void                do_scheduling();
@@ -51,8 +58,9 @@ class ra_mgr
 
     /* Define variables */
     int                 num_v_in_ra; // number of vehicles in the roundabout now
-    vector<Vehicle>     total_v_info; // store each vehicle's properties
+    vector<Vehicle>     total_v; // store each vehicle's properties
     
+
     // roundabout information //
     float           radius;
     float           safety_velocity;
