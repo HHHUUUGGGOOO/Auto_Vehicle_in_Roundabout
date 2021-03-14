@@ -40,7 +40,7 @@ class Vehicle
         };
         /* Vehicle status[ WAIT / IN / OUT ] */
         Vehicle_status              status;
-        /* Roundabout variable, need to set value by other functions */
+        /* Vehicle variable, need to set value by other functions */
         int                         id;
         float                       earliest_arrival_time;
         float                       source_angle;

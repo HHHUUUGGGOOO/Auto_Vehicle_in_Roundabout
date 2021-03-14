@@ -44,4 +44,5 @@
 
 [待處理]
     > output file
+    > xfig (畫向量圖)
 

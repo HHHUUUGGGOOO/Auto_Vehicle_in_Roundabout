@@ -33,12 +33,12 @@ ra_mgr::read_vehicle(const string& infile)
   char buffer[100];
   fstream fin(infile);
   
-  int v_id=0;
+  int v_id = 0;
   float eat, sa, da; // angle is base on 360
 
   while (fin >> v_id >> eat >> sa >> da){
-    // check source/destination angle (5)(6) & base on PI // 
-    if (sa >= 360 || da >= 360) 
+    // check source/destination angle (5)(6) & base on 'π' // 
+    if (sa >= 360 || da >= 360 || sa < 0 || da < 0) 
     {
       cerr << "ID = " << v_id << "'s source or destination angle is not defined in 360 degree !!" << endl;
       return false;
@@ -49,7 +49,7 @@ ra_mgr::read_vehicle(const string& infile)
       return false;
     }
 
-    // TODO: decide whether need to switch to PI form //
+    // TODO: decide whether need to switch to 'π' form //
     /* 
     sa = sa / 360 * M_PI;
     da = da / 360 * M_PI;
@@ -59,7 +59,7 @@ ra_mgr::read_vehicle(const string& infile)
     da = (sa > da)? da+360: da;
     // store //
     Vehicle vehicle(v_id, eat, sa, da);
-    total_v.push_back(vehicle);  
+    total_v.push_back(vehicle);     
   }
 
   fin.close();
@@ -131,10 +131,10 @@ ra_mgr::greedy_without_safetymargin()
     return;
   }
 
-  int time_unit=100;
-  float angle_unit=30;
+  int time_unit = 0.1;  // unit: sec
+  float angle_unit = 360*(5/radius) + 2*(safety_velocity/2); // unit: m, r*θ >= 5 (小客車長度5公尺, 小型車至少要保持「車速/2」距離(單位：公尺)；大型車至少要保持「車速-20」距離(單位：公尺)) 
 
-  int t=0;
+  int t = 0; 
   int conflict_v;
   int angle;
 
@@ -142,33 +142,33 @@ ra_mgr::greedy_without_safetymargin()
   while(1)
   {
     // find trying in first //
-    for (int i=0; i<total_v.size(); i++)
+    for (int i=0; i < total_v.size(); i++)
     {
-      if (total_v[i].status== WAIT && total_v[i].earliest_arrival_time <= t)
+      if (total_v[i].status == WAIT && total_v[i].earliest_arrival_time <= t)
         trying_in.push_back(make_pair(i, total_v[i].source_angle));
     }
 
-    for (int i=0; i<total_v.size(); i++)
+    for (int i=0; i < total_v.size(); i++)
     {
       if (total_v[i].status == IN)
       {
-        total_v[i].now_angle+=angle_unit;
+        total_v[i].now_angle += angle_unit;
         // leave //
-        if (total_v[i].now_angle==total_v[i].destination_angle)
+        if (total_v[i].now_angle == total_v[i].destination_angle)
         {
           total_v[i].status = OUT;
           num_v_in_ra--;
         }
         // conflict and has lower priority // 
         else if (check_intersection(total_v[i].now_angle) && check_conflict(i, trying_in))
-          total_v[i].now_angle-=angle_unit;
+          total_v[i].now_angle -= angle_unit;
         
         // no conflict or has higher priority -> do nothing //
         total_v[i].position.push_back(make_pair(total_v[i].now_angle,t));
       }
     }
 
-    for (int i=0; i<trying_in.size(); i++)
+    for (int i=0; i < trying_in.size(); i++)
     {
       if (num_v_in_ra >= max_capacity) 
       {
@@ -178,12 +178,12 @@ ra_mgr::greedy_without_safetymargin()
       if (trying_in[i].first != -1)
       {
         total_v[trying_in[i].first].position.push_back(make_pair(total_v[trying_in[i].first].source_angle,t));
-        total_v[trying_in[i].first].status=IN;
-        total_v[trying_in[i].first].now_angle=total_v[trying_in[i].first].source_angle;
+        total_v[trying_in[i].first].status = IN;
+        total_v[trying_in[i].first].now_angle = total_v[trying_in[i].first].source_angle;
         num_v_in_ra ++;
       }
     }
-    t+=100;
+    t += 100;
     trying_in.clear();
     current_situation();
     if (t == 1100) break;
@@ -193,12 +193,20 @@ ra_mgr::greedy_without_safetymargin()
 
 
 // utility //
+bool
+ra_mgr::verify_capacity()
+{
+  // Determine if vehicle number in ra now "+" this vehicle will exceed the max capacity
+  return (num_v_in_ra + 1 > max_capacity) ? true: false;
+}
+
 bool                
 ra_mgr::verify_angle(float sa, float da) 
 {
-  for(int i=0; i<valid_source_angle.size(); i++)
+  // sa: source angle, da: destination angle
+  for(int i=0; i < valid_source_angle.size(); i++)
     if (sa == valid_source_angle[i]) return true; 
-  for(int i=0; i<valid_destination_angle.size(); i++)
+  for(int i=0; i < valid_destination_angle.size(); i++)
     if (da == valid_destination_angle[i]) return true; 
 
   return false;
@@ -214,12 +222,12 @@ ra_mgr::Roundabout_information()
   cerr << "Safety margin: " << safety_margin << " (m)" << endl;
   cerr << "Maximum capacity: " << max_capacity << " (unit)" << endl;
   cerr << "Valid source angles: ";
-  for (int i=0; i<valid_source_angle.size(); i++)
+  for (int i=0; i < valid_source_angle.size(); i++)
     cerr << valid_source_angle[i] << " ";
   cerr << " (degree)" << endl;
 
   cerr << "Valid destionation angle: ";
-  for (int i=0; i<valid_destination_angle.size(); i++)
+  for (int i=0; i < valid_destination_angle.size(); i++)
     cerr << valid_destination_angle[i] << " ";
   cerr << " (degree)" << endl;
   cerr << "------------------------------------------------------------" << endl;
@@ -233,24 +241,24 @@ ra_mgr::current_situation()
 
   cerr << "------------------------------------------------------------" << endl;
   cerr << "Current situation" << endl;
-  for (int i=0; i< total_v.size(); i++)
+  for (int i=0; i < total_v.size(); i++)
   {
-    if (total_v[i].status==IN)
+    if (total_v[i].status == IN)
       cerr << "Vehicle id: " << total_v[i].id << " -> " 
         << total_v[i].position.back().first << " degree (" << total_v[i].position.back().second << " ms)." << endl;
-    else if (total_v[i].status==WAIT)
+    else if (total_v[i].status == WAIT)
       wait.push_back(total_v[i].id);
-    else if (total_v[i].status==OUT)
+    else if (total_v[i].status == OUT)
       out.push_back(total_v[i].id);    
   }
 
   cerr << "Unscheduled vehicles' id: ";
-  for (int i=0; i< wait.size(); i++)
+  for (int i=0; i < wait.size(); i++)
     cerr << wait[i] << " ";
   cerr << endl;
 
   cerr << "Scheduled vehicles' id: ";
-  for (int i=0; i< out.size(); i++)
+  for (int i=0; i < out.size(); i++)
     cerr << out[i] << " ";
   cerr << endl;
   
@@ -261,10 +269,15 @@ ra_mgr::current_situation()
 bool
 ra_mgr::check_intersection(float angle)
 {
+  if (angle >= 360)
+  {
+    // select the equivalent angle in [0, 2*pi]
+    angle = angle + 360*(int)(-angle/360);
+  }
   for (int i=0; i < valid_source_angle.size(); i++)
   {
-    if (angle >=360) angle-=360;
-    if (angle==valid_source_angle[i]) return true;
+    // if (angle >= 360) angle -= 360;
+    if (angle == valid_source_angle[i]) return true;
   }
   return false;
 }
@@ -272,11 +285,11 @@ ra_mgr::check_intersection(float angle)
 bool
 ra_mgr::check_conflict(int index, vector< pair<int, float> >& trying_in)
 {
-  for (int i=0; i< trying_in.size(); i++)
+  for (int i=0; i < trying_in.size(); i++)
   {
     if (trying_in[i].second == total_v[i].now_angle || trying_in[i].second == total_v[i].now_angle-360)
     {
-      if (total_v[trying_in[i].first].destination_angle- total_v[trying_in[i].first].source_angle> total_v[i].destination_angle-total_v[i].now_angle) return true;
+      if (total_v[trying_in[i].first].destination_angle - total_v[trying_in[i].first].source_angle > total_v[i].destination_angle - total_v[i].now_angle) return true;
       else
       {
         trying_in[i].first = -1;

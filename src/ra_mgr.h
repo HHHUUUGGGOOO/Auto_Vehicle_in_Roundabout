@@ -66,11 +66,11 @@ class ra_mgr
     // roundabout information //
     float           radius;
     float           safety_velocity;
-    float           safety_margin;
+    float           safety_margin; // 小型車至少要保持「車速/2」距離(單位：公尺)；大型車至少要保持「車速-20」距離(單位：公尺)
     int             max_capacity;
 
     vector<float>   valid_source_angle; // 0 <= angle < 2*pi
-    vector<float>   valid_destination_angle; // 0 <= angle < 2*pi
+    vector<float>   valid_destination_angle; // Si <= Di < Si + 2*pi ; D_i > 0
     
 };
 
