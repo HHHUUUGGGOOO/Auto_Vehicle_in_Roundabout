@@ -34,9 +34,9 @@ ra_mgr::read_vehicle(const string& infile)
   fstream fin(infile);
   
   int v_id = 0;
-  float eat, sa, da; // angle is base on 360
+  float eat, sa, da, vel; // angle is base on 360
 
-  while (fin >> v_id >> eat >> sa >> da){
+  while (fin >> v_id >> eat >> sa >> da >> vel){
     // check source/destination angle (5)(6) & base on 'π' // 
     if (sa >= 360 || da >= 360 || sa < 0 || da < 0) 
     {
@@ -58,7 +58,7 @@ ra_mgr::read_vehicle(const string& infile)
 
     da = (sa > da)? da+360: da;
     // store //
-    Vehicle vehicle(v_id, eat, sa, da);
+    Vehicle vehicle(v_id, eat, sa, da, vel);
     total_v.push_back(vehicle);     
   }
   

@@ -33,8 +33,8 @@ class Vehicle
   typedef pair<float, float> my_pair;
     public:
         /* Constructor */
-        Vehicle(int v_id, float eat, float sa, float da)
-        : id(v_id), earliest_arrival_time(eat), source_angle(sa), destination_angle(da) {
+        Vehicle(int v_id, float eat, float sa, float da, float vel)
+        : id(v_id), earliest_arrival_time(eat), source_angle(sa), destination_angle(da), velocity(vel) {
           status = WAIT;
           now_angle = -1;
         };
@@ -45,6 +45,7 @@ class Vehicle
         float                       earliest_arrival_time;
         float                       source_angle;
         float                       destination_angle;
+        float                       velocity;
         float                       priority;
         /* output answer type, < <angle_1, t_1>, <angle_2, t_2>, ... > */
         vector<my_pair>             position;
