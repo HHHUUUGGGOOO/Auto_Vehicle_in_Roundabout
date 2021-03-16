@@ -35,7 +35,7 @@ class ra_mgr
   public:
     /* Default constructor */
     ra_mgr() {
-      num_v_in_ra=0;
+      num_v_in_ra = 0;
     }
     virtual ~ra_mgr() {}
 
@@ -49,7 +49,8 @@ class ra_mgr
     void                Roundabout_information();
     void                current_situation();   
     bool                check_intersection(float); 
-    bool                check_conflict(int, vector< pair<int, float> >&);     
+    bool                check_conflict(int, vector< pair<int, float> >&); 
+    bool                check_capacity() {return (num_v_in_ra >= max_capacity);}    
 
     /* Define function: schedule() */
     void                do_scheduling();
@@ -61,6 +62,11 @@ class ra_mgr
     /* Define variables */
     int                 num_v_in_ra; // number of vehicles in the roundabout now
     vector<Vehicle>     total_v; // store each vehicle's properties
+
+    int                 v_unscheduled;
+    float               time_unit; 
+    float               angle_unit;
+    vector <vector <int> >  output_chart; // store the output
     
 
     // roundabout information //
