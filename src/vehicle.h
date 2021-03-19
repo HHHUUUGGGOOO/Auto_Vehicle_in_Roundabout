@@ -37,6 +37,8 @@ class Vehicle
         : id(v_id), earliest_arrival_time(eat), source_angle(sa), destination_angle(da), velocity(vel) {
           status = WAIT;
           now_angle = -1;
+          angle_unit=5;
+          initial_priority=da-sa;
         };
         /* Vehicle status[ WAIT / IN / OUT ] */
         Vehicle_status              status;
@@ -46,11 +48,12 @@ class Vehicle
         float                       source_angle;
         float                       destination_angle;
         float                       velocity;
-        float                       priority;
+        float                       initial_priority;
         /* output answer type, < <angle_1, t_1>, <angle_2, t_2>, ... > */
         vector<my_pair>             position;
 
-        float                       now_angle;  
+        float                       now_angle; 
+        float                       angle_unit; 
 };
 
 #endif

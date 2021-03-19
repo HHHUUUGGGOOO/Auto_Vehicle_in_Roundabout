@@ -24,7 +24,6 @@ class ra_mgr;
 extern ra_mgr* raMgr;
 
 
-
 //----------------------------------------------------------------------------------------
 //    Function
 //----------------------------------------------------------------------------------------
@@ -33,50 +32,44 @@ class ra_mgr
   // typedef map<const int, Vehicle*>   VehicleMap;
 
   public:
-    /* Default constructor */
-    ra_mgr() {
-      num_v_in_ra = 0;
-    }
+    ra_mgr();
     virtual ~ra_mgr() {}
 
-    /* Define function: read_file() */
+    // read info about roundabout and vehicle -> call in main //
     bool                read_vehicle(const string&);
     bool                read_ra_info(const string&);
 
-    // utility //
-    bool                verify_capacity();
-    bool                verify_angle(float, float);
+    // utility -> call in schedule  //
+    // bool                check_capacity() {return (v_in_ra_now >= ra_max_capacity);}    
+    bool                verify_angle(float, float); // verify if vehicle's input angle is valid in roundabout
+    void                find_ra_angle_unit(float, float); // use radius and safety velocity to compute angle unit
     void                Roundabout_information();
-    void                current_situation();   
+    void                current_situation(vector<Vehicle*>& ,vector<Vehicle*>&); // see the current situation when scheduling
     bool                check_intersection(float); 
-    bool                check_conflict(int, vector< pair<int, float> >&); 
-    bool                check_capacity() {return (num_v_in_ra >= max_capacity);}    
+    bool                check_conflict(int, vector< pair<int, Vehicle*> >&, vector<Vehicle*>&); 
 
-    /* Define function: schedule() */
-    void                do_scheduling();
+    // schedule //
     void                greedy_without_safetymargin();
 
-    /* Define function: output_file() */
-    void                do_output_file();
-
-    /* Define variables */
-    int                 num_v_in_ra; // number of vehicles in the roundabout now
-    vector<Vehicle>     total_v; // store each vehicle's properties
-
-    int                 v_unscheduled;
-    float               time_unit; 
-    float               angle_unit;
+    // output the final solution //
     vector <vector <int> >  output_chart; // store the output
+    void                output_solution();
+
+    // vehicle variables //
+    vector<Vehicle*>     v_total; // store each vehicle's properties
+
     
-
     // roundabout information //
-    float           radius;
-    float           safety_velocity;
-    float           safety_margin; // 小型車至少要保持「車速/2」距離(單位：公尺)；大型車至少要保持「車速-20」距離(單位：公尺)
-    int             max_capacity;
+    float               ra_time_unit; // unit : s
+    float               ra_angle_unit; // unit : degree
+    float               ra_radius;
+    float               ra_safety_velocity;
+    float               ra_safety_margin; // 小型車至少要保持「車速/2」距離(單位：公尺)；大型車至少要保持「車速-20」距離(單位：公尺)
+    int                 ra_max_capacity;
+    vector<float>       ra_valid_source_angle; // 0 <= angle < 2*pi
+    vector<float>       ra_valid_destination_angle; // Si <= Di < Si + 2*pi ; D_i > 0
 
-    vector<float>   valid_source_angle; // 0 <= angle < 2*pi
-    vector<float>   valid_destination_angle; // Si <= Di < Si + 2*pi ; D_i > 0
+    void                reset();
     
 };
 
