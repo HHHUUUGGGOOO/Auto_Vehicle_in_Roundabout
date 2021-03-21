@@ -24,11 +24,11 @@ using namespace std;
 // constructor //
 ra_mgr::ra_mgr()
 { 
-  ra_time_unit = 0.1;
-  ra_angle_unit = 5;
-  ra_radius = 0;
-  ra_safety_velocity = 0;
-  ra_safety_margin = 0;
+  ra_time_unit = 0.1; // unit: sec
+  ra_angle_unit = 0.025; // unit: rad
+  ra_radius = 20; // unit: m
+  ra_safety_velocity = 7; // unit: m/s
+  ra_safety_margin = 3; // unit: m
   ra_max_capacity = 0;
 }
 
@@ -40,7 +40,7 @@ ra_mgr::read_vehicle(const string& infile)
 
   // read file //
   // char buffer[100];
-  fstream fin(infile);
+  fstream fin(infile.c_str()); // To MobaXTerm, I need to use 'c_str()' to make it successfully compile
   
   int v_id = 0;
   float eat, sa, da, vel; // angle is base on 360
@@ -69,6 +69,8 @@ ra_mgr::read_vehicle(const string& infile)
     
     // store //
     Vehicle* v = new Vehicle(v_id, eat, sa, da, vel);
+    v->safety_margin = round(v->velocity/2);
+    v->angle_unit = 0.025*ceil((v->velocity/10)/0.5);
     v_total.push_back(v);     
   }
   
@@ -83,7 +85,7 @@ ra_mgr::read_ra_info(const string& rafile)
   float r, sv, sm;
   int mc;
   string va;
-  fstream fin(rafile);
+  fstream fin(rafile.c_str()); // To MobaXTerm, I need to use 'c_str()' to make it successfully compile
   fin >> r >> sv >> sm >> mc;
   ra_radius = r;
   ra_safety_velocity = sv*1000/3600;
@@ -101,7 +103,8 @@ ra_mgr::read_ra_info(const string& rafile)
 		{
 			string tmp = va.substr(current, next - current);
 			if (tmp.size() != 0)
-				ra_valid_source_angle.push_back(stoi(tmp));
+				// ra_valid_source_angle.push_back(stoi(tmp));
+        ra_valid_source_angle.push_back(atoi(tmp.c_str())); // To MobaXTerm, it cannot support C++11's 'stoi()'
 		}
 		if (next == string::npos) break;
 		current = next + 1; 
@@ -117,7 +120,8 @@ ra_mgr::read_ra_info(const string& rafile)
 		{
 			string tmp = va.substr(current, next - current);
 			if (tmp.size() != 0)
-				ra_valid_destination_angle.push_back(stoi(tmp));
+				// ra_valid_destination_angle.push_back(stoi(tmp));
+        ra_valid_destination_angle.push_back(atoi(tmp.c_str()));
 		}
 		if (next == string::npos) break;
 		current = next + 1; 
@@ -129,7 +133,7 @@ ra_mgr::read_ra_info(const string& rafile)
   // 大型車至少要保持「車速-20」距離(單位：公尺)) 
   // ra_angle_unit = 360*(5/ra_radius) + 2*(ra_safety_velocity/2); 
   
-  //find_ra_angle_unit(ra_radius, ra_safety_velocity)
+  // find_ra_angle_unit(ra_radius, ra_safety_velocity)
 
  return true;
 }
@@ -200,6 +204,13 @@ ra_mgr::greedy_without_safetymargin()
       trying_in[i].second->position.push_back(make_pair(trying_in[i].second->source_angle,t));
       trying_in[i].second->now_angle = trying_in[i].second->source_angle; 
       position_T[trying_in[i].second->source_angle/ra_angle_unit] = trying_in[i].second->id;
+      // check safety_margin with the previous vehicle
+      int next_id = (i+1==trying_in.size()) ? 0: i+1;
+      if ((trying_in[next_id].second->now_angle - (trying_in[i].second->now_angle + trying_in[i].second->angle_unit)) <= trying_in[i].second->safety_margin)
+      {
+        trying_in[next_id].second->angle_unit = trying_in[i].second->angle_unit;
+      }
+      
       
       in_list.push_back(trying_in[i].second);
       wait_list.erase(wait_list.begin()+trying_in[i].first-correction_term);

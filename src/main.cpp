@@ -32,7 +32,7 @@ int main(int argc, char** argv)
   {
     if (!raMgr->read_ra_info(argv[2])) {
       cerr << "Error: cannot open roundabout information input file \"" << argv[2] << "\"!!\n";
-      return 0;;
+      return 0;
     }
     if (!raMgr->read_vehicle(argv[1])) {
       cerr << "Error: cannot open vehicle information input file \"" << argv[1] << "\"!!\n";
