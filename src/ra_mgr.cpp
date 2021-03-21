@@ -2,7 +2,7 @@
   FileName     [ ra_mgr.cpp ]
   PackageName  [ Auto Vehicle in Roundabout ]
   Synopsis     [ Read file, do scheduling, and output answer ]
-  Author       [ Yen-Yu, Chen & Hugo, Chen ]
+  Author       [ Yen-Yu, Chen & Hugo, Chen & Yi-Jun, Huang]
   Professor    [ Iris Jiang & Chung-Wei, Lin ]
   Copyright    [ Copyleft(c) 2021, NTUEE, Taiwan ]
 *****************************************************************************************/
@@ -247,12 +247,16 @@ bool
 ra_mgr::verify_angle(float sa, float da) 
 {
   // sa: source angle, da: destination angle
-  for(int i=0; i < ra_valid_source_angle.size(); i++)
-    if (sa == ra_valid_source_angle[i]) return true; 
-  for(int i=0; i < ra_valid_destination_angle.size(); i++)
-    if (da == ra_valid_destination_angle[i]) return true; 
-
-  return false;
+  // Verify if sa is valid
+  bool valid = false;
+  for(int i=0; i < ra_valid_source_angle.size() && !valid; i++)
+    if (sa == ra_valid_source_angle[i]) valid=true; 
+  if(!valid) return false;
+  // Verify if da is valid
+  valid=true;
+  for(int i=0; i < ra_valid_destination_angle.size() && !valid; i++)
+    if (da == ra_valid_destination_angle[i]) valid=true; 
+  return valid;
 }
 
 void
