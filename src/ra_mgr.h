@@ -46,7 +46,7 @@ class ra_mgr
     void                Roundabout_information();
     void                current_situation(vector<Vehicle*>& ,vector<Vehicle*>&); // see the current situation when scheduling
     bool                check_intersection(float); 
-    bool                check_conflict(int, vector< pair<int, Vehicle*> >&, vector<Vehicle*>&); 
+    bool                check_conflict(int, vector<Vehicle*>&, vector<Vehicle*>&); 
 
     // schedule //
     void                greedy_without_safetymargin();

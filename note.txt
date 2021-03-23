@@ -96,6 +96,7 @@
                 ---------------
                 5. initial velocity = 5（m/s）, 小於 safety_velocity 最好算的數字單位, 之後會連同上面參數改掉, 否則依照安全速度, 目前大家的angle_unit會都一樣
 
-        - trying_in 想先改成每個路口的 queue, 這樣 check_conflict() 也要修正
-            -- line 170-174 / 196-201
-        - 在想要不要把in檔等全部的角度換成弧度為單位, 這樣 ra_angle_unit 才比較好看 (0.025 rad = 1.433... degree ~= 1.5 degree, r*theta也不用換算)
+        - trying_in 想先改成每個路口的 queue, 這樣 check_conflict() 的輸入也要修正
+            -- 剩下 line 216-234 要把 trying_in 改成 queue 表示法
+
+        - 在想要不要把in檔及cpp檔等全部的角度換成弧度為單位, 這樣 ra_angle_unit 才比較好看 (0.025 rad = 1.433... degree ~= 1.5 degree, r*theta也不用換算)

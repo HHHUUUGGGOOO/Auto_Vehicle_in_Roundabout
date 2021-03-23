@@ -195,16 +195,17 @@ ra_mgr::greedy_without_safetymargin()
 
       float next_intersection_angle = 0;
       vector<Vehicle*> next_intersection;
-      if (((float) 0 <= in_list[i]->now_angle) && (in_list[i]->now_angle < (float) 90)) { next_intersection_angle = 90.0; next_intersection = queue_90; }
-      else if (((float) 90 <= in_list[i]->now_angle) && (in_list[i]->now_angle < (float) 180)) { next_intersection_angle = 180.0; next_intersection = queue_180; }
-      else if (((float) 180 <= in_list[i]->now_angle) && (in_list[i]->now_angle < (float) 270)) { next_intersection_angle = 270.0; next_intersection = queue_270; }
-      else if (((float) 270 <= in_list[i]->now_angle) && (in_list[i]->now_angle < (float) 360)) { next_intersection_angle = 0.0; next_intersection = queue_0; }
+      if (((float) 0 <= in_list[i]->now_angle) && (in_list[i]->now_angle < (float) 90)) { next_intersection_angle = 90.0; next_intersection.assign(queue_90.begin(), queue_90.end()); }
+      else if (((float) 90 <= in_list[i]->now_angle) && (in_list[i]->now_angle < (float) 180)) { next_intersection_angle = 180.0; next_intersection.assign(queue_180.begin(), queue_180.end()); }
+      else if (((float) 180 <= in_list[i]->now_angle) && (in_list[i]->now_angle < (float) 270)) { next_intersection_angle = 270.0; next_intersection.assign(queue_270.begin(), queue_270.end()); }
+      else if (((float) 270 <= in_list[i]->now_angle) && (in_list[i]->now_angle < (float) 360)) { next_intersection_angle = 0.0; next_intersection.assign(queue_0.begin(), queue_0.end()); }
+      
       // conflict and in_list has lower priority // 
 
       // take check_intersection(v_total[i]->now_angle) out?
 
       // no conflict or conflict but in_list has higher priority
-      if(!check_conflict(i, trying_in, in_list))
+      if(!check_conflict(i, next_intersection, in_list))
       {
         in_list[i]->now_angle += in_list[i]->angle_unit;
         in_list[i]->position.push_back(make_pair(in_list[i]->now_angle,t));
@@ -335,25 +336,26 @@ ra_mgr::check_intersection(float angle) // need modify
 }
 
 bool
-ra_mgr::check_conflict(int index, vector< pair<int, Vehicle*> >& trying_in, vector<Vehicle*>& in_list)
+ra_mgr::check_conflict(int index, vector<Vehicle*>& next_intersection, vector<Vehicle*>& in_list)
 {
   //return true if conflict
-  //remove conflict trying_in
-  float before_angle = in_list[index]->now_angle;
-  float after_angle = in_list[index]->now_angle + in_list[index]->angle_unit;
-  float trying_in_angle = 0;
-  for (int i=0; i < trying_in.size(); i++)
+  //remove conflict next_intersection
+  if (next_intersection.size() > 0)
   {
-    trying_in_angle = (after_angle>360)? trying_in[i].second->source_angle+360:trying_in[i].second->source_angle;
-    if (before_angle < trying_in_angle && after_angle > trying_in_angle)
+    float before_angle = in_list[index]->now_angle;
+    float after_angle = in_list[index]->now_angle + in_list[index]->angle_unit;
+    float next_intersection_angle = 0;
+
+    next_intersection_angle = (after_angle>360)? next_intersection[0]->source_angle+360:next_intersection[0]->source_angle;
+    if (before_angle < next_intersection_angle && after_angle > next_intersection_angle)
     {
-      if (trying_in[i].second->initial_priority > in_list[index]->destination_angle - before_angle) return true;
+      if (next_intersection[0]->initial_priority > (in_list[index]->destination_angle - before_angle)) { return true; }
       else
       {
-        trying_in.erase(trying_in.begin()+i);
-        i--;
+        next_intersection.erase(next_intersection.begin());
       }
     }
+    return false;
   }
   return false;
 }
