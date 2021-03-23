@@ -58,14 +58,21 @@
             -- 想法: 如果準備超過 safety_margin 的話, 讓前一台車的 angle_unit 在下一個時間單位時變得跟自己一樣, 同理, 在更前面一台也是
             -- 想法: 檢查時機, 每次檢查的時候把現在的距離加上一個自己的angle_unit, 如果會小於安全距離, 就當場把前面一台車的angle_unit改掉
             -- 還沒想到怎麼解決的情況: 如果1號車加速, 使得前面的2號車加速, 但再前面遇到路口priority較高的3號車要進來, 迫使2號車需要減速, 1號車是要跟著減速或是? 2號車呢?
+                * 想法: 路口 priority 的重要程度大於後面車子加速的重要程度
+                * 作法: 在兩個安全距離外先檢查是否priority低於tring_in的車子, 如果是, 在兩個安全距離的時間內減速到該車進來的初始速度 (angle unit), 同理也讓後面原本加速的車子減速
+                * 提醒: 要用到每個路口自己的queue, 才能知道每個路口最前面車的priority
+                * 待改位置: greedy_without_safetymargin()
     
     [ 考慮 IN/OUT ]
-        - for IN: 走自己的 angle unit (在 time unit 的時間內走的距離), 在經過 intersection 時要考慮 coflict with 'trying_in'
-        - for OUT: 不管, 最後一個點不會出現
+        (o) - for IN: 走自己的 angle unit (在 time unit 的時間內走的距離), 在經過 intersection 時要考慮 coflict with 'trying_in'
+        (o) - for OUT: 不管, 最後一個點不會出現
         - 建立 windows, 考慮一個一個區域
 
     [ 考慮路口的 queue ]
         - 每個路口存自己的 queue, 內容包含'車的class'/'priority排序'
+            -- 想法: 在greedy_without_safetymargin()一開始的wait_list就處理
+            -- 把trying_in改成queue_0, queue_90, queue_180, queue_270 (數字代表入口的位置角度)
+
         - 當車子距離路口 2*(safety_margin) 時, 檢查路口的 queue 會不會撞到
 
 [2021.03.20 Hugo's modification]
@@ -81,10 +88,14 @@
                 [vehicle.h  -> 新增變數: float safety_margin]
                 ---------------------------
                 1. ra_radius = 20（m）
-                2. ra_angle_unit = 0.025 (rad), 作圖0.1秒初始走一格angle_unit, 即 0.5 公尺, 這樣'r*θ'就不用換算了 (但跑檔案會超大看不清楚, 這部分再修, 可能要改作圖時間單位成1秒, 但計算時以0.1秒看待?)
+                2. ra_angle_unit = 0.025 (rad) ~= 1.5 (degree), 作圖0.1秒初始走一格angle_unit, 即 0.5 公尺, (但跑檔案會超大看不清楚, 這部分再修, 可能要改作圖時間單位成1秒, 但計算時以0.1秒看待?)
                 3. safety_margin = 四捨五入(自己車速/2), 初始值為 2.5 (m), i.e.初始距離, 一般轎車長度為 5 (m), 小型車至少要保持「車速/2」距離(單位：公尺)；大型車至少要保持「車速-20」距離(單位：公尺)
                 4. safety_velocity = 7 (m/s), 按照市政規格設計的 25(km/hr)
                 ---------------
                 [input -> 1.in]
                 ---------------
                 5. initial velocity = 5（m/s）, 小於 safety_velocity 最好算的數字單位, 之後會連同上面參數改掉, 否則依照安全速度, 目前大家的angle_unit會都一樣
+
+        - trying_in 想先改成每個路口的 queue, 這樣 check_conflict() 也要修正
+            -- line 170-174 / 196-201
+        - 在想要不要把in檔等全部的角度換成弧度為單位, 這樣 ra_angle_unit 才比較好看 (0.025 rad = 1.433... degree ~= 1.5 degree, r*theta也不用換算)

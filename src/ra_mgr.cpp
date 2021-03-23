@@ -25,7 +25,7 @@ using namespace std;
 ra_mgr::ra_mgr()
 { 
   ra_time_unit = 0.1; // unit: sec
-  ra_angle_unit = 0.025; // unit: rad
+  ra_angle_unit = 1.5; // unit: 1.5 degree = 0.025 rad
   ra_radius = 20; // unit: m
   ra_safety_velocity = 7; // unit: m/s
   ra_safety_margin = 3; // unit: m
@@ -156,6 +156,7 @@ ra_mgr::greedy_without_safetymargin()
   vector<Vehicle*>  wait_list;
   vector<Vehicle*>  in_list;
   wait_list = v_total;
+  vector<Vehicle*> queue_0, queue_90, queue_180, queue_270;
   vector< pair<int , Vehicle*> > trying_in;
 
   while(1)
@@ -166,7 +167,11 @@ ra_mgr::greedy_without_safetymargin()
     for (int i=0; i < wait_list.size(); i++)
     {
       if (wait_list[i]->earliest_arrival_time <= t)
-        trying_in.push_back(make_pair(i , wait_list[i])); // i means index in wait list
+        if (wait_list[i]->source_angle == (float) 0) { queue_0.push_back(wait_list[i]); }
+        else if (wait_list[i]->source_angle == (float) 90) { queue_90.push_back(wait_list[i]); }
+        else if (wait_list[i]->source_angle == (float) 180) { queue_180.push_back(wait_list[i]); }
+        else if (wait_list[i]->source_angle == (float) 270) { queue_270.push_back(wait_list[i]); }
+        // trying_in.push_back(make_pair(i , wait_list[i])); // i means index in wait list
     }
 
     // cerr << "deal with vehicle in roundabout..." << endl;
@@ -180,9 +185,26 @@ ra_mgr::greedy_without_safetymargin()
         i--;
         continue;
       }
-      // conflict and has lower priority // 
+
+      // check safety_margin with the previous vehicle
+      int next_id = (i+1==in_list.size()) ? 0: i+1;
+      if ((in_list[next_id]->now_angle - (in_list[i]->now_angle + in_list[i]->angle_unit)) <= in_list[i]->safety_margin)
+      {
+        in_list[next_id]->angle_unit = in_list[i]->angle_unit;
+      }
+
+      float next_intersection_angle = 0;
+      vector<Vehicle*> next_intersection;
+      if (((float) 0 <= in_list[i]->now_angle) && (in_list[i]->now_angle < (float) 90)) { next_intersection_angle = 90.0; next_intersection = queue_90; }
+      else if (((float) 90 <= in_list[i]->now_angle) && (in_list[i]->now_angle < (float) 180)) { next_intersection_angle = 180.0; next_intersection = queue_180; }
+      else if (((float) 180 <= in_list[i]->now_angle) && (in_list[i]->now_angle < (float) 270)) { next_intersection_angle = 270.0; next_intersection = queue_270; }
+      else if (((float) 270 <= in_list[i]->now_angle) && (in_list[i]->now_angle < (float) 360)) { next_intersection_angle = 0.0; next_intersection = queue_0; }
+      // conflict and in_list has lower priority // 
+
       // take check_intersection(v_total[i]->now_angle) out?
-      else if(!check_conflict(i, trying_in, in_list))
+
+      // no conflict or conflict but in_list has higher priority
+      if(!check_conflict(i, trying_in, in_list))
       {
         in_list[i]->now_angle += in_list[i]->angle_unit;
         in_list[i]->position.push_back(make_pair(in_list[i]->now_angle,t));
@@ -203,14 +225,7 @@ ra_mgr::greedy_without_safetymargin()
       
       trying_in[i].second->position.push_back(make_pair(trying_in[i].second->source_angle,t));
       trying_in[i].second->now_angle = trying_in[i].second->source_angle; 
-      position_T[trying_in[i].second->source_angle/ra_angle_unit] = trying_in[i].second->id;
-      // check safety_margin with the previous vehicle
-      int next_id = (i+1==trying_in.size()) ? 0: i+1;
-      if ((trying_in[next_id].second->now_angle - (trying_in[i].second->now_angle + trying_in[i].second->angle_unit)) <= trying_in[i].second->safety_margin)
-      {
-        trying_in[next_id].second->angle_unit = trying_in[i].second->angle_unit;
-      }
-      
+      position_T[trying_in[i].second->source_angle/ra_angle_unit] = trying_in[i].second->id;      
       
       in_list.push_back(trying_in[i].second);
       wait_list.erase(wait_list.begin()+trying_in[i].first-correction_term);
