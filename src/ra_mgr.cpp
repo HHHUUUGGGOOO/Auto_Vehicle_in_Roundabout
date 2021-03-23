@@ -21,11 +21,16 @@
 
 using namespace std;
 
+bool compare_v(Vehicle const *a, Vehicle const *b)
+{
+  return a->earliest_arrival_time < b->earliest_arrival_time;
+}
+
 // constructor //
 ra_mgr::ra_mgr()
 { 
   ra_time_unit = 0.1; // unit: sec
-  ra_angle_unit = 1.5; // unit: 1.5 degree = 0.025 rad
+  ra_angle_unit = PI/6; //degree_to_rad(1.5); // unit: 1.5 degree = 0.025 rad
   ra_radius = 20; // unit: m
   ra_safety_velocity = 7; // unit: m/s
   ra_safety_margin = 3; // unit: m
@@ -47,7 +52,9 @@ ra_mgr::read_vehicle(const string& infile)
 
   while (fin >> v_id >> eat >> sa >> da >> vel){
     // check source/destination angle (5)(6) & base on 'π' // 
-    if (sa >= 360 || da >= 360 || sa < 0 || da < 0) 
+    sa = degree_to_rad(sa);
+    da = degree_to_rad(da);
+    if (sa >= 2*PI || da >= 2*PI || sa < 0 || da < 0) 
     {
       cerr << "ID = " << v_id << "'s source or destination angle is not defined in 360 degree !!" << endl;
       return false;
@@ -58,19 +65,12 @@ ra_mgr::read_vehicle(const string& infile)
       return false;
     }
 
-    // TODO: decide whether need to switch to 'π' form //
-    /* 
-    sa = sa / 360 * M_PI;
-    da = da / 360 * M_PI;
-    if (sa > da) da += M_PI; 
-    */
-
-    da = (sa > da)? da+360: da;
+    da = (sa > da)? da+2*PI: da;
     
     // store //
     Vehicle* v = new Vehicle(v_id, eat, sa, da, vel);
     v->safety_margin = round(v->velocity/2);
-    v->angle_unit = 0.025*ceil((v->velocity/10)/0.5);
+    v->angle_unit = v_min_angle_unit(degree_to_rad((v->velocity/ra_radius))); //0.025*ceil((v->velocity/10)/0.5);
     v_total.push_back(v);     
   }
   
@@ -104,7 +104,7 @@ ra_mgr::read_ra_info(const string& rafile)
 			string tmp = va.substr(current, next - current);
 			if (tmp.size() != 0)
 				// ra_valid_source_angle.push_back(stoi(tmp));
-        ra_valid_source_angle.push_back(atoi(tmp.c_str())); // To MobaXTerm, it cannot support C++11's 'stoi()'
+        ra_valid_source_angle.push_back(degree_to_rad(atof(tmp.c_str()))); // To MobaXTerm, it cannot support C++11's 'stoi()'
 		}
 		if (next == string::npos) break;
 		current = next + 1; 
@@ -121,7 +121,7 @@ ra_mgr::read_ra_info(const string& rafile)
 			string tmp = va.substr(current, next - current);
 			if (tmp.size() != 0)
 				// ra_valid_destination_angle.push_back(stoi(tmp));
-        ra_valid_destination_angle.push_back(atoi(tmp.c_str()));
+        ra_valid_destination_angle.push_back(degree_to_rad(atof(tmp.c_str())));
 		}
 		if (next == string::npos) break;
 		current = next + 1; 
@@ -156,7 +156,8 @@ ra_mgr::greedy_without_safetymargin()
   vector<Vehicle*>  wait_list;
   vector<Vehicle*>  in_list;
   wait_list = v_total;
-  vector<Vehicle*> queue_0, queue_90, queue_180, queue_270;
+  vector<vector <Vehicle*> > queue_0, queue_90, queue_180, queue_270;
+  vector<vector <Vehicle*> > entry(ra_valid_source_angle.size());
   vector< pair<int , Vehicle*> > trying_in;
 
   while(1)
@@ -256,8 +257,97 @@ ra_mgr::greedy_without_safetymargin()
 
 }
 
+void                
+ra_mgr::greedy_with_safetymargin()
+{
+  if (!v_total.size())
+  {
+    cerr << "There is no vehicles to schedule !!" << endl;
+    return;
+  }
+  // float number has big problem
+  vector<int>  position_at_time(floor(2*PI/ra_angle_unit)+1, 0); // the last one must be 2PI, the same as 0
+  cerr << "size=" << position_at_time.size() << endl;
+  float t=0;
+  int i;
+  vector<Vehicle*>  in_list;
+  vector<vector <Vehicle*> > wait_list(ra_valid_source_angle.size());
+
+  // put vehicle into specific wait_list entry
+  for (i = 0; i < v_total.size(); i++)
+    for(int j = 0; j<ra_valid_source_angle.size(); j++)
+      if (v_total[i]->source_angle == ra_valid_source_angle[j])
+        wait_list[j].push_back(v_total[i]);
+
+  // sort wait_list[i] accroding to earlist arrival time
+  for (i=0; i< wait_list.size(); i++)
+  {
+    sort(wait_list[i].rbegin(), wait_list[i].rend(), compare_v);
+    /* check entry
+    cerr << i << endl;
+    for (int j=0; j < wait_list[i].size(); j++)
+    {
+      cerr << wait_list[i][j]->id << " -> " << wait_list[i][j]->earliest_arrival_time << endl;
+    }
+    cerr << endl; */
+  }
+
+  Vehicle* tmp;
+  int entry_index = -1;
+  while(1)
+  {
+    cerr << "time = " << t << endl;
+
+    // deal with vehicle in roundabout // 
+    for (i = 0; i < in_list.size(); i++)
+    {
+
+      // leave //
+      if (in_list[i]->now_angle+in_list[i]->angle_unit >= in_list[i]->destination_angle)
+      {
+        in_list[i]->position.push_back(make_pair(in_list[i]->destination_angle,t));
+        in_list.erase(in_list.begin()+i);
+        i--;
+        continue;
+      }
+
+    }
+
+    // deal with vehicle trying to enter //
+    for (i = 0; i< wait_list.size(); i++)
+    {
+      if (wait_list[i].size())
+      {
+        tmp = wait_list[i].back();
+        if (tmp->earliest_arrival_time <= t)
+        {
+          if (!check_conflict_by_wait(tmp, in_list)) 
+          {
+            cerr << tmp->id << " enter in " << tmp->source_angle << "(rad)" << endl;
+            in_list.push_back(tmp);
+            tmp->position.push_back(make_pair(tmp->source_angle, t));
+            position_at_time[tmp->source_angle/ra_angle_unit]=tmp->id;
+            wait_list[i].pop_back();
+          }
+        }
+      }
+    }
+
+    t += ra_time_unit;
+    if (t>0.05) break;
+  }
+  
+}
+
 
 // utility //
+
+bool
+ra_mgr::check_conflict_by_wait(Vehicle const *tmp, vector<Vehicle*>& in_list)
+{
+  if (!in_list.size()) return false;
+  return false;
+}
 
 bool                
 ra_mgr::verify_angle(float sa, float da) 
@@ -280,23 +370,42 @@ ra_mgr::Roundabout_information()
 {
   cerr << "------------------------------------------------------------" << endl;
   cerr << "Roundabout information" << endl;
+  // cerr << "Purpose: " << ra_purpose << endl;
   cerr << "Roundabout ra_radius: " << ra_radius << " (m)" << endl;
   cerr << "Safety Velocity: " << ra_safety_velocity << " (m/s)" << endl;
   cerr << "Safety margin: " << ra_safety_margin << " (m)" << endl;
   cerr << "Maximum capacity: " << ra_max_capacity << " (unit)" << endl;
-  cerr << "Angle unit" << ra_angle_unit << "(degree/time_unit)" << endl;
   cerr << "ra_valid source angles: ";
   for (int i=0; i < ra_valid_source_angle.size(); i++)
     cerr << ra_valid_source_angle[i] << " ";
-  cerr << " (degree)" << endl;
+  cerr << " (rad)" << endl;
 
   cerr << "ra_valid destionation angle: ";
   for (int i=0; i < ra_valid_destination_angle.size(); i++)
     cerr << ra_valid_destination_angle[i] << " ";
-  cerr << " (degree)" << endl;
+  cerr << " (rad)" << endl;
   cerr << "ra_time_unit: " << ra_time_unit << " (s)" << endl;
-  cerr << "ra_angle_unit: " << ra_angle_unit << " (degree)"<<endl;
+  cerr << "ra_angle_unit: " << ra_angle_unit << " (rad)"<<endl;
   cerr << "------------------------------------------------------------" << endl;
+}
+
+void
+ra_mgr::Vehicle_information()
+{
+  cerr << "------------------------------------------------------------" << endl;
+  cerr << "Vehicle information" << endl;
+  for (int i=0; i < v_total.size(); i++)
+  {
+    cerr << "vehicle id: " << v_total[i]->id << endl;
+    cerr << "  Earliest arrival time: " << v_total[i]->earliest_arrival_time << endl;
+    cerr << "  Source_angle: " << v_total[i]->source_angle << " (rad)" << endl;
+    cerr << "  Denstination_angle: " << v_total[i]->destination_angle << " (rad)" << endl;
+    cerr << "  Velocity:" << v_total[i]->velocity << " (m/s)" << endl;
+    cerr << "  Angle unit: " << v_total[i]->angle_unit << " (rad)" << endl;
+    cerr << endl;
+  }
+  cerr << "------------------------------------------------------------" << endl;
+   
 }
 
 void
@@ -320,7 +429,7 @@ ra_mgr::current_situation(vector<Vehicle*>& in_list, vector<Vehicle*>& wait_list
 }
 
 bool
-ra_mgr::check_intersection(float angle) // need modify
+ra_mgr::check_intersection(float angle)
 {
   if (angle >= 360)
   {

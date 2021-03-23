@@ -46,9 +46,9 @@ int main(int argc, char** argv)
   }
 
   string in;
-  cerr << "Show roundabout information? (y/n)" << endl;
   while (1)
   {
+    cerr << "Show roundabout information? (y/n)" << endl;
     cin >> in;
     if (in == "y")
     {
@@ -61,15 +61,31 @@ int main(int argc, char** argv)
       cerr << "unknown answer OAO!!" << endl;
   }
 
-
-  ////// schedule //////
-  cerr << "Run schedule? (y/n)" << endl;
   while (1)
   {
+    cerr << "Show vehicle information? (y/n)" << endl;
     cin >> in;
     if (in == "y")
     {
-      raMgr->greedy_without_safetymargin();
+      raMgr->Vehicle_information();
+      break;
+    }
+    else if (in == "n")
+        break;
+    else
+      cerr << "unknown answer OAO!!" << endl;
+  }
+
+
+  ////// schedule //////
+  while (1)
+  {
+    cerr << "Run schedule? (y/n)" << endl;
+    cin >> in;
+    if (in == "y")
+    {
+      // raMgr->greedy_without_safetymargin();
+      raMgr->greedy_with_safetymargin();
       break;
     }
     else if (in == "n")

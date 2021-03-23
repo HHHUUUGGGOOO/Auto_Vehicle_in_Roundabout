@@ -1,5 +1,5 @@
 [語言] C++
-[讀檔] 
+[讀檔]
     > Vehicle input file: store all vehicles property and information
         - Format:
           [ Vehicle_id, Earliest_arrival_time, Source_angle, Destination_angle, initial_velocity ]
@@ -100,3 +100,27 @@
             -- 剩下 line 216-234 要把 trying_in 改成 queue 表示法
 
         - 在想要不要把in檔及cpp檔等全部的角度換成弧度為單位, 這樣 ra_angle_unit 才比較好看 (0.025 rad = 1.433... degree ~= 1.5 degree, r*theta也不用換算)
+
+
+
+1 degree= 0.017 rad
+1 rad = 57.29 degree
+
+input data angle is still in degree unit, but convert to rad unit to store
+you can use Roundabout_information and Vehicle_information to check ra and vehicle data
+
+// use in ra_mgr.cpp -> read_vehicle and read_ra_info
+//define in ra_mgr.h
+1. degree_to_rad() 
+2. v_min_angle_unit()
+
+// main.cpp
+I use greedy_with_safetymargin, if you want to check greedy_without_safetymargin
+remember to revise it
+
+// test data
+add 2.in and ra02.in just not to modify origin test data
+but not use 1.in and ra01.in
+
+I suppose there will be some problem in safety_margin of ra and vehicle
+need to discuss with you XD

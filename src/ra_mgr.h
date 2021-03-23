@@ -13,15 +13,19 @@
 #define _RA_MGR_H
 
 #include <vector>
-#include <string>
+#include <cstring>
 #include <iostream>
 #include <utility>
+#include <cmath>
 #include "vehicle.h"
 
 using namespace std;
 
 class ra_mgr;
 extern ra_mgr* raMgr;
+
+// define the value of PI //
+#define PI      3.14159265357
 
 
 //----------------------------------------------------------------------------------------
@@ -43,13 +47,21 @@ class ra_mgr
     // bool                check_capacity() {return (v_in_ra_now >= ra_max_capacity);}    
     bool                verify_angle(float, float); // verify if vehicle's input angle is valid in roundabout
     void                find_ra_angle_unit(float, float); // use radius and safety velocity to compute angle unit
-    void                Roundabout_information();
     void                current_situation(vector<Vehicle*>& ,vector<Vehicle*>&); // see the current situation when scheduling
-    bool                check_intersection(float); 
+    bool                check_intersection(float); // now_angle and next_angle 
     bool                check_conflict(int, vector<Vehicle*>&, vector<Vehicle*>&); 
+    bool                check_conflict_by_wait(Vehicle const *, vector<Vehicle*>&);
+    float               degree_to_rad(float degree) { return (degree*PI/180); }
+    float               v_min_angle_unit(float angle) { return ((ceil(angle/ra_angle_unit))*ra_angle_unit); }
+
+
+    // information for check //
+    void                Roundabout_information();
+    void                Vehicle_information();
 
     // schedule //
     void                greedy_without_safetymargin();
+    void                greedy_with_safetymargin();
 
     // output the final solution //
     vector <vector <int> >  output_chart; // store the output
@@ -60,6 +72,7 @@ class ra_mgr
 
     
     // roundabout information //
+    // string              ra_purpose;
     float               ra_time_unit; // unit : s
     float               ra_angle_unit; // unit : degree
     float               ra_radius;

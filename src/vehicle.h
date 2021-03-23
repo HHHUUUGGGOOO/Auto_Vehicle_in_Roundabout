@@ -37,7 +37,7 @@ class Vehicle
         : id(v_id), earliest_arrival_time(eat), source_angle(sa), destination_angle(da), velocity(vel) {
           status = WAIT;
           now_angle = -1;
-          angle_unit = 0.5; // unit: rad = 57.3 degree
+          angle_unit = 0; // unit: rad = 57.3 degree
           initial_priority = da-sa; // larger angle, higher priority
         };
         /* Vehicle status[ WAIT / IN / OUT ] */
