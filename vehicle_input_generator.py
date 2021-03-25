@@ -3,7 +3,7 @@
 import sys
 import math
 import numpy as np
-#from scipy import stats
+from scipy import stats
 from numpy.random import exponential
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
@@ -59,37 +59,17 @@ def main(args):
     v_destination_angle = 0;
     v_initial_velocity = 10; #unit=km/hr
 
+
     with open(vehicle_file_name, "w+") as f:
         for v_id in range(args.num_of_vehicles):
             v_source_angle = entry_list[ np.random.randint(0, num_of_entry)]
             v_destination_angle = exit_list[np.random.randint(0, num_of_entry)]
             while v_destination_angle == v_source_angle:
                 v_destination_angle = exit_list[np.random.randint(0, num_of_entry)]
-                y=np.random.ranf(size=None)
-                k=stats.expon.ppf(y, loc=0 ,scale=1/expon_lamda)
-                v_earlist_arrival_time+=k
-                f.write("%i %.1f %.1f %.1f %.1f\n" %(v_id+1, v_earlist_arrival_time, v_source_angle, v_destination_angle, v_initial_velocity))  
-    
-'''
-    for v_index in range(0, num_of_v_file):
-            v_id = 1;
-            v_earlist_arrival_time = 0;
-            v_source_angle = 0;
-            v_destination_angle = 0;
-            v_initial_velocity = 10; #unit=km/hr
-
-            file_name = './input/' + str(v_index+1) + ".in"
-            f=open(file_name, "w+")
-            for i in range(num_of_v):
-                    v_source_angle = entry_list[ np.random.randint(0,num_of_entry) ]
-                    v_destination_angle = exit_list[ np.random.randint(0,num_of_exit) ]
-                    y=np.random.ranf(size=None)
-                    k=stats.expon.ppf(y, loc=0 ,scale=1/expon_lamda)
-                    v_earlist_arrival_time+=k
-                    f.write("%i %.1f %.1f %.1f %.1f\n" %(v_id, v_earlist_arrival_time, v_source_angle, v_destination_angle, v_initial_velocity))
-                    v_id+=1;
-            f.close()
-'''
+            y=np.random.ranf(size=None)
+            k=stats.expon.ppf(y, loc=0 ,scale=1/args.expon_lamda)
+            v_earlist_arrival_time+=k
+            f.write("%i %.1f %.1f %.1f %.1f\n" %(v_id+1, v_earlist_arrival_time, v_source_angle, v_destination_angle, v_initial_velocity))    
     print('Vehicles input file generated.')
     return
 
@@ -100,6 +80,7 @@ def parse_args() -> Namespace:
     parser.add_argument('--vehicles_dir', type=Path, default='./input/', help='Directory to the vehicles input file')
     parser.add_argument('--vehicles_file_name', type=str, default='1.in', help='Filename of the vehicle file (e.g. 1.in)')
     parser.add_argument('--num_of_vehicles', type=int, default=5)
+    print('here')
     parser.add_argument('--expon_lamda', type=float, default=2, help='Lamda of the exponantial distribution')
 
     args = parser.parse_args()
