@@ -93,7 +93,21 @@ ra_mgr::read_ra_info(const string& rafile)
   ra_max_capacity = mc;
 
   // read ra_valid_source_angle //
-  fin >> va;
+  int num_of_entry, num_of_exit;
+  fin >> num_of_entry;
+  for(int i = 0; i < num_of_entry; i++){
+    float tmp;
+    fin >> tmp;
+    ra_valid_source_angle.push_back(tmp);
+  }
+  fin >> num_of_exit;
+  for(int i = 0; i < num_of_entry; i++){
+    float tmp;
+    fin >> tmp;
+    ra_valid_destination_angle.push_back(tmp);
+  }
+
+  /*
   int current = 0; 
 	int next;
 	while (1)
@@ -109,7 +123,7 @@ ra_mgr::read_ra_info(const string& rafile)
 		if (next == string::npos) break;
 		current = next + 1; 
 	}
-
+  
   // read ra_valid_destination_angle //
   fin >> va;
   current = 0; 
@@ -126,7 +140,7 @@ ra_mgr::read_ra_info(const string& rafile)
 		if (next == string::npos) break;
 		current = next + 1; 
 	}
-
+  */
   fin.close();
   
   // unit: m, r*θ >= 5 (小客車長度5公尺, 小型車至少要保持「車速/2」距離(單位：公尺)
