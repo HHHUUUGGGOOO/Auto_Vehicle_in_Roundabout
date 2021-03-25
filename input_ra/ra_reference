@@ -1,3 +1,5 @@
 Radius(m) Safety_Velocity(km/hr) Safety_Margin(m) Maximum_capacity
-All valid source angles with one "," between(degree)
-All valid destination angles with one "," between
+num_of_entry (say N)
+source_angle1 source_angle2 ... sourec_angleN
+num_of_exit (say M)
+destination_angle1 source_angle2 ... source_angleM
