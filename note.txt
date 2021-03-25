@@ -121,6 +121,11 @@ remember to revise it
 // test data
 add 2.in and ra02.in just not to modify origin test data
 but not use 1.in and ra01.in
+> I've manually change the inputs into new type
+
+// input generators:
+use python xxx_generator.py --help to see the help information
+I use argument parser in it so that we can change some parameters by argument (e.g. python ra_input_generator.py --ra_radius 20)
 
 I suppose there will be some problem in safety_margin of ra and vehicle
 need to discuss with you XD
