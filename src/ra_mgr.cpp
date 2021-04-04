@@ -29,8 +29,8 @@ bool compare_v(Vehicle const *a, Vehicle const *b)
 // constructor //
 ra_mgr::ra_mgr()
 { 
-  ra_time_unit = 0.1; // unit: sec
-  ra_angle_unit = PI/6; //degree_to_rad(1.5); // unit: 1.5 degree = 0.025 rad
+  ra_time_unit = 0.1; // unit: sec 
+  ra_angle_unit =  degree_to_rad(1.5); // unit: 1.5 degree = 0.025 rad
   ra_radius = 20; // unit: m
   ra_safety_velocity = 7; // unit: m/s
   ra_safety_margin = 3; // unit: m
@@ -70,7 +70,8 @@ ra_mgr::read_vehicle(const string& infile)
     // store //
     Vehicle* v = new Vehicle(v_id, eat, sa, da, vel);
     v->safety_margin = round(v->velocity/2);
-    v->angle_unit = v_min_angle_unit(degree_to_rad((v->velocity/ra_radius))); //0.025*ceil((v->velocity/10)/0.5);
+    //printf("%f, %f, Velocity = %f(rad)\n", v->velocity, ra_radius, v->velocity/ra_radius);
+    v->angle_unit = v_min_angle_unit(v->velocity*ra_time_unit/ra_radius); //0.025*ceil((v->velocity/10)/0.5);
     v_total.push_back(v);     
   }
   
@@ -98,7 +99,7 @@ ra_mgr::read_ra_info(const string& rafile)
   for(int i = 0; i < num_of_entry; i++){
     float tmp;
     fin >> tmp;
-    ra_valid_source_angle.push_back(tmp);
+    ra_valid_source_angle.push_back(degree_to_rad(tmp));
   }
   // Resize the number of waiting queue
   waiting_lists.resize(num_of_entry);
@@ -107,8 +108,18 @@ ra_mgr::read_ra_info(const string& rafile)
   for(int i = 0; i < num_of_exit; i++){
     float tmp;
     fin >> tmp;
-    ra_valid_destination_angle.push_back(tmp);
+    ra_valid_destination_angle.push_back(degree_to_rad(tmp));
   }
+  /*
+  printf("Valid Source Angle:");
+  for(int i = 0; i < ra_valid_source_angle.size(); i++)
+    printf("%f ", ra_valid_source_angle[i]);
+  printf("\n");
+  printf("Valid Destination Angle:");
+  for(int i = 0; i < ra_valid_destination_angle.size(); i++)
+    printf("%f ", ra_valid_destination_angle[i]);
+  printf("\n");
+  */
 
   fin.close();
   
@@ -135,10 +146,12 @@ void ra_mgr::trivial_solution(){
     int n_vehicle = v_total.size();
     int finished = 0;
     int start_entering = 0;
+    
+    //getchar();
 
     // Do while not finished
     while(finished < n_vehicle){
-        // cerr << "t = " << t << endl;
+         cerr << "t = " << t << endl;
         // find trying in first //
         // cerr << "find trying in first..." << endl;
         //
@@ -146,6 +159,7 @@ void ra_mgr::trivial_solution(){
         while(start_entering < n_vehicle && v_total[start_entering]->earliest_arrival_time <= t){
             for(int entering_road = 0; entering_road < ra_valid_source_angle.size(); entering_road++){
                 if( v_total[start_entering]->source_angle == ra_valid_source_angle[entering_road]){
+                    printf("Vehicles %d enters road %d (at %f)\n", start_entering, entering_road, ra_valid_source_angle[entering_road]);
                     waiting_lists[entering_road].push_back(v_total[start_entering]);
                     break;
                 }
@@ -155,29 +169,32 @@ void ra_mgr::trivial_solution(){
 
         // cerr << "deal with vehicle in roundabout..." << endl;
 
-        for (int i=0; i < in_list.size(); i++){
+        for (vector<Vehicle*>::iterator iter = in_list.begin(); iter != in_list.end(); iter++){
           // leave //
-            if (in_list[i]->now_angle+in_list[i]->angle_unit >= in_list[i]->destination_angle){
+            if ((*iter)->now_angle+(*iter)->angle_unit >= (*iter)->destination_angle){
                 // Leaving time is calculated by 內插法
-                float leaving_time = t + ra_time_unit * ((in_list[i]->destination_angle - in_list[i]->now_angle)/in_list[i]->angle_unit);
-                in_list[i]->position.push_back(make_pair(leaving_time, in_list[i]->destination_angle));
-                in_list.erase(in_list.begin()+i);
-                i--;
+                float leaving_time = t + ra_time_unit * (((*iter)->destination_angle - (*iter)->now_angle)/(*iter)->angle_unit);
+                (*iter)->position.push_back(make_pair(leaving_time, (*iter)->destination_angle));
+                iter = in_list.erase(iter);
                 finished++;
             }
             else{
-                in_list[i]->now_angle += in_list[i]->angle_unit;
-                in_list[i]->position.push_back(make_pair(t, in_list[i]->now_angle));
-                position_T[in_list[i]->now_angle/ra_angle_unit] = in_list[i]->id;
+                (*iter)->now_angle += (*iter)->angle_unit;
+                (*iter)->position.push_back(make_pair(t, (*iter)->now_angle));
+                position_T[(*iter)->now_angle/ra_angle_unit] = (*iter)->id;
+                printf("(%d, %f,%f) ", (*iter)->id, (*iter)->now_angle, (*iter)->destination_angle);
             }
+            if(iter == in_list.end())
+                break;
         }
+        printf("\n");
         // cerr << "send vehicle into roundabout..." << endl;
         int correction_term=0;
-        while(in_list.size() < ra_max_capacity){
+        while(in_list.empty()){ //ra_max_capacity){
             int cur_choice = -1;
-            float cur_waiting_time = -1; // Using waiting time as priority
+            float cur_waiting_time = -0.01; // Using waiting time as priority
             for(int i = 0; i < waiting_lists.size(); i++){
-                if(waiting_lists.empty())
+                if(waiting_lists[i].empty())
                     continue;
                 float pr = t - waiting_lists[i][0]->earliest_arrival_time;
                 if(pr > cur_waiting_time){
@@ -189,27 +206,37 @@ void ra_mgr::trivial_solution(){
             if(cur_choice == -1) 
                 break;
             // Check if conflict ( no need in trivial solution)
-        
             // Push it into the roundabout
             Vehicle* Chosen = waiting_lists[cur_choice][0];
             Chosen->position.push_back( make_pair( t, Chosen->source_angle));
+            Chosen->now_angle = Chosen->source_angle;
             // Find position to insert
             vector<Vehicle*>::iterator it = in_list.begin();
             while(it != in_list.end() && (*it)->now_angle < Chosen->source_angle){
                 it++;
             }
             in_list.insert(it, Chosen);
+            /*
+            printf("in_list: ");
+            for(int i = 0; i < in_list.size(); i++)
+                printf("%f ", in_list[i]->now_angle);
+            printf("\n");
+            */
             // Pop
             waiting_lists[cur_choice].erase(waiting_lists[cur_choice].begin());
         }
 
         // cerr << "final..." << endl;
+        cerr << "vehicles Enter: " << start_entering << ", vehicles in the roundabout: " << in_list.size() << ", vehicles finished: " << finished << endl;
         output_chart.push_back(position_T);
         fill(position_T.begin(), position_T.end(), 0);
         t += ra_time_unit;
+        //printf("Press any key to continue\n");
+        //getchar();
     }
 
   // print chart
+  /*
     for (int i=0; i < output_chart.size(); i++){
         for (int j=0; j < output_chart[i].size(); j++){
             if (output_chart[i][j] == 0) cerr << ". ";
@@ -218,6 +245,14 @@ void ra_mgr::trivial_solution(){
         cerr << endl;
     }
     cerr << endl;
+    */
+  // print output
+    for(int i = 0; i < v_total.size(); i++){
+        printf("%d ", i);
+        for(int j = 0; j < v_total[i]->position.size(); j++)
+            printf("(%f, %f) ", v_total[i]->position[j].first, v_total[i]->position[j].second);
+        printf("\n");
+    }
 }
 
 
@@ -435,15 +470,22 @@ bool
 ra_mgr::verify_angle(float sa, float da) 
 {
   // sa: source angle, da: destination angle
+  // printf("%f %f\n", sa, da);
+
   // Verify if sa is valid
   bool valid = false;
-  for(int i=0; i < ra_valid_source_angle.size() && !valid; i++)
-    if (sa == ra_valid_source_angle[i]) valid=true; 
-  if(!valid) return false;
+  for(int i=0; i < ra_valid_source_angle.size() && !valid; i++){
+    if (sa == ra_valid_source_angle[i])
+      valid=true; 
+  }
+  if(valid == false) return false;
+
   // Verify if da is valid
-  valid=true;
-  for(int i=0; i < ra_valid_destination_angle.size() && !valid; i++)
-    if (da == ra_valid_destination_angle[i]) valid=true; 
+  valid = false;
+  for(int i=0; i < ra_valid_destination_angle.size() && !valid; i++){
+    if (da == ra_valid_destination_angle[i])
+      valid=true;  
+  }
   return valid;
 }
 
@@ -483,7 +525,7 @@ ra_mgr::Vehicle_information()
     cerr << "  Source_angle: " << v_total[i]->source_angle << " (rad)" << endl;
     cerr << "  Denstination_angle: " << v_total[i]->destination_angle << " (rad)" << endl;
     cerr << "  Velocity:" << v_total[i]->velocity << " (m/s)" << endl;
-    cerr << "  Angle unit: " << v_total[i]->angle_unit << " (rad)" << endl;
+    cerr << "  Angle unit: " << v_total[i]->angle_unit << " (rad/time unit)" << endl;
     cerr << endl;
   }
   cerr << "------------------------------------------------------------" << endl;
