@@ -100,47 +100,16 @@ ra_mgr::read_ra_info(const string& rafile)
     fin >> tmp;
     ra_valid_source_angle.push_back(tmp);
   }
+  // Resize the number of waiting queue
+  waiting_lists.resize(num_of_entry);
+
   fin >> num_of_exit;
-  for(int i = 0; i < num_of_entry; i++){
+  for(int i = 0; i < num_of_exit; i++){
     float tmp;
     fin >> tmp;
     ra_valid_destination_angle.push_back(tmp);
   }
 
-  /*
-  int current = 0; 
-	int next;
-	while (1)
-	{
-		next = va.find_first_of(",", current);
-		if (next != current)
-		{
-			string tmp = va.substr(current, next - current);
-			if (tmp.size() != 0)
-				// ra_valid_source_angle.push_back(stoi(tmp));
-        ra_valid_source_angle.push_back(degree_to_rad(atof(tmp.c_str()))); // To MobaXTerm, it cannot support C++11's 'stoi()'
-		}
-		if (next == string::npos) break;
-		current = next + 1; 
-	}
-  
-  // read ra_valid_destination_angle //
-  fin >> va;
-  current = 0; 
-	while (1)
-	{
-		next = va.find_first_of(",", current);
-		if (next != current)
-		{
-			string tmp = va.substr(current, next - current);
-			if (tmp.size() != 0)
-				// ra_valid_destination_angle.push_back(stoi(tmp));
-        ra_valid_destination_angle.push_back(degree_to_rad(atof(tmp.c_str())));
-		}
-		if (next == string::npos) break;
-		current = next + 1; 
-	}
-  */
   fin.close();
   
   // unit: m, r*θ >= 5 (小客車長度5公尺, 小型車至少要保持「車速/2」距離(單位：公尺)
@@ -153,24 +122,123 @@ ra_mgr::read_ra_info(const string& rafile)
 }
 
 
+void ra_mgr::trivial_solution(){
+    if (!v_total.size()){
+        cerr << "There is no vehicles to schedule !!" << endl;
+        return;
+    }
+    float t = 0;
+
+    vector<int>  position_T(360/ra_angle_unit+1, 0); // for time t: position  
+
+    vector<vector<int>> output_chart;
+    int n_vehicle = v_total.size();
+    int finished = 0;
+    int start_entering = 0;
+
+    // Do while not finished
+    while(finished < n_vehicle){
+        // cerr << "t = " << t << endl;
+        // find trying in first //
+        // cerr << "find trying in first..." << endl;
+        //
+        // Push vehicles to wait at its source road
+        while(start_entering < n_vehicle && v_total[start_entering]->earliest_arrival_time <= t){
+            for(int entering_road = 0; entering_road < ra_valid_source_angle.size(); entering_road++){
+                if( v_total[start_entering]->source_angle == ra_valid_source_angle[entering_road]){
+                    waiting_lists[entering_road].push_back(v_total[start_entering]);
+                    break;
+                }
+            }
+            start_entering++;
+        }
+
+        // cerr << "deal with vehicle in roundabout..." << endl;
+
+        for (int i=0; i < in_list.size(); i++){
+          // leave //
+            if (in_list[i]->now_angle+in_list[i]->angle_unit >= in_list[i]->destination_angle){
+                // Leaving time is calculated by 內插法
+                float leaving_time = t + ra_time_unit * ((in_list[i]->destination_angle - in_list[i]->now_angle)/in_list[i]->angle_unit);
+                in_list[i]->position.push_back(make_pair(leaving_time, in_list[i]->destination_angle));
+                in_list.erase(in_list.begin()+i);
+                i--;
+                finished++;
+            }
+            else{
+                in_list[i]->now_angle += in_list[i]->angle_unit;
+                in_list[i]->position.push_back(make_pair(t, in_list[i]->now_angle));
+                position_T[in_list[i]->now_angle/ra_angle_unit] = in_list[i]->id;
+            }
+        }
+        // cerr << "send vehicle into roundabout..." << endl;
+        int correction_term=0;
+        while(in_list.size() < ra_max_capacity){
+            int cur_choice = -1;
+            float cur_waiting_time = -1; // Using waiting time as priority
+            for(int i = 0; i < waiting_lists.size(); i++){
+                if(waiting_lists.empty())
+                    continue;
+                float pr = t - waiting_lists[i][0]->earliest_arrival_time;
+                if(pr > cur_waiting_time){
+                    cur_choice = i;
+                    cur_waiting_time = pr;
+                }
+            }
+            // no vehicles
+            if(cur_choice == -1) 
+                break;
+            // Check if conflict ( no need in trivial solution)
+        
+            // Push it into the roundabout
+            Vehicle* Chosen = waiting_lists[cur_choice][0];
+            Chosen->position.push_back( make_pair( t, Chosen->source_angle));
+            // Find position to insert
+            vector<Vehicle*>::iterator it = in_list.begin();
+            while(it != in_list.end() && (*it)->now_angle < Chosen->source_angle){
+                it++;
+            }
+            in_list.insert(it, Chosen);
+            // Pop
+            waiting_lists[cur_choice].erase(waiting_lists[cur_choice].begin());
+        }
+
+        // cerr << "final..." << endl;
+        output_chart.push_back(position_T);
+        fill(position_T.begin(), position_T.end(), 0);
+        t += ra_time_unit;
+    }
+
+  // print chart
+    for (int i=0; i < output_chart.size(); i++){
+        for (int j=0; j < output_chart[i].size(); j++){
+            if (output_chart[i][j] == 0) cerr << ". ";
+            else cerr << output_chart[i][j] << " ";
+        }
+        cerr << endl;
+    }
+    cerr << endl;
+}
+
+
 void                
 ra_mgr::greedy_without_safetymargin()
 {
   if (!v_total.size())
   {
     cerr << "There is no vehicles to schedule !!" << endl;
-    return;
   }
-
   float t = 0;
   int conflict_v;
   int angle;
 
+  vector<vector<int>> output_chart;
   vector<int>  position_T(360/ra_angle_unit+1, 0); // for time t: position  
   vector<Vehicle*>  wait_list;
   vector<Vehicle*>  in_list;
   wait_list = v_total;
-  vector<vector <Vehicle*> > queue_0, queue_90, queue_180, queue_270;
+ 
+  vector<Vehicle*> queue_0, queue_90, queue_180, queue_270;
   vector<vector <Vehicle*> > entry(ra_valid_source_angle.size());
   vector< pair<int , Vehicle*> > trying_in;
 
@@ -230,8 +298,7 @@ ra_mgr::greedy_without_safetymargin()
 
     // cerr << "send vehicle into roundabout..." << endl;
     int correction_term=0;
-    for (int i=0; i < trying_in.size(); i++)
-    {
+    for (int i=0; i < trying_in.size(); i++){
       // check capacity
       if (in_list.size() >= ra_max_capacity) 
       {
@@ -271,6 +338,7 @@ ra_mgr::greedy_without_safetymargin()
 
 }
 
+/*
 void                
 ra_mgr::greedy_with_safetymargin()
 {
@@ -297,13 +365,13 @@ ra_mgr::greedy_with_safetymargin()
   for (i=0; i< wait_list.size(); i++)
   {
     sort(wait_list[i].rbegin(), wait_list[i].rend(), compare_v);
-    /* check entry
+    *//* check entry
     cerr << i << endl;
     for (int j=0; j < wait_list[i].size(); j++)
     {
       cerr << wait_list[i][j]->id << " -> " << wait_list[i][j]->earliest_arrival_time << endl;
     }
-    cerr << endl; */
+    cerr << endl; *//*
   }
 
   Vehicle* tmp;
@@ -351,7 +419,7 @@ ra_mgr::greedy_with_safetymargin()
     if (t>0.05) break;
   }
   
-}
+}*/
 
 
 // utility //

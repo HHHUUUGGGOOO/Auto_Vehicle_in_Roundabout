@@ -85,7 +85,8 @@ int main(int argc, char** argv)
     if (in == "y")
     {
       // raMgr->greedy_without_safetymargin();
-      raMgr->greedy_with_safetymargin();
+      //raMgr->greedy_with_safetymargin();
+      raMgr->trivial_solution();
       break;
     }
     else if (in == "n")

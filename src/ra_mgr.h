@@ -62,9 +62,12 @@ class ra_mgr
     // schedule //
     void                greedy_without_safetymargin();
     void                greedy_with_safetymargin();
+    void                trivial_solution();
 
     // output the final solution //
-    vector <vector <int> >  output_chart; // store the output
+    // output format: v1 t1 p1 t2 p2 t3 p3 ....
+    //                v2 t1 p1 t2 p2 t3 p3
+    vector <vector < pair<int, int> > >  output_chart; // store the output
     void                output_solution();
 
     // vehicle variables //
@@ -81,6 +84,12 @@ class ra_mgr
     int                 ra_max_capacity;
     vector<float>       ra_valid_source_angle; // 0 <= angle < 2*pi
     vector<float>       ra_valid_destination_angle; // Si <= Di < Si + 2*pi ; D_i > 0
+
+    // Let vehicles waiting on the road.
+    // So, we need a queue for each road.(Using vector so as to trace the vehicles on the road)
+    // The angles are defined in ra_valid_source_angle
+    vector<vector<Vehicle*>>  waiting_lists;
+    vector<Vehicle*>  in_list;
 
     void                reset();
     
