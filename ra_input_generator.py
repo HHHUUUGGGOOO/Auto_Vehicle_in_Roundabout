@@ -46,7 +46,7 @@ def main(args):
             f.write("{:.1f} ".format(entry_list[i]))
         f.write('\n')
 
-        f.write('{:d}\n'.format(args.num_of_exit));
+        f.write('{:d}\n'.format(args.num_of_exit))
         for i in range(args.num_of_exit):
             f.write("{:.1f} ".format(exit_list[i]))
         f.write('\n')
@@ -84,3 +84,5 @@ def parse_args() -> Namespace:
 if __name__ == '__main__':
     args = parse_args()
     main(args)
+
+

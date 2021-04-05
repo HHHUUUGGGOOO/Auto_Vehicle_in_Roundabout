@@ -53,10 +53,10 @@ def main(args):
             print('Stop generating file ...')
             return
 
-    v_id = 1;
-    v_earlist_arrival_time = 0;
-    v_source_angle = 0;
-    v_destination_angle = 0;
+    v_id = 1
+    v_earlist_arrival_time = 0
+    v_source_angle = 0
+    v_destination_angle = 0
     v_initial_velocity = 10; #unit=km/hr
 
 
