@@ -247,10 +247,17 @@ void ra_mgr::trivial_solution(){
     cerr << endl;
     */
   // print output
+    FILE *fptr = fopen("./output/output.txt", "w");
+
+
     for(int i = 0; i < v_total.size(); i++){
+        fprintf(fptr, "%d ", i);
         printf("%d ", i);
-        for(int j = 0; j < v_total[i]->position.size(); j++)
+        for(int j = 0; j < v_total[i]->position.size(); j++){
             printf("(%f, %f) ", v_total[i]->position[j].first, v_total[i]->position[j].second);
+            fprintf(fptr, "%f %f ", v_total[i]->position[j].first, v_total[i]->position[j].second);
+        }
+        fprintf(fptr, "\n");
         printf("\n");
     }
 }
