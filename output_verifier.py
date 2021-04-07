@@ -127,6 +127,11 @@ def main(args):
             angle_unit=round((v_dict[vehicle].get_angle_by_time(tmp_list[i+1])-v_dict[vehicle].get_angle_by_time(tmp_list[i]))/(tmp_list[i+1]-tmp_list[i]),6)
             
             # TODO: compare _ra_safety_velocity and angle_unit to verify constraint #
+            delta_theta = round((v_dict[vehicle].get_angle_by_time(tmp_list[i+1])-v_dict[vehicle].get_angle_by_time(tmp_list[i]))*(math.pi/180), 3)
+            vel = round((_ra_radius*delta_theta)/(tmp_list[i+1]-tmp_list[i]),6)
+            if (vel > _ra_safety_velocity):
+                print("At time {} to time {}, vehicle {} violate safety velocity constraint with velocity = {} (m/s)".format(tmp_list[i], tmp_list[i+1], vehicle._id, vel))
+                return
 
             # print("{}, {}, {}, {}, {}".format(t2, t1, tmp_list[i+1], tmp_list[i], unit))
             for j in range(t1+1, t2):
@@ -145,6 +150,13 @@ def main(args):
                 return
             
             # TODO: check _ra_safety_margin to verify constraint # 
+            # _ra_safety_margin / t_dict: { time: [vehicle, angle] } / dist = r*theta 
+            for benchmark in range(len(t_dict[t])-1):
+                for comp in range(benchmark+1, len(t_dict[t])):
+                    dist = round(_ra_radius*abs(t_dict[t][benchmark][1]-t_dict[t][comp][1])*(math.pi/180), 3)
+                    if (dist < _ra_safety_margin):
+                        print("At time {}, vehicle {} and {} violate safety margin constraint with distance = {} (m)".format(t, t_dict[t][benchmark][0]._id, t_dict[t][comp][0]._id, dist))
+                        return
     
     # output the last vehicle output time #
     print("--------------------------")
@@ -167,3 +179,14 @@ def parse_args() -> Namespace:
 if __name__ == '__main__':
     args = parse_args()
     main(args)
+
+
+# Variable Format #
+'''
+timelist = ['time_1', 'time_2', ...]
+self.time2angle = { 'time': 'a specific vehicle's now angle' }
+v_dict = { 'vehicle ID': 'corresponding class Vehicle()' }
+t_dict = { 'time_1': [[vehicle 1's ID, vehicle 1's angle], [vehicle 2's ID, vehicle 2's angle], ...], 'time_2': ... } 
+time2id = { 'time_1': 'i-th time' }
+
+'''
