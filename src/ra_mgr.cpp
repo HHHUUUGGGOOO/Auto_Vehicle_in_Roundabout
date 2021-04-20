@@ -132,6 +132,105 @@ ra_mgr::read_ra_info(const string& rafile)
  return true;
 }
 
+/*
+void ra_mgr::line_trivial_solution(){
+    if (!v_total.size()){
+        cerr << "There is no vehicles to schedule !!" << endl;
+        return;
+    }
+    int n_vehicle = v_total.size();
+    vector<vector<pair<float, float>> source_banned_time(ra_valid_source_angle.size());
+    
+
+    // Do while not finished
+    for (int i = 0; i < n_vehicle; i++) {
+        // find a time to enter the roundabout
+        float start_time = v_total[i]->earliest_arrival_time, start_angle = v_total[i]->source_angle, dest_angle = v_total[i]->destination_angle;
+        int start_intersection = 0;
+        //// get start intersection
+        while (start_intersection < ra_valid_source_angle.size() && ra_valid_source_angle[start_intersection] != start_angle) 
+            start_intersection += 1;
+        if (start_intersection >= ra_valid_source_angle.size()) {
+            cerr << "Something goes wrong in the source angle of vehicle " << start_intersection << endl;
+            return;
+        }
+        //// Check manually
+        bool over_2PI = false;
+        int intersection_idx = start_intersection;
+        while(true){
+            // Stop when the line segments between last ra entry and current ra entry covers the destination angle;
+            float current_angle = ra_valid_source_angle[intersection_idx];
+            bool ban_flag = false;
+            while(current_angle <= dest_angle && !ban_flag){
+                float move_time = (current_angle - start_angle) * ra_radius / v_total[i]->velocity;
+                float arrival_time = start_time + move_time;
+                for(vector<vector<pair<float, float>>>::iterator iter = source_banned_time[intersection_idx].begin(); iter != source_banned_time[intersection_idx].end(); iter++){
+                    if(iter->first <= arrival_time && iter->second > arrival_time){
+                        ban_flag = true;
+                        start_time = iter->second - move_time;
+                    } else if( iter->first > start_time) { break; }
+                }
+                if(ban_flag) { break; }
+                // next intersection index
+                if (intersection_idx == ra_valid_source_angle.size()-1) {
+                    over_2PI = true;
+                    intersection_idx = 0;
+                } else {
+                    intersection_idx += 1;
+                }
+                current_angle = (over_2PI)? ra_valid_source_angle[intersection_idx] + 2*PI : ra_valid_source_angle[intersection_idx];
+            }
+            if(!ban_flag){
+                break;
+            }
+        }
+        float end_time = start_time + (dest_angle - start_angle) * ra_radius;
+        v_total[i]->position.push_back(make_pair(start_time, start_angle));
+        v_total[i]->position.push_back(make_pair(end_time, dest_angle));
+        // ban the intersections that will encounter this vehicle
+        over_2PI = false;
+        intersection_idx = start_intersection;
+        float current_angle = ra_valid_source_angle[intersection_idx];
+        float ban_range = ra_safety_margin / v_total[i]->velocity;
+        while(current_angle <= dest_angle){
+            float move_time = (current_angle - start_angle) * ra_radius / v_total[i]->velocity;
+            float arrival_time = start_time + move_time;
+            float upper_bound = arrival_time + ban_range, lower_bound = arrival_time - ban_range;
+            bool last_flag = true;
+            int insert_pos = 0;
+            while(insert_pos < source_banned_time[intersection_idx].size() && last_flag){
+                if( source_banned_time[intersection_idx][insert_pos].second >= lower_bound && source_banned_time[intersection_idx][insert_pos].first <= lower_bound){
+                    source_banned_time[intersection_idx][insert_pos].second = max(upper_bound, source_banned_time[intersection_idx][insert_pos].second);
+                    last_flag = false;
+                } else if( source_banned_time[intersection_idx][insert_pos].first <= upper_bound && source_banned_time[intersection_idx][insert_pos].second >= upper_bound){
+                    source_banned_time[intersection_idx][insert_pos].first = min(lower_bound, source_banned_time[intersection_idx][insert_pos].first);
+                    last_flag = false;
+                } else if( source_banned_time[intersection_idx][insert_pos].second < lower_bound){
+                    source_banned_time[intersection_idx].insert(source_banned_time[intersection_idx].begin()+insert_pos, make_pair(lower_bound, upper_bound));
+                }
+                if ( last_flag ) { insert_pos += 1; }
+            }
+            if(last_flag){
+                source_banned_time[intersection_idx].push_back(make_pair(lower_bound, upper_bound));
+            } else{
+                for(int j = 0; j < source_banned_time.size() - 1; j++){
+                    if(source_banned_time[intersection_idx][j].second >= source_banned_time[intersection_idx][j+1].first){
+                        if( source_banned_time[intersection_idx][j].second < source_banned_time[intersection_idx][j+1].second)
+                            source_banned_time[intersection_idx][j].second = source_banned_time[intersection_idx][j+1].second;
+                        source_banned_time[intersection_idx].erase(source_banned_time[intersection_idx].begin() + j + 1);
+                    }
+                }
+            }
+
+            if(intersection_idx == ra_valid_source_angle.size() -1){
+                over_2PI = true;
+                intersection_idx = 0;
+            } else { intersection_idx += 1;}
+            current_angle = ra_valid_source_angle[intersection_idx] + (over_2PI)? 2*PI:0;
+        }
+    }
+}*/
+
 
 void ra_mgr::trivial_solution(){
     if (!v_total.size()){
@@ -140,7 +239,6 @@ void ra_mgr::trivial_solution(){
     }
     float t = 0;
 
-    vector<int>  position_T(360/ra_angle_unit+1, 0); // for time t: position  
 
     vector<vector<int>> output_chart;
     int n_vehicle = v_total.size();
@@ -181,7 +279,6 @@ void ra_mgr::trivial_solution(){
             else{
                 (*iter)->now_angle += (*iter)->angle_unit;
                 (*iter)->position.push_back(make_pair(t, (*iter)->now_angle));
-                position_T[(*iter)->now_angle/ra_angle_unit] = (*iter)->id;
                 printf("(%d, %f,%f) ", (*iter)->id, (*iter)->now_angle, (*iter)->destination_angle);
             }
             if(iter == in_list.end())
@@ -228,37 +325,9 @@ void ra_mgr::trivial_solution(){
 
         // cerr << "final..." << endl;
         cerr << "vehicles Enter: " << start_entering << ", vehicles in the roundabout: " << in_list.size() << ", vehicles finished: " << finished << endl;
-        output_chart.push_back(position_T);
-        fill(position_T.begin(), position_T.end(), 0);
         t += ra_time_unit;
         //printf("Press any key to continue\n");
         //getchar();
-    }
-
-  // print chart
-  /*
-    for (int i=0; i < output_chart.size(); i++){
-        for (int j=0; j < output_chart[i].size(); j++){
-            if (output_chart[i][j] == 0) cerr << ". ";
-            else cerr << output_chart[i][j] << " ";
-        }
-        cerr << endl;
-    }
-    cerr << endl;
-    */
-  // print output
-    FILE *fptr = fopen("./output/output.txt", "w");
-
-
-    for(int i = 0; i < v_total.size(); i++){
-        fprintf(fptr, "%d ", i);
-        printf("%d ", i);
-        for(int j = 0; j < v_total[i]->position.size(); j++){
-            printf("(%f, %f) ", v_total[i]->position[j].first, v_total[i]->position[j].second);
-            fprintf(fptr, "%f %f ", v_total[i]->position[j].first, v_total[i]->position[j].second);
-        }
-        fprintf(fptr, "\n");
-        printf("\n");
     }
 }
 
@@ -599,3 +668,16 @@ ra_mgr::check_conflict(int index, vector<Vehicle*>& next_intersection, vector<Ve
   }
   return false;
 }
+
+void ra_mgr::output_solution(const string &path){
+    ofstream fout(path.c_str());
+    for(int i = 0; i < v_total.size(); i++){
+        fout << i << " ";
+        for(int j = 0; j < v_total[i]->position.size(); j++){
+            fout << v_total[i]->position[j].first << " " << v_total[i]->position[j].second << " ";
+        }
+        fout << endl;
+    }
+    return;
+}
+

@@ -28,6 +28,7 @@ ra_mgr* raMgr = new ra_mgr();
 int main(int argc, char** argv)
 {
   ////// read input file //////
+  // argv[1]:input file, argv[2]:input_ra_file, argv[3]:output_file
   if (argc == 4) 
   {
     if (!raMgr->read_ra_info(argv[2])) {
@@ -96,7 +97,7 @@ int main(int argc, char** argv)
   }
 
   ////// write output file //////
-
+  raMgr->output_solution(argv[3]);
 
   delete raMgr;
 

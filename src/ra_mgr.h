@@ -63,12 +63,13 @@ class ra_mgr
     void                greedy_without_safetymargin();
     void                greedy_with_safetymargin();
     void                trivial_solution();
+    void                line_trivial_solution();
 
     // output the final solution //
     // output format: v1 t1 p1 t2 p2 t3 p3 ....
     //                v2 t1 p1 t2 p2 t3 p3
     vector <vector < pair<int, int> > >  output_chart; // store the output
-    void                output_solution();
+    void                output_solution(const string&);
 
     // vehicle variables //
     vector<Vehicle*>     v_total; // store each vehicle's properties
