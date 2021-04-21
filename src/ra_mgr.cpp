@@ -132,14 +132,13 @@ ra_mgr::read_ra_info(const string& rafile)
  return true;
 }
 
-/*
 void ra_mgr::line_trivial_solution(){
     if (!v_total.size()){
         cerr << "There is no vehicles to schedule !!" << endl;
         return;
     }
     int n_vehicle = v_total.size();
-    vector<vector<pair<float, float>> source_banned_time(ra_valid_source_angle.size());
+    vector<vector<pair<float, float>>> source_banned_time(ra_valid_source_angle.size());
     
 
     // Do while not finished
@@ -164,7 +163,7 @@ void ra_mgr::line_trivial_solution(){
             while(current_angle <= dest_angle && !ban_flag){
                 float move_time = (current_angle - start_angle) * ra_radius / v_total[i]->velocity;
                 float arrival_time = start_time + move_time;
-                for(vector<vector<pair<float, float>>>::iterator iter = source_banned_time[intersection_idx].begin(); iter != source_banned_time[intersection_idx].end(); iter++){
+                for(vector<pair<float, float>>::iterator iter = source_banned_time[intersection_idx].begin(); iter != source_banned_time[intersection_idx].end(); iter++){
                     if(iter->first <= arrival_time && iter->second > arrival_time){
                         ban_flag = true;
                         start_time = iter->second - move_time;
@@ -229,7 +228,7 @@ void ra_mgr::line_trivial_solution(){
             current_angle = ra_valid_source_angle[intersection_idx] + (over_2PI)? 2*PI:0;
         }
     }
-}*/
+}
 
 
 void ra_mgr::trivial_solution(){
