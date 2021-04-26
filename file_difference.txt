@@ -1,0 +1,11 @@
+[File]
+    - Original:
+        -- 奕鈞寫的原版本
+    - Case_1:
+        -- 全部等速
+        -- first come first serve
+        -- 一個圓環只能容納一台車, 當一台車出去才能換下一台車進來, 不用time_banned_range
+    - Case_2:
+        
+    - Case_3:
+    
