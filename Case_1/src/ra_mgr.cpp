@@ -18,10 +18,17 @@
 #include <cstdlib>
 #include <cmath>
 #include <utility>
+#include <algorithm>
 #include "vehicle.h"
 #include "ra_mgr.h"
 
 using namespace std;
+
+// sort vehicles by its earliest arrival time //
+bool compare_v(Vehicle const *a, Vehicle const *b)
+{
+  return a->earliest_arrival_time < b->earliest_arrival_time;
+}
 
 // constructor //
 ra_mgr::ra_mgr()
@@ -49,9 +56,10 @@ ra_mgr::read_vehicle(const string& infile)
 
   while (fin >> v_id >> eat >> sa >> da >> vel){
     // check source/destination angle (5)(6) & base on 'π' // 
-    sa = degree_to_rad(sa);
-    da = degree_to_rad(da);
-    if (sa >= 2*PI || da >= 2*PI || sa < 0 || da < 0) 
+
+    // sa = degree_to_rad(sa);
+    // da = degree_to_rad(da);
+    if (sa >= 360 || da >= 360 || sa < 0 || da < 0) 
     {
       cerr << "ID = " << v_id << "'s source or destination angle is not defined in 360 degree !!" << endl;
       return false;
@@ -62,7 +70,7 @@ ra_mgr::read_vehicle(const string& infile)
       return false;
     }
 
-    da = (sa > da)? da+2*PI: da;
+    da = (sa > da)? da+360: da;
     
     // store //
     Vehicle* v = new Vehicle(v_id, eat, sa, da, vel);
@@ -72,6 +80,22 @@ ra_mgr::read_vehicle(const string& infile)
     v_total.push_back(v);     
   }
 
+  // put vehicle into specific wait_list entry
+  for (int i = 0 ; i < v_total.size() ; i++)
+  {
+    wait_list.push_back(v_total[i]);
+  }
+
+  // sort wait_list[i] accroding to earliest arrival time
+  sort(wait_list.begin(), wait_list.end(), compare_v);
+  cout << "=====================================" << endl;
+  cout << "Earliest Arrival Time after Sorting : " << endl;
+  cout << "=====================================" << endl;
+  for ( int i = 0 ; i < v_total.size() ; i++)
+  {
+    cout << wait_list[i]->id << " -> " << wait_list[i]->earliest_arrival_time << " (s)" << endl;
+  }
+  cout << endl;
   fin.close();
   return true;
 }
@@ -95,7 +119,7 @@ ra_mgr::read_ra_info(const string& rafile)
   for(int i = 0; i < num_of_entry; i++){
     float tmp;
     fin >> tmp;
-    ra_valid_source_angle.push_back(degree_to_rad(tmp));
+    ra_valid_source_angle.push_back(tmp);
   }
   // Resize the number of waiting queue
   waiting_lists.resize(num_of_entry);
@@ -104,7 +128,7 @@ ra_mgr::read_ra_info(const string& rafile)
   for(int i = 0; i < num_of_exit; i++){
     float tmp;
     fin >> tmp;
-    ra_valid_destination_angle.push_back(degree_to_rad(tmp));
+    ra_valid_destination_angle.push_back(tmp);
   }
 
   fin.close();
@@ -114,7 +138,59 @@ ra_mgr::read_ra_info(const string& rafile)
 void 
 ra_mgr::line_trivial_solution_case_1()
 {
-    
+    if (!v_total.size()) { cerr << "There is no vehicles to schedule !!" << endl; return; }
+    int n_vehicle = wait_list.size();
+  // in ra time
+    for (int i = 0 ; i < n_vehicle ; i++)
+    {
+      float run_time = ra_radius*degree_to_rad(wait_list[i]->destination_angle-wait_list[i]->source_angle)/wait_list[i]->velocity;
+      // 無條件進入到小數點後第一位
+      run_time = ceil(run_time*10 + 0.5)/10;
+      in_ra_time.push_back(run_time);
+    }
+    // The first vehicle
+    real_enter_time.push_back(wait_list[0]->earliest_arrival_time);
+    // Do while traversing all vehicles in the wait_list
+    for (int i = 1 ; i < n_vehicle ; i++)
+    {
+      float can_enter_time = real_enter_time[i-1] + in_ra_time[i];
+      real_enter_time.push_back(max(wait_list[i]->earliest_arrival_time, can_enter_time));
+    }
+    // debug 
+    cout << "====================" << endl;
+    cout << "Vehicle in ra time : " << endl;
+    cout << "====================" << endl;
+    for ( int i = 0 ; i < in_ra_time.size() ; i++)
+    {
+      cerr << wait_list[i]->id << " -> " << in_ra_time[i] << " (s)" << endl;
+    }
+    cout << endl;
+    cout << "=========================" << endl;
+    cout << "Vehicle real enter time : " << endl;
+    cout << "=========================" << endl;
+    for ( int i = 0 ; i < real_enter_time.size() ; i++)
+    {
+      cerr << wait_list[i]->id << " -> " << real_enter_time[i] << " (s)" << endl;
+    }
+  // make pair of position
+    for (int i = 0 ; i < n_vehicle ; i++)
+    {
+      for (int j = 0 ; j < (int)in_ra_time[i]/0.1 ; j++)
+      {
+        if (j == (int)in_ra_time[i]/0.1 - 1)
+        {
+          float t = real_enter_time[i] + (ra_radius*degree_to_rad(wait_list[i]->destination_angle-wait_list[i]->source_angle)/wait_list[i]->velocity);
+          float angle = wait_list[i]->destination_angle;
+          wait_list[i]->position.push_back(make_pair(t, angle));
+        }
+        else
+        {
+          float t = real_enter_time[i] + 0.1*j;
+          float angle = wait_list[i]->source_angle + rad_to_degree(wait_list[i]->velocity*0.1*j/ra_radius);
+          wait_list[i]->position.push_back(make_pair(t, angle));
+        }
+      }
+    }
 }
 
 
@@ -257,10 +333,10 @@ void
 ra_mgr::output_solution(const string &path)
 {
     ofstream fout(path.c_str());
-    for(int i = 0; i < v_total.size(); i++){
+    for(int i = 0; i < wait_list.size(); i++){
         fout << i << " ";
-        for(int j = 0; j < v_total[i]->position.size(); j++){
-            fout << v_total[i]->position[j].first << " " << v_total[i]->position[j].second << " ";
+        for(int j = 0; j < wait_list[i]->position.size(); j++){
+            fout << wait_list[i]->position[j].first << " " << wait_list[i]->position[j].second << " ";
         }
         fout << endl;
     }

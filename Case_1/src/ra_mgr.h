@@ -52,6 +52,7 @@ class ra_mgr
     bool                check_conflict(int, vector<Vehicle*>&, vector<Vehicle*>&); 
     bool                check_conflict_by_wait(Vehicle const *, vector<Vehicle*>&);
     float               degree_to_rad(float degree) { return (degree*PI/180); }
+    float               rad_to_degree(float rad) { return (rad*180/PI); }
     float               v_min_angle_unit(float angle) { return ((ceil(angle/ra_angle_unit))*ra_angle_unit); }
 
 
@@ -69,8 +70,10 @@ class ra_mgr
     void                                 output_solution(const string&);
 
     // vehicle variables //
-    vector<Vehicle*>     v_total; // store each vehicle's properties
-
+    vector<Vehicle*>     v_total; // store each vehicle's properties, sort by Vehicle_ID
+    vector<Vehicle*>     wait_list; // sort by eat
+    vector<float>        in_ra_time; // time that a car needs to go through the ra
+    vector<float>        real_enter_time; // real time that a car enters the ra
     
     // roundabout information //
     // string              ra_purpose;

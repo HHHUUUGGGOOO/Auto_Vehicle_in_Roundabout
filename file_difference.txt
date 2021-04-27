@@ -2,9 +2,15 @@
     - Original:
         -- 奕鈞寫的原版本
     - Case_1:
-        -- 全部等速
-        -- first come first serve
-        -- 一個圓環只能容納一台車, 當一台車出去才能換下一台車進來, 不用time_banned_range
+        -- 統一規格部分
+            * 全部等速
+            * 有兩個函數 degree_to_rad 及 rad_to_degree, 存在 vehicle 中的是 "degree", 需要計算 r*theta 再改成 "rad", 輸出檔也是 "degree"
+        -- First come First serve
+            * 一個圓環只能容納一台車, 當一台車出去才能換下一台車進來, 不用time_banned_range
+        -- Output format
+            * 角度為"360度制"
+        -- Test Case
+            * test.in --> test.out
     - Case_2:
         
     - Case_3:

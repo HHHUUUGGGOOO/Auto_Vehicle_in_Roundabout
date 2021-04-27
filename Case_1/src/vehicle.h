@@ -45,8 +45,8 @@ class Vehicle
         /* Vehicle variable, need to set value by other functions */
         int                         id;
         float                       earliest_arrival_time;
-        float                       source_angle;
-        float                       destination_angle;
+        float                       source_angle; // 弧度
+        float                       destination_angle; // 弧度
         float                       velocity;
         float                       initial_priority;
         /* output answer type, < <angle_1, t_1>, <angle_2, t_2>, ... > */
