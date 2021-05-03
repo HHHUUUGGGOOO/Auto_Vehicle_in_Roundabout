@@ -52,9 +52,7 @@ ra_mgr::read_vehicle(const string& infile)
 
   while (fin >> v_id >> eat >> sa >> da >> vel){
     // check source/destination angle (5)(6) & base on 'π' // 
-    sa = degree_to_rad(sa);
-    da = degree_to_rad(da);
-    if (sa >= 2*PI || da >= 2*PI || sa < 0 || da < 0) 
+    if (sa >= 360 || da >= 360 || sa < 0 || da < 0) 
     {
       cerr << "ID = " << v_id << "'s source or destination angle is not defined in 360 degree !!" << endl;
       return false;
@@ -65,13 +63,13 @@ ra_mgr::read_vehicle(const string& infile)
       return false;
     }
 
-    da = (sa > da)? da+2*PI: da;
+    da = (sa > da)? da+360: da;
     
     // store //
     Vehicle* v = new Vehicle(v_id, eat, sa, da, vel);
     v->safety_margin = round(v->velocity/2);
     //printf("%f, %f, Velocity = %f(rad)\n", v->velocity, ra_radius, v->velocity/ra_radius);
-    v->angle_unit = v_min_angle_unit(v->velocity*ra_time_unit/ra_radius); //0.025*ceil((v->velocity/10)/0.5);
+    v->angle_unit = 360 * (v->velocity * ra_time_unit) / ( 2 * PI * ra_radius); //0.025*ceil((v->velocity/10)/0.5);
     v_total.push_back(v);     
   }
   
@@ -99,7 +97,7 @@ ra_mgr::read_ra_info(const string& rafile)
   for(int i = 0; i < num_of_entry; i++){
     float tmp;
     fin >> tmp;
-    ra_valid_source_angle.push_back(degree_to_rad(tmp));
+    ra_valid_source_angle.push_back(tmp);
   }
   // Resize the number of waiting queue
   waiting_lists.resize(num_of_entry);
@@ -108,7 +106,7 @@ ra_mgr::read_ra_info(const string& rafile)
   for(int i = 0; i < num_of_exit; i++){
     float tmp;
     fin >> tmp;
-    ra_valid_destination_angle.push_back(degree_to_rad(tmp));
+    ra_valid_destination_angle.push_back(tmp);
   }
   /*
   printf("Valid Source Angle:");
@@ -161,7 +159,7 @@ void ra_mgr::line_trivial_solution(){
             float current_angle = ra_valid_source_angle[intersection_idx];
             bool ban_flag = false;
             while(current_angle <= dest_angle && !ban_flag){
-                float move_time = (current_angle - start_angle) * ra_radius / v_total[i]->velocity;
+                float move_time = degree_to_rad(current_angle - start_angle) * ra_radius / v_total[i]->velocity;
                 float arrival_time = start_time + move_time;
                 for(vector<pair<float, float>>::iterator iter = source_banned_time[intersection_idx].begin(); iter != source_banned_time[intersection_idx].end(); iter++){
                     if(iter->first <= arrival_time && iter->second > arrival_time){
@@ -177,13 +175,13 @@ void ra_mgr::line_trivial_solution(){
                 } else {
                     intersection_idx += 1;
                 }
-                current_angle = (over_2PI)? ra_valid_source_angle[intersection_idx] + 2*PI : ra_valid_source_angle[intersection_idx];
+                current_angle = (over_2PI)? ra_valid_source_angle[intersection_idx] + 360 : ra_valid_source_angle[intersection_idx];
             }
             if(!ban_flag){
                 break;
             }
         }
-        float end_time = start_time + (dest_angle - start_angle) * ra_radius;
+        float end_time = start_time + degree_to_rad(dest_angle - start_angle) * ra_radius;
         v_total[i]->position.push_back(make_pair(start_time, start_angle));
         v_total[i]->position.push_back(make_pair(end_time, dest_angle));
         // ban the intersections that will encounter this vehicle
@@ -192,7 +190,7 @@ void ra_mgr::line_trivial_solution(){
         float current_angle = ra_valid_source_angle[intersection_idx];
         float ban_range = ra_safety_margin / v_total[i]->velocity;
         while(current_angle <= dest_angle){
-            float move_time = (current_angle - start_angle) * ra_radius / v_total[i]->velocity;
+            float move_time = degree_to_rad(current_angle - start_angle) * ra_radius / v_total[i]->velocity;
             float arrival_time = start_time + move_time;
             float upper_bound = arrival_time + ban_range, lower_bound = arrival_time - ban_range;
             bool last_flag = true;
@@ -577,7 +575,7 @@ ra_mgr::Roundabout_information()
   cerr << "ra_valid source angles: ";
   for (int i=0; i < ra_valid_source_angle.size(); i++)
     cerr << ra_valid_source_angle[i] << " ";
-  cerr << " (rad)" << endl;
+  cerr << " (radius)" << endl;
 
   cerr << "ra_valid destionation angle: ";
   for (int i=0; i < ra_valid_destination_angle.size(); i++)
@@ -597,10 +595,10 @@ ra_mgr::Vehicle_information()
   {
     cerr << "vehicle id: " << v_total[i]->id << endl;
     cerr << "  Earliest arrival time: " << v_total[i]->earliest_arrival_time << endl;
-    cerr << "  Source_angle: " << v_total[i]->source_angle << " (rad)" << endl;
-    cerr << "  Denstination_angle: " << v_total[i]->destination_angle << " (rad)" << endl;
+    cerr << "  Source_angle: " << v_total[i]->source_angle << " (angle)" << endl;
+    cerr << "  Denstination_angle: " << v_total[i]->destination_angle << " (angle)" << endl;
     cerr << "  Velocity:" << v_total[i]->velocity << " (m/s)" << endl;
-    cerr << "  Angle unit: " << v_total[i]->angle_unit << " (rad/time unit)" << endl;
+    cerr << "  Angle unit: " << v_total[i]->angle_unit << " (angle/time unit)" << endl;
     cerr << endl;
   }
   cerr << "------------------------------------------------------------" << endl;

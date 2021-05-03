@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     cerr << "Error: illegal number of argument (" << argc << ")!!\n";
     return 0;
   }
-
+  
   string in;
   while (1)
   {
@@ -85,9 +85,7 @@ int main(int argc, char** argv)
     cin >> in;
     if (in == "y")
     {
-      // raMgr->greedy_without_safetymargin();
-      //raMgr->greedy_with_safetymargin();
-      raMgr->trivial_solution();
+      raMgr->line_trivial_solution_case_3();
       break;
     }
     else if (in == "n")
@@ -100,6 +98,6 @@ int main(int argc, char** argv)
   raMgr->output_solution(argv[3]);
 
   delete raMgr;
-
+  
   return 0;
 }
