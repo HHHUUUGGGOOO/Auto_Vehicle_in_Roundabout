@@ -69,7 +69,11 @@ ra_mgr::read_vehicle(const string& infile)
       cerr << "ID = " << v_id << "'s source or destination angle is not ra_valid !!" << endl;
       return false;
     }
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> bec4627b82d1f4b04fb2338de56c03cfb506124e
     da = (sa > da)? da+360: da;
     
     // store //
@@ -77,6 +81,8 @@ ra_mgr::read_vehicle(const string& infile)
     v->safety_margin = round(v->velocity/2);
     //printf("%f, %f, Velocity = %f(rad)\n", v->velocity, ra_radius, v->velocity/ra_radius);
     v->angle_unit = v_min_angle_unit(v->velocity*ra_time_unit/ra_radius); //0.025*ceil((v->velocity/10)/0.5);
+<<<<<<< HEAD
+=======
     // intersection id
     vector<float>::iterator sp = find(ra_valid_source_angle.begin(), ra_valid_source_angle.end(), sa);
     int s_id = distance(ra_valid_source_angle.begin(), sp);
@@ -84,6 +90,7 @@ ra_mgr::read_vehicle(const string& infile)
     int d_id = distance(ra_valid_destination_angle.begin(), dp);
     v->source_intersection_id = s_id;
     v->destination_intersection_id = d_id;
+>>>>>>> bec4627b82d1f4b04fb2338de56c03cfb506124e
     v_total.push_back(v);     
   }
 
@@ -147,6 +154,9 @@ ra_mgr::line_trivial_solution_case_2()
 {
     if (!v_total.size()) { cerr << "There is no vehicles to schedule !!" << endl; return; }
     int n_vehicle = wait_list.size();
+<<<<<<< HEAD
+  
+=======
   // in ra time
 
     for (int i = 0 ; i < n_vehicle ; i++)
@@ -247,6 +257,7 @@ ra_mgr::line_trivial_solution_case_2()
         }
       }
     }
+>>>>>>> bec4627b82d1f4b04fb2338de56c03cfb506124e
 }
 
 

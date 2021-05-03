@@ -160,7 +160,7 @@ ra_mgr::line_trivial_solution_case_1()
     cout << "====================" << endl;
     cout << "Vehicle in ra time : " << endl;
     cout << "====================" << endl;
-    for ( int i = 0 ; i < in_ra_time.size() ; i++)
+    for (int i = 0 ; i < in_ra_time.size() ; i++)
     {
       cerr << wait_list[i]->id << " -> " << in_ra_time[i] << " (s)" << endl;
     }
@@ -168,7 +168,7 @@ ra_mgr::line_trivial_solution_case_1()
     cout << "=========================" << endl;
     cout << "Vehicle real enter time : " << endl;
     cout << "=========================" << endl;
-    for ( int i = 0 ; i < real_enter_time.size() ; i++)
+    for (int i = 0 ; i < real_enter_time.size() ; i++)
     {
       cerr << wait_list[i]->id << " -> " << real_enter_time[i] << " (s)" << endl;
     }

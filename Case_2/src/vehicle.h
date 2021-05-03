@@ -44,8 +44,11 @@ class Vehicle
         Vehicle_status              status;
         /* Vehicle variable, need to set value by other functions */
         int                         id;
+<<<<<<< HEAD
+=======
         int                         source_intersection_id;
         int                         destination_intersection_id;
+>>>>>>> bec4627b82d1f4b04fb2338de56c03cfb506124e
         float                       earliest_arrival_time;
         float                       source_angle; // 弧度
         float                       destination_angle; // 弧度
@@ -59,4 +62,8 @@ class Vehicle
         float                       safety_margin;
 };
 
+<<<<<<< HEAD
 #endif
+=======
+#endif
+>>>>>>> bec4627b82d1f4b04fb2338de56c03cfb506124e
