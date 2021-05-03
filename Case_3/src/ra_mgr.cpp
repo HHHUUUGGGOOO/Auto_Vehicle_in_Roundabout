@@ -143,7 +143,7 @@ ra_mgr::read_ra_info(const string& rafile)
 }
 
 void 
-ra_mgr::line_trivial_solution_case_2()
+ra_mgr::line_trivial_solution_case_3()
 {
     if (!v_total.size()) { cerr << "There is no vehicles to schedule !!" << endl; return; }
     int n_vehicle = wait_list.size();
@@ -156,16 +156,15 @@ ra_mgr::line_trivial_solution_case_2()
       run_time = ceil(run_time*10 + 0.5)/10;
       in_ra_time.push_back(run_time);
     }
-
-    // The first vehicle
-    vector<float> intersection_can_enter_time(ra_valid_source_angle.size(), 0);
+	
+	// intersection
+    vector<vector<pair<float, float>>> intersection_used_time(ra_valid_source_angle.size());
     // Do while traversing all vehicles in the wait_list
     for (int i = 0 ; i < n_vehicle ; i++)
     {
-      printf("%d \n", i);
       // find first_start_time
-      //float can_enter_time = wait_list[i]->earliest_arrival_time;
-      float vehicle_can_enter_time = max(wait_list[i]->earliest_arrival_time, intersection_can_enter_time[wait_list[i]->source_intersection_id]);
+      float vehicle_can_enter_time = wait_list[i]->earliest_arrival_time;
+      printf("%d %f\n", i, vehicle_can_enter_time);
       while(true){
         int over_360_degree = 0;
         float cur_angle = wait_list[i]->source_angle;
@@ -173,13 +172,15 @@ ra_mgr::line_trivial_solution_case_2()
         bool finish_flag = true;
         while(cur_angle <= wait_list[i]->destination_angle){            
           float move_time = ra_radius * degree_to_rad(cur_angle - wait_list[i]->source_angle) / wait_list[i]->velocity;
-          if( vehicle_can_enter_time + move_time < intersection_can_enter_time[cur_intersection_id] ){
-            vehicle_can_enter_time = (intersection_can_enter_time[cur_intersection_id] - move_time);
-            finish_flag = false;
-            break;
-          }
+		  for(int j = 0; j < intersection_used_time[cur_intersection_id].size(); j++){
+			if(vehicle_can_enter_time + move_time >= intersection_used_time[cur_intersection_id][j].first && vehicle_can_enter_time + move_time < intersection_used_time[cur_intersection_id][j].second){
+			  vehicle_can_enter_time = intersection_used_time[cur_intersection_id][j].second - move_time;
+			  finish_flag = false;
+			}
+		  }
+		  if(!finish_flag) break;
 
-          if(cur_intersection_id == ra_valid_source_angle.size() - 1 && over_360_degree){ break; }
+          if(cur_intersection_id == ra_valid_source_angle.size() - 1 && over_360_degree) { break; }
           else if(cur_intersection_id == ra_valid_source_angle.size()-1){
             cur_intersection_id = 0;
             over_360_degree = 1;
@@ -195,7 +196,7 @@ ra_mgr::line_trivial_solution_case_2()
           float safety_margin_time = 0.5;
           while( cur_angle <= wait_list[i]->destination_angle){
             float move_time = ra_radius * degree_to_rad(cur_angle - wait_list[i]->source_angle) / wait_list[i]->velocity;
-            intersection_can_enter_time[cur_intersection_id] = vehicle_can_enter_time + move_time + safety_margin_time;
+            intersection_used_time[cur_intersection_id].push_back(make_pair(vehicle_can_enter_time + move_time - safety_margin_time, vehicle_can_enter_time + move_time + safety_margin_time));
             if(cur_intersection_id == ra_valid_source_angle.size() - 1 && over_360_degree){ break; }
             else if(cur_intersection_id == ra_valid_source_angle.size()-1){
               cur_intersection_id = 0;
