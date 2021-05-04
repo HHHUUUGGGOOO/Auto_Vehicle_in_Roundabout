@@ -62,6 +62,9 @@ class ra_mgr
 
     // schedule //
     void                line_trivial_solution_case_1();
+    void                line_trivial_solution_case_2();
+    void                line_trivial_solution_case_3();
+
 
     // output the final solution //
     // output format: v1 t1 p1 t2 p2 t3 p3 ....
@@ -89,7 +92,7 @@ class ra_mgr
     // Let vehicles waiting on the road.
     // So, we need a queue for each road.(Using vector so as to trace the vehicles on the road)
     // The angles are defined in ra_valid_source_angle
-    vector<vector<Vehicle*>>  waiting_lists;
+    vector<vector <Vehicle*> >  waiting_lists;
     vector<Vehicle*>          in_list;
 
     void                reset();

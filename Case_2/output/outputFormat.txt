@@ -1,6 +1,0 @@
-# VehicleID time1 position1 time2 position2 ... timeN positionN 
-# Time1 is the time it enter the system
-# The last timestamp timeN is the last timestamp before it leaves the system
-# For example: vehicle 1 starts at 0 and ends at 90, vehicle 2 starts at 90 and ends at 180
-1 0.0 0.0  0.1 40 0.2 80
-2 0.0 90.0 0.1 120 0.2 150 0.3 180
