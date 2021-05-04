@@ -112,9 +112,9 @@ ra_mgr::line_trivial_solution_case_3()
   // make pair of position
     for (int i = 0 ; i < n_vehicle ; i++)
     {
-      for (int j = 0 ; j < (int)in_ra_time[i]/0.1 ; j++)
+      for (int j = 0 ; j < (int)(in_ra_time[i]/0.1) ; j++)
       {
-        if (j == (int)in_ra_time[i]/0.1 - 0.1)
+        if (j == (int)(in_ra_time[i]/0.1) - 1)
         {
           float t = real_enter_time[i] + (ra_radius*degree_to_rad(wait_list[i]->destination_angle-wait_list[i]->source_angle)/wait_list[i]->velocity);
           float angle = wait_list[i]->destination_angle;

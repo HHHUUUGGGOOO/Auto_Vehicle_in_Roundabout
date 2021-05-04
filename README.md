@@ -18,10 +18,10 @@ Solve the automatic vehicles' scheduling in roundabout
 - make clean
 
 # How to generate vehicle input file?
-- ./generator/vechile_input_generator.py
+- python3 ./generator/vechile_input_generator.py
 
 # How to generate roundabout information file?
-- ./generator/ra_input_generator.py
+- python3 ./generator/ra_input_generator.py
 
 # How to plot?
 - ./plotter/plot_answer.py

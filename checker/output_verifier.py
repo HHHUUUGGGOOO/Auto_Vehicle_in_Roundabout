@@ -157,7 +157,7 @@ def main(args):
             for comp in range(benchmark+1, len(t_dict[t])):
                 dist = round(_ra_radius*abs(t_dict[t][benchmark][1]-t_dict[t][comp][1])*(math.pi/180), 3)
                 if (dist < _ra_safety_margin):
-                    print("At time {}, vehicle {} and {} violate safety margin constraint with distance = {} (m)".format(t, t_dict[t][benchmark][0]._id, t_dict[t][comp][0]._id, dist))
+                    print("At time {}, vehicle {} and {} violate safety margin constraint with distance = {} (m)".format(t, v_dict[t_dict[t][benchmark][0]]._id, v_dict[t_dict[t][comp][0]]._id, dist))
                     return
     
     # output the last vehicle output time #
