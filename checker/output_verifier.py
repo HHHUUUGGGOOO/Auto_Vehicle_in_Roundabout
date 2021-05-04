@@ -74,7 +74,7 @@ def main(args):
         for line in f:
             id, eat, sa, da, iv = [i for i in line.split()]
             v_dict[int(id)] = Vehicle(id, eat, sa, da, iv)
-            print("Read Vehicle...(id = {:d})".format(int(id)))
+            print("Read Vehicle...(id = {:s})".format(id))
         print("")
 
     '''
@@ -93,9 +93,11 @@ def main(args):
             tmp=line.split(' ')
             tmp_id=int(tmp[0])
             # construct t_dict #
-            for i in range(1, len(tmp),2):
+            print(len(tmp))
+            for i in range(1, len(tmp)-1,2):
                 time=round(float(tmp[i]), 3)
-                angle=round(float(tmp[i+1]), 3)
+                angle=round(float(tmp[i+1]), 3) ### in degree ###
+                print("{:d} add angle {:.3f} at time {:.3f}".format(tmp_id,angle, time))
                 v_dict[tmp_id].time2angle_dict(time, angle)
                 if time in t_dict:
                     t_dict[time].append([tmp_id,angle])
@@ -109,7 +111,7 @@ def main(args):
     for vehicle in v_dict:
         # print("id= {:d}".format(vehicle))
         tmp_list=v_dict[vehicle].get_timelist()
-        # print(tmp_list)
+        print(tmp_list)
 
         # check source and destination angle
         if v_dict[vehicle].get_angle_by_time(tmp_list[0]) != v_dict[vehicle].get_source_angle():
@@ -117,7 +119,7 @@ def main(args):
             return
         
         if v_dict[vehicle].get_angle_by_time(tmp_list[len(tmp_list)-1]) != v_dict[vehicle].get_destination_angle():
-            print("id: {:d}'s source angle is scheduled wrong!! ({} vs {})".format(vehicle, v_dict[vehicle].get_angle_by_time(tmp_list[len(tmp_list)-1]), v_dict[vehicle].get_destination_angle()))
+            print("id: {:d}'s destination angle is scheduled wrong!! ({} vs {})".format(vehicle, v_dict[vehicle].get_angle_by_time(tmp_list[len(tmp_list)-1]), v_dict[vehicle].get_destination_angle()))
             return
         
         # deal with middle 
@@ -127,10 +129,10 @@ def main(args):
             angle_unit=round((v_dict[vehicle].get_angle_by_time(tmp_list[i+1])-v_dict[vehicle].get_angle_by_time(tmp_list[i]))/(tmp_list[i+1]-tmp_list[i]),6)
             
             # TODO: compare _ra_safety_velocity and angle_unit to verify constraint #
-            delta_theta = round((v_dict[vehicle].get_angle_by_time(tmp_list[i+1])-v_dict[vehicle].get_angle_by_time(tmp_list[i]))*(math.pi/180), 3)
+            delta_theta = round((v_dict[vehicle].get_angle_by_time(tmp_list[i+1])-v_dict[vehicle].get_angle_by_time(tmp_list[i]))*(math.pi/180), 3) ## change to rad?
             vel = round((_ra_radius*delta_theta)/(tmp_list[i+1]-tmp_list[i]),6)
             if (vel > _ra_safety_velocity):
-                print("At time {} to time {}, vehicle {} violate safety velocity constraint with velocity = {} (m/s)".format(tmp_list[i], tmp_list[i+1], vehicle._id, vel))
+                print("At time {} to time {}, vehicle {} violate safety velocity constraint with velocity = {} (m/s)".format(tmp_list[i], tmp_list[i+1], v_dict[vehicle]._id, vel))
                 return
 
             # print("{}, {}, {}, {}, {}".format(t2, t1, tmp_list[i+1], tmp_list[i], unit))
@@ -140,23 +142,23 @@ def main(args):
                 t_dict[timelist[j]].append([vehicle,angle])
                 print("id: {} insert angle {} at time {}".format(vehicle, angle, timelist[j]))
         
-        for t in timelist:
-            # sort t_dict's value list with value[i][1]
-            t_dict[t]=sorted(t_dict[t], key=operator.itemgetter(1))
+    for t in timelist:
+        # sort t_dict's value list with value[i][1]
+        t_dict[t]=sorted(t_dict[t], key=operator.itemgetter(1))
 
-            # capacity constraint
-            if len(t_dict[t]) > _ra_max_capacity:
-                print("At time {} violate capacity constraint: {}".format(t, len(t_dict[t])))
-                return
-            
-            # TODO: check _ra_safety_margin to verify constraint # 
-            # _ra_safety_margin / t_dict: { time: [vehicle, angle] } / dist = r*theta 
-            for benchmark in range(len(t_dict[t])-1):
-                for comp in range(benchmark+1, len(t_dict[t])):
-                    dist = round(_ra_radius*abs(t_dict[t][benchmark][1]-t_dict[t][comp][1])*(math.pi/180), 3)
-                    if (dist < _ra_safety_margin):
-                        print("At time {}, vehicle {} and {} violate safety margin constraint with distance = {} (m)".format(t, t_dict[t][benchmark][0]._id, t_dict[t][comp][0]._id, dist))
-                        return
+        # capacity constraint
+        if len(t_dict[t]) > _ra_max_capacity:
+            print("At time {} violate capacity constraint: {}".format(t, len(t_dict[t])))
+            return
+        
+        # TODO: check _ra_safety_margin to verify constraint # 
+        # _ra_safety_margin / t_dict: { time: [vehicle, angle] } / dist = r*theta 
+        for benchmark in range(len(t_dict[t])-1):
+            for comp in range(benchmark+1, len(t_dict[t])):
+                dist = round(_ra_radius*abs(t_dict[t][benchmark][1]-t_dict[t][comp][1])*(math.pi/180), 3)
+                if (dist < _ra_safety_margin):
+                    print("At time {}, vehicle {} and {} violate safety margin constraint with distance = {} (m)".format(t, t_dict[t][benchmark][0]._id, t_dict[t][comp][0]._id, dist))
+                    return
     
     # output the last vehicle output time #
     print("--------------------------")
@@ -168,8 +170,8 @@ def main(args):
 
 def parse_args() -> Namespace:
     parser = ArgumentParser()
-    parser.add_argument('--input_ra_dir', type=Path, default='./input_ra/', help='Directory to the roundabout input')
-    parser.add_argument('--input_vehicle_dir', type=Path, default='./input/', help='Directory to the vehicle input')
+    parser.add_argument('--input_vehicle_dir', type=Path, default='input/v_in/', help='Directory to the vehicle input')
+    parser.add_argument('--input_ra_dir', type=Path, default='input/ra_in/', help='Directory to the roundabout input')
     parser.add_argument('--output', type=Path, default='output', help='Schedule output')
 
     args = parser.parse_args()

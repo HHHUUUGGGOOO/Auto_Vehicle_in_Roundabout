@@ -269,7 +269,7 @@ ra_mgr::output_solution(const string &path)
 {
     ofstream fout(path.c_str());
     for(int i = 0; i < wait_list.size(); i++){
-        fout << i << " ";
+        fout << wait_list[i]->id << " ";
         for(int j = 0; j < wait_list[i]->position.size(); j++){
             fout << wait_list[i]->position[j].first << " " << wait_list[i]->position[j].second << " ";
         }
