@@ -12,9 +12,10 @@ def plot_line(all_v: dict, max_t: int):
     plt.ylabel('Time (unit: sec)')
     # plot every single line
     id_label = []
-    for id in range(len(all_v)):
+    print(all_v)
+    for id in all_v:
         # set point and its size
-        plt.plot(all_v[str(id)][0], all_v[str(id)][1], marker='o', markersize=3)
+        plt.plot(all_v[id][0], all_v[id][1], marker='o', markersize=3)
         id_label.append(str(id))
     # plot vertical line in degree (90, 180, 270, 360)
     plt.vlines(90, 0, max_t, colors = "c", linestyles = "dashed")
