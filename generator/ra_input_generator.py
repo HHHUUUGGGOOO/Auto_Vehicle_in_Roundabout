@@ -69,7 +69,7 @@ def main(args):
 
 def parse_args() -> Namespace:
     parser = ArgumentParser()
-    parser.add_argument('--input_ra_dir', type=Path, default='./input_ra/', help='Directory to the roundabout input')
+    parser.add_argument('--input_ra_dir', type=Path, default='./input/ra_in', help='Directory to the roundabout input')
     parser.add_argument('--num_of_entry', type=int, default=4, help='Number of entries in roundabout')
     parser.add_argument('--num_of_exit',  type=int, default=4, help='NUmber of exits in roundabout')
     parser.add_argument('--ra_file_name', type=str,  default='ra1.in', help='file name of the ra input file')

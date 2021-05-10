@@ -75,9 +75,9 @@ def main(args):
 
 def parse_args() -> Namespace:
     parser = ArgumentParser()
-    parser.add_argument('--ra_dir', type=Path, default='./input_ra/', help='Directory to the ra input files')
+    parser.add_argument('--ra_dir', type=Path, default='./input/ra_in/', help='Directory to the ra input files')
     parser.add_argument('--ra_file_name', type=str, default='ra1.in', help='Filename of the ra file')
-    parser.add_argument('--vehicles_dir', type=Path, default='./input/', help='Directory to the vehicles input file')
+    parser.add_argument('--vehicles_dir', type=Path, default='./input/v_in', help='Directory to the vehicles input file')
     parser.add_argument('--vehicles_file_name', type=str, default='1.in', help='Filename of the vehicle file (e.g. 1.in)')
     parser.add_argument('--num_of_vehicles', type=int, default=5)
     print('here')
