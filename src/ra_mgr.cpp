@@ -267,11 +267,12 @@ ra_mgr::check_conflict(int index, vector<Vehicle*>& next_intersection, vector<Ve
 void 
 ra_mgr::output_solution(const string &path)
 {
+    // <t_1, angle_1>
     ofstream fout(path.c_str());
     for(int i = 0; i < wait_list.size(); i++){
         fout << wait_list[i]->id << " ";
         for(int j = 0; j < wait_list[i]->position.size(); j++){
-            fout << wait_list[i]->position[j].first << " " << wait_list[i]->position[j].second << " ";
+            fout << wait_list[i]->position[j].first << " " << ((wait_list[i]->position[j].second>=360.0)? (wait_list[i]->position[j].second-360): (wait_list[i]->position[j].second) ) << " ";
         }
         fout << endl;
     }

@@ -51,7 +51,7 @@ class Vehicle
         float                       destination_angle; // 弧度
         float                       velocity;
         float                       initial_priority;
-        /* output answer type, < <angle_1, t_1>, <angle_2, t_2>, ... > */
+        /* output answer type, <t_1, angle_1>, <t_2, angle_2>, ... > */
         vector<my_pair>             position;
 
         float                       now_angle; 
