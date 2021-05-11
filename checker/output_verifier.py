@@ -61,6 +61,7 @@ def main(args):
             print("Number of destination lanes are given wrong!!", _ra_number_of_destination)
             return
         
+        error = 0.1
         # print roundabout information #
         print("--------------------------------")
         print("Roundabout informaion")
@@ -68,6 +69,7 @@ def main(args):
         print("Radius: {:.2f}".format(_ra_radius))
         print("Safety velocity: {:.2f}".format(_ra_safety_velocity))
         print("Safety margin: {:.2f}".format(_ra_safety_margin))
+        print("Error: {:.2f}".format(error))
         print("Maximum capacity: {:d}".format(_ra_max_capacity))
         print("--------------------------------\n")
 
@@ -166,7 +168,8 @@ def main(args):
         for benchmark in range(len(t_dict[t])-1):
             for comp in range(benchmark+1, len(t_dict[t])):
                 dist = round(_ra_radius*abs(t_dict[t][benchmark][1]-t_dict[t][comp][1])*(math.pi/180), 3)
-                if (dist < _ra_safety_margin):
+                if (dist < (_ra_safety_margin-error)):
+                    print("safety margin constraint: {}(m)".format((_ra_safety_margin-error)))
                     print("At time {}, vehicle {} and {} violate safety margin constraint with distance = {} (m)".format(t, v_dict[t_dict[t][benchmark][0]]._id, v_dict[t_dict[t][comp][0]]._id, dist))
                     return
     
