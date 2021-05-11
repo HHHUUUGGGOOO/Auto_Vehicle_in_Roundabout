@@ -41,7 +41,7 @@ ra_mgr::line_trivial_solution_case_1()
     // Do while traversing all vehicles in the wait_list
     for (int i = 1 ; i < n_vehicle ; i++)
     {
-      double can_enter_time = real_enter_time[i-1] + in_ra_time[i];
+      double can_enter_time = real_enter_time[i-1] + in_ra_time[i-1];
       real_enter_time.push_back(max(wait_list[i]->earliest_arrival_time, can_enter_time));
     }
     // debug 
