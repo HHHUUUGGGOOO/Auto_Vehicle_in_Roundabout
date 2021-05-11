@@ -56,7 +56,7 @@ ra_mgr::line_trivial_solution_case_2()
         while(cur_angle <= wait_list[i]->destination_angle){            
           double move_time = ra_radius * degree_to_rad(cur_angle - wait_list[i]->source_angle) / wait_list[i]->velocity;
           if( vehicle_can_enter_time + move_time < intersection_can_enter_time[cur_intersection_id] ){
-            vehicle_can_enter_time = (intersection_can_enter_time[cur_intersection_id] - move_time) + 0.001;
+            vehicle_can_enter_time = (intersection_can_enter_time[cur_intersection_id] - move_time) + 1e-6;
             finish_flag = false;
             break;
           }
@@ -74,7 +74,7 @@ ra_mgr::line_trivial_solution_case_2()
           cur_intersection_id = wait_list[i]->source_intersection_id;
           cur_angle = ra_valid_source_angle[cur_intersection_id];
           over_360_degree = 0;
-          double safety_margin_time = 0.5;
+          double safety_margin_time = ra_safety_margin / wait_list[i]->velocity;
           while( cur_angle <= wait_list[i]->destination_angle){
             double move_time = ra_radius * degree_to_rad(cur_angle - wait_list[i]->source_angle) / wait_list[i]->velocity;
             intersection_can_enter_time[cur_intersection_id] = vehicle_can_enter_time + move_time + safety_margin_time;
