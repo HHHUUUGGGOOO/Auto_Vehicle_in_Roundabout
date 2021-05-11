@@ -8,6 +8,11 @@ from argparse import ArgumentParser, Namespace
 import os
 import operator
 
+# need to check:
+# floating point comparison (>360)
+# tolerate some angle error ? also in comparison
+
+
 class Vehicle:
     def __init__(self, id, eat, sa, da, iv):
         self._id = int(id)
@@ -126,19 +131,24 @@ def main(args):
         for i in range(0, len(tmp_list)-1):
             t1=time2id[tmp_list[i]]
             t2=time2id[tmp_list[i+1]]
-            angle_unit=round((v_dict[vehicle].get_angle_by_time(tmp_list[i+1])-v_dict[vehicle].get_angle_by_time(tmp_list[i]))/(tmp_list[i+1]-tmp_list[i]),6)
+            angle1=v_dict[vehicle].get_angle_by_time(tmp_list[i])
+            angle2=v_dict[vehicle].get_angle_by_time(tmp_list[i+1])
+            if (angle2 < angle1):
+                angle2 = angle2+360
+            angle_unit=round((angle2-angle1)/(tmp_list[i+1]-tmp_list[i]),6)
             
-            # TODO: compare _ra_safety_velocity and angle_unit to verify constraint #
-            delta_theta = round((v_dict[vehicle].get_angle_by_time(tmp_list[i+1])-v_dict[vehicle].get_angle_by_time(tmp_list[i]))*(math.pi/180), 3) ## change to rad?
+            # compare _ra_safety_velocity and angle_unit to verify constraint #
+            delta_theta = round((angle2-angle1)*(math.pi/180), 3) ## change to rad?
             vel = round((_ra_radius*delta_theta)/(tmp_list[i+1]-tmp_list[i]),6)
             if (vel > _ra_safety_velocity):
                 print("At time {} to time {}, vehicle {} violate safety velocity constraint with velocity = {} (m/s)".format(tmp_list[i], tmp_list[i+1], v_dict[vehicle]._id, vel))
                 return
 
-            # print("{}, {}, {}, {}, {}".format(t2, t1, tmp_list[i+1], tmp_list[i], unit))
             for j in range(t1+1, t2):
                 time_unit=timelist[j]-tmp_list[i]
-                angle=v_dict[vehicle].get_angle_by_time(tmp_list[i])+angle_unit*time_unit
+                angle=angle1+angle_unit*time_unit
+                if (angle >= 360):
+                    angle = angle-360
                 t_dict[timelist[j]].append([vehicle,angle])
                 print("id: {} insert angle {} at time {}".format(vehicle, angle, timelist[j]))
         
@@ -151,7 +161,7 @@ def main(args):
             print("At time {} violate capacity constraint: {}".format(t, len(t_dict[t])))
             return
         
-        # TODO: check _ra_safety_margin to verify constraint # 
+        # check _ra_safety_margin to verify constraint # 
         # _ra_safety_margin / t_dict: { time: [vehicle, angle] } / dist = r*theta 
         for benchmark in range(len(t_dict[t])-1):
             for comp in range(benchmark+1, len(t_dict[t])):
