@@ -31,30 +31,30 @@ ra_mgr::line_trivial_solution_case_3()
 
     for (int i = 0 ; i < n_vehicle ; i++)
     {
-      float run_time = ra_radius*degree_to_rad(wait_list[i]->destination_angle-wait_list[i]->source_angle)/wait_list[i]->velocity;
+      double run_time = ra_radius*degree_to_rad(wait_list[i]->destination_angle-wait_list[i]->source_angle)/wait_list[i]->velocity;
       // 無條件進入到小數點後第一位
       run_time = ceil(run_time*10 + 0.5)/10;
       in_ra_time.push_back(run_time);
     }
 	
 	// intersection
-    vector<vector<pair<float, float> > > intersection_used_time(ra_valid_source_angle.size());
+    vector<vector<pair<double, double> > > intersection_used_time(ra_valid_source_angle.size());
     // Do while traversing all vehicles in the wait_list
     for (int i = 0 ; i < n_vehicle ; i++)
     {
       // find first_start_time
-      float vehicle_can_enter_time = wait_list[i]->earliest_arrival_time;
-      printf("%d %f\n", i, vehicle_can_enter_time);
+      double vehicle_can_enter_time = wait_list[i]->earliest_arrival_time;
+      printf("%d %lf\n", i, vehicle_can_enter_time);
       while(true){
         int over_360_degree = 0;
-        float cur_angle = wait_list[i]->source_angle;
+        double cur_angle = wait_list[i]->source_angle;
         int cur_intersection_id = wait_list[i]->source_intersection_id;
         bool finish_flag = true;
         while(cur_angle <= wait_list[i]->destination_angle){            
-          float move_time = ra_radius * degree_to_rad(cur_angle - wait_list[i]->source_angle) / wait_list[i]->velocity;
+          double move_time = ra_radius * degree_to_rad(cur_angle - wait_list[i]->source_angle) / wait_list[i]->velocity;
 		  for(int j = 0; j < intersection_used_time[cur_intersection_id].size(); j++){
 			if(vehicle_can_enter_time + move_time >= intersection_used_time[cur_intersection_id][j].first && vehicle_can_enter_time + move_time < intersection_used_time[cur_intersection_id][j].second){
-			  vehicle_can_enter_time = intersection_used_time[cur_intersection_id][j].second - move_time;
+			  vehicle_can_enter_time = intersection_used_time[cur_intersection_id][j].second - move_time + 0.001;
 			  finish_flag = false;
 			}
 		  }
@@ -73,9 +73,9 @@ ra_mgr::line_trivial_solution_case_3()
           cur_intersection_id = wait_list[i]->source_intersection_id;
           cur_angle = ra_valid_source_angle[cur_intersection_id];
           over_360_degree = 0;
-          float safety_margin_time = 0.5;
+          double safety_margin_time = 0.5;
           while( cur_angle <= wait_list[i]->destination_angle){
-            float move_time = ra_radius * degree_to_rad(cur_angle - wait_list[i]->source_angle) / wait_list[i]->velocity;
+            double move_time = ra_radius * degree_to_rad(cur_angle - wait_list[i]->source_angle) / wait_list[i]->velocity;
             intersection_used_time[cur_intersection_id].push_back(make_pair(vehicle_can_enter_time + move_time - safety_margin_time, vehicle_can_enter_time + move_time + safety_margin_time));
             if(cur_intersection_id == ra_valid_source_angle.size() - 1 && over_360_degree){ break; }
             else if(cur_intersection_id == ra_valid_source_angle.size()-1){
@@ -116,14 +116,14 @@ ra_mgr::line_trivial_solution_case_3()
       {
         if (j == (int)(in_ra_time[i]/0.1) - 1)
         {
-          float t = real_enter_time[i] + (ra_radius*degree_to_rad(wait_list[i]->destination_angle-wait_list[i]->source_angle)/wait_list[i]->velocity);
-          float angle = wait_list[i]->destination_angle;
+          double t = real_enter_time[i] + (ra_radius*degree_to_rad(wait_list[i]->destination_angle-wait_list[i]->source_angle)/wait_list[i]->velocity);
+          double angle = wait_list[i]->destination_angle;
           wait_list[i]->position.push_back(make_pair(t, angle));
         }
         else
         {
-          float t = real_enter_time[i] + 0.1*j;
-          float angle = wait_list[i]->source_angle + rad_to_degree(wait_list[i]->velocity*0.1*j/ra_radius);
+          double t = real_enter_time[i] + 0.1*j;
+          double angle = wait_list[i]->source_angle + rad_to_degree(wait_list[i]->velocity*0.1*j/ra_radius);
           wait_list[i]->position.push_back(make_pair(t, angle));
         }
       }

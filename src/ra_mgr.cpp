@@ -39,7 +39,7 @@ ra_mgr::read_vehicle(const string& infile)
   fstream fin(infile.c_str()); // To MobaXTerm, I need to use 'c_str()' to make it successfully compile
   
   int v_id = 0;
-  float eat, sa, da, vel; // angle is base on 360
+  double eat, sa, da, vel; // angle is base on 360
 
   while (fin >> v_id >> eat >> sa >> da >> vel){
     // check source/destination angle (5)(6) & base on 'π' // 
@@ -62,12 +62,12 @@ ra_mgr::read_vehicle(const string& infile)
     // store //
     Vehicle* v = new Vehicle(v_id, eat, sa, da, vel);
     v->safety_margin = round(v->velocity/2);
-    //printf("%f, %f, Velocity = %f(rad)\n", v->velocity, ra_radius, v->velocity/ra_radius);
+    //printf("%lf, %lf, Velocity = %lf(rad)\n", v->velocity, ra_radius, v->velocity/ra_radius);
     v->angle_unit = v_min_angle_unit(v->velocity*ra_time_unit/ra_radius); //0.025*ceil((v->velocity/10)/0.5);
     // intersection id
-    vector<float>::iterator sp = find(ra_valid_source_angle.begin(), ra_valid_source_angle.end(), sa);
+    vector<double>::iterator sp = find(ra_valid_source_angle.begin(), ra_valid_source_angle.end(), sa);
     int s_id = distance(ra_valid_source_angle.begin(), sp);
-    vector<float>::iterator dp = find(ra_valid_destination_angle.begin(), ra_valid_destination_angle.end(), da);
+    vector<double>::iterator dp = find(ra_valid_destination_angle.begin(), ra_valid_destination_angle.end(), da);
     int d_id = distance(ra_valid_destination_angle.begin(), dp);
     v->source_intersection_id = s_id;
     v->destination_intersection_id = d_id;
@@ -97,7 +97,7 @@ ra_mgr::read_vehicle(const string& infile)
 bool
 ra_mgr::read_ra_info(const string& rafile)
 {
-  float r, sv, sm;
+  double r, sv, sm;
   int mc;
   string va;
   fstream fin(rafile.c_str()); // To MobaXTerm, I need to use 'c_str()' to make it successfully compile
@@ -111,7 +111,7 @@ ra_mgr::read_ra_info(const string& rafile)
   int num_of_entry, num_of_exit;
   fin >> num_of_entry;
   for(int i = 0; i < num_of_entry; i++){
-    float tmp;
+    double tmp;
     fin >> tmp;
     ra_valid_source_angle.push_back(tmp);
   }
@@ -120,7 +120,7 @@ ra_mgr::read_ra_info(const string& rafile)
 
   fin >> num_of_exit;
   for(int i = 0; i < num_of_exit; i++){
-    float tmp;
+    double tmp;
     fin >> tmp;
     ra_valid_destination_angle.push_back(tmp);
   }
@@ -138,10 +138,10 @@ ra_mgr::check_conflict_by_wait(Vehicle const *tmp, vector<Vehicle*>& in_list)
 }
 
 bool                
-ra_mgr::verify_angle(float sa, float da) 
+ra_mgr::verify_angle(double sa, double da) 
 {
   // sa: source angle, da: destination angle
-  // printf("%f %f\n", sa, da);
+  // printf("%lf %lf\n", sa, da);
 
   // Verify if sa is valid
   bool valid = false;
@@ -224,7 +224,7 @@ ra_mgr::current_situation(vector<Vehicle*>& in_list, vector<Vehicle*>& wait_list
 }
 
 bool
-ra_mgr::check_intersection(float angle)
+ra_mgr::check_intersection(double angle)
 {
   if (angle >= 360)
   {
@@ -246,9 +246,9 @@ ra_mgr::check_conflict(int index, vector<Vehicle*>& next_intersection, vector<Ve
   //remove conflict next_intersection
   if (next_intersection.size() > 0)
   {
-    float before_angle = in_list[index]->now_angle;
-    float after_angle = in_list[index]->now_angle + in_list[index]->angle_unit;
-    float next_intersection_angle = 0;
+    double before_angle = in_list[index]->now_angle;
+    double after_angle = in_list[index]->now_angle + in_list[index]->angle_unit;
+    double next_intersection_angle = 0;
 
     next_intersection_angle = (after_angle>360)? next_intersection[0]->source_angle+360:next_intersection[0]->source_angle;
     if (before_angle < next_intersection_angle && after_angle > next_intersection_angle)

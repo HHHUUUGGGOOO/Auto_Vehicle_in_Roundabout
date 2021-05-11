@@ -45,15 +45,15 @@ class ra_mgr
 
     // utility -> call in schedule  //
     // bool                check_capacity() {return (v_in_ra_now >= ra_max_capacity);}    
-    bool                verify_angle(float, float); // verify if vehicle's input angle is valid in roundabout
-    void                find_ra_angle_unit(float, float); // use radius and safety velocity to compute angle unit
+    bool                verify_angle(double, double); // verify if vehicle's input angle is valid in roundabout
+    void                find_ra_angle_unit(double, double); // use radius and safety velocity to compute angle unit
     void                current_situation(vector<Vehicle*>& ,vector<Vehicle*>&); // see the current situation when scheduling
-    bool                check_intersection(float); // now_angle and next_angle 
+    bool                check_intersection(double); // now_angle and next_angle 
     bool                check_conflict(int, vector<Vehicle*>&, vector<Vehicle*>&); 
     bool                check_conflict_by_wait(Vehicle const *, vector<Vehicle*>&);
-    float               degree_to_rad(float degree) { return (degree*PI/180); }
-    float               rad_to_degree(float rad) { return (rad*180/PI); }
-    float               v_min_angle_unit(float angle) { return ((ceil(angle/ra_angle_unit))*ra_angle_unit); }
+    double               degree_to_rad(double degree) { return (degree*PI/180); }
+    double               rad_to_degree(double rad) { return (rad*180/PI); }
+    double               v_min_angle_unit(double angle) { return ((ceil(angle/ra_angle_unit))*ra_angle_unit); }
 
 
     // information for check //
@@ -75,19 +75,19 @@ class ra_mgr
     // vehicle variables //
     vector<Vehicle*>     v_total; // store each vehicle's properties, sort by Vehicle_ID
     vector<Vehicle*>     wait_list; // sort by eat
-    vector<float>        in_ra_time; // time that a car needs to go through the ra
-    vector<float>        real_enter_time; // real time that a car enters the ra
+    vector<double>        in_ra_time; // time that a car needs to go through the ra
+    vector<double>        real_enter_time; // real time that a car enters the ra
     
     // roundabout information //
     // string              ra_purpose;
-    float               ra_time_unit; // unit : s
-    float               ra_angle_unit; // unit : degree
-    float               ra_radius;
-    float               ra_safety_velocity;
-    float               ra_safety_margin; // 小型車至少要保持「車速/2」距離(單位：公尺)；大型車至少要保持「車速-20」距離(單位：公尺)
+    double               ra_time_unit; // unit : s
+    double               ra_angle_unit; // unit : degree
+    double               ra_radius;
+    double               ra_safety_velocity;
+    double               ra_safety_margin; // 小型車至少要保持「車速/2」距離(單位：公尺)；大型車至少要保持「車速-20」距離(單位：公尺)
     int                 ra_max_capacity;
-    vector<float>       ra_valid_source_angle; // 0 <= angle < 2*pi
-    vector<float>       ra_valid_destination_angle; // Si <= Di < Si + 2*pi ; D_i > 0
+    vector<double>       ra_valid_source_angle; // 0 <= angle < 2*pi
+    vector<double>       ra_valid_destination_angle; // Si <= Di < Si + 2*pi ; D_i > 0
 
     // Let vehicles waiting on the road.
     // So, we need a queue for each road.(Using vector so as to trace the vehicles on the road)

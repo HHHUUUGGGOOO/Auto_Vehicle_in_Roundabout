@@ -31,7 +31,7 @@ ra_mgr::line_trivial_solution_case_1()
   // in ra time
     for (int i = 0 ; i < n_vehicle ; i++)
     {
-      float run_time = ra_radius*degree_to_rad(wait_list[i]->destination_angle-wait_list[i]->source_angle)/wait_list[i]->velocity;
+      double run_time = ra_radius*degree_to_rad(wait_list[i]->destination_angle-wait_list[i]->source_angle)/wait_list[i]->velocity;
       // 無條件進入到小數點後第一位
       run_time = ceil(run_time*10 + 0.5)/10;
       in_ra_time.push_back(run_time);
@@ -41,7 +41,7 @@ ra_mgr::line_trivial_solution_case_1()
     // Do while traversing all vehicles in the wait_list
     for (int i = 1 ; i < n_vehicle ; i++)
     {
-      float can_enter_time = real_enter_time[i-1] + in_ra_time[i];
+      double can_enter_time = real_enter_time[i-1] + in_ra_time[i];
       real_enter_time.push_back(max(wait_list[i]->earliest_arrival_time, can_enter_time));
     }
     // debug 
@@ -67,14 +67,14 @@ ra_mgr::line_trivial_solution_case_1()
       {
         if (j == (int)(in_ra_time[i]/0.1) - 1)
         {
-          float t = real_enter_time[i] + (ra_radius*degree_to_rad(wait_list[i]->destination_angle-wait_list[i]->source_angle)/wait_list[i]->velocity);
-          float angle = wait_list[i]->destination_angle;
+          double t = real_enter_time[i] + (ra_radius*degree_to_rad(wait_list[i]->destination_angle-wait_list[i]->source_angle)/wait_list[i]->velocity);
+          double angle = wait_list[i]->destination_angle;
           wait_list[i]->position.push_back(make_pair(t, angle));
         }
         else
         {
-          float t = real_enter_time[i] + 0.1*j;
-          float angle = wait_list[i]->source_angle + rad_to_degree(wait_list[i]->velocity*0.1*j/ra_radius);
+          double t = real_enter_time[i] + 0.1*j;
+          double angle = wait_list[i]->source_angle + rad_to_degree(wait_list[i]->velocity*0.1*j/ra_radius);
           wait_list[i]->position.push_back(make_pair(t, angle));
         }
       }
