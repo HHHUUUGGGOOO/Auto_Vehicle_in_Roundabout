@@ -118,7 +118,7 @@ def main(args):
     for vehicle in v_dict:
         # print("id= {:d}".format(vehicle))
         tmp_list=v_dict[vehicle].get_timelist()
-        print(tmp_list)
+        # print(tmp_list)
 
         # check source and destination angle
         if v_dict[vehicle].get_angle_by_time(tmp_list[0]) != v_dict[vehicle].get_source_angle():
