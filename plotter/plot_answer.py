@@ -2,6 +2,7 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from argparse import ArgumentParser
 
 # line = { 'id': [ [pos1, pos2, ...], [t1, t2, ...] ], ... }, one color for one id key
 
@@ -66,8 +67,25 @@ def main(filename_v, filename_ra):
     # plot
     plot_line(all_v, max_t, entry_list, exit_list)
 
+def parse_args():
+    parser = ArgumentParser()
+    parser.add_argument(
+            "output_file",
+            type=str,
+            help="path to the output_file",
+    )
+    parser.add_argument(
+            "ra_file",
+            type=str,
+            help="path to the round-about file",
+    )
+    args = parser.parse_args()
+    return args
+
 if __name__ == '__main__':
     # e.g. "output/test.txt"
-    filename_v = input('Please enter the output filename to plot : ')
-    filename_ra = input('Please enter the round-about filename to plot : ')
-    main(filename_v, filename_ra)
+    args = parse_args()
+    main(args.output_file, args.ra_file)
+    #filename_v = input('Please enter the output filename to plot : ')
+    #filename_ra = input('Please enter the round-about filename to plot : ')
+    #main(filename_v, filename_ra)
