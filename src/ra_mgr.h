@@ -77,7 +77,8 @@ class ra_mgr
 
     void insertToEntry(vector<DLnode*> & );
     void updatePosition(Vehicle* , const vector<DLnode*> &);
-    void computeSkyline(const vector<DLnode*> &);
+    void computeUDSkyline(const vector<DLnode*> &);
+    void computeSkyline();
     //map<int, int> vehicletoId;
 
 
