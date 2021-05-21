@@ -28,6 +28,35 @@ enum Vehicle_status
   OUT = 2 
 };
 
+// to handle list in every source and destination angle //
+class DLnode
+{
+public:
+  DLnode(int id, double t1, double t2 = -1, double angle = -1):
+    _id(id), _t1(t1), _t2(t2), _angle(angle), _next(NULL), _prev(NULL) {}
+  ~DLnode() {}
+
+    //set function
+    void setNext(DLnode* next) {_next = next;}
+    void setPrev(DLnode* prev) {_prev = prev;}
+
+    //get function
+    double getT1() {return _t1;}
+    double getT2() {return _t2;}
+    double getAngle() {return _angle;} //angle at t1
+    int getId() {return _id;}
+    DLnode* getNext() {return _next;}
+    DLnode* getPrev() {return _prev;}
+
+private:
+    DLnode* _next;
+    DLnode* _prev;
+    int _id;
+    double _t1;
+    double _t2;
+    double _angle;
+};
+
 class Vehicle
 {
   typedef pair<double, double> my_pair;

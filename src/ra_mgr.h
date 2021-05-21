@@ -17,6 +17,7 @@
 #include <iostream>
 #include <utility>
 #include <cmath>
+#include <map>
 #include "vehicle.h"
 
 using namespace std;
@@ -60,10 +61,24 @@ class ra_mgr
     void                Roundabout_information();
     void                Vehicle_information();
 
-    // schedule //
+    // solution //
     void                line_trivial_solution_case_1();
     void                line_trivial_solution_case_2();
     void                line_trivial_solution_case_3();
+    void                skyline_solution_case_2();
+
+    // newly add in skyline //
+    vector< DLnode* > _raSourceAngleList;
+    map<int, int> _sourceAngletoId;
+    map<int, int> _destAngletoId;
+    DLnode* _upSkyline;
+    DLnode* _downSkyline;
+    DLnode* _skyline;
+
+    void insertToEntry(vector<DLnode*> & );
+    void updatePosition(Vehicle* , const vector<DLnode*> &);
+    void computeSkyline(const vector<DLnode*> &);
+    //map<int, int> vehicletoId;
 
 
     // output the final solution //
@@ -75,8 +90,9 @@ class ra_mgr
     // vehicle variables //
     vector<Vehicle*>     v_total; // store each vehicle's properties, sort by Vehicle_ID
     vector<Vehicle*>     wait_list; // sort by eat
-    vector<double>        in_ra_time; // time that a car needs to go through the ra
-    vector<double>        real_enter_time; // real time that a car enters the ra
+    vector<Vehicle*>     in_list;
+    vector<double>       in_ra_time; // time that a car needs to go through the ra
+    vector<double>       real_enter_time; // real time that a car enters the ra
     
     // roundabout information //
     // string              ra_purpose;
@@ -85,16 +101,10 @@ class ra_mgr
     double               ra_radius;
     double               ra_safety_velocity;
     double               ra_safety_margin; // 小型車至少要保持「車速/2」距離(單位：公尺)；大型車至少要保持「車速-20」距離(單位：公尺)
-    int                 ra_max_capacity;
+    int                  ra_max_capacity;
     vector<double>       ra_valid_source_angle; // 0 <= angle < 2*pi
     vector<double>       ra_valid_destination_angle; // Si <= Di < Si + 2*pi ; D_i > 0
-
-    // Let vehicles waiting on the road.
-    // So, we need a queue for each road.(Using vector so as to trace the vehicles on the road)
-    // The angles are defined in ra_valid_source_angle
-    vector<vector <Vehicle*> >  waiting_lists;
-    vector<Vehicle*>          in_list;
-
+    
     void                reset();
     
 };

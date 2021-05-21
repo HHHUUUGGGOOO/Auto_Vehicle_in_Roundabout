@@ -114,15 +114,15 @@ ra_mgr::read_ra_info(const string& rafile)
     double tmp;
     fin >> tmp;
     ra_valid_source_angle.push_back(tmp);
+    _sourceAngletoId[int(tmp)] = i; 
   }
-  // Resize the number of waiting queue
-  waiting_lists.resize(num_of_entry);
 
   fin >> num_of_exit;
   for(int i = 0; i < num_of_exit; i++){
     double tmp;
     fin >> tmp;
     ra_valid_destination_angle.push_back(tmp);
+    _destAngletoId[int(tmp)] = i;
   }
 
   fin.close();

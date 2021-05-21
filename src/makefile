@@ -12,8 +12,8 @@ all	: ../bin/runner
 	@echo -n ""
 
 # optimized version
-../bin/runner	: main_opt.o ra_mgr.o case1.o case2.o case3.o 
-			$(CC) $(OPTFLAGS) main_opt.o ra_mgr.o case1.o case2.o case3.o -o ../bin/runner
+../bin/runner	: main_opt.o ra_mgr.o case1.o case2.o case3.o skylinesol.o
+			$(CC) $(OPTFLAGS) main_opt.o ra_mgr.o case1.o case2.o case3.o skylinesol.o -o ../bin/runner
 main_opt.o 	: main.cpp
 			$(CC) $(CFLAGS) $< -Ilib -o $@
 ra_mgr.o    : ra_mgr.cpp ra_mgr.h 
@@ -23,6 +23,8 @@ case1.o     : case1.cpp ra_mgr.h
 case2.o     : case2.cpp ra_mgr.h
 			$(CC) $(CFLAGS) $< -Ilib -o $@
 case3.o     : case3.cpp ra_mgr.h
+			$(CC) $(CFLAGS) $< -Ilib -o $@
+skylinesol.o   : skylinesol.cpp ra_mgr.h
 			$(CC) $(CFLAGS) $< -Ilib -o $@
 
 # clean all the .o and executable files

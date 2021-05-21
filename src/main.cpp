@@ -87,18 +87,23 @@ int main(int argc, char** argv)
     {
       if (strcmp(argv[1], "-case1") == 0)
       {
-        cerr << "ran case1 :>" << endl;
+        cerr << "run case1 :>" << endl;
         raMgr->line_trivial_solution_case_1();
       }
       else if (strcmp(argv[1], "-case2") == 0)
       {
-        cerr << "ran case2 :>" << endl;
+        cerr << "run case2 :>" << endl;
         raMgr->line_trivial_solution_case_2();
       }
       else if (strcmp(argv[1], "-case3") == 0)
       {
-        cerr << "ran case3 :>" << endl;
+        cerr << "run case3 :>" << endl;
         raMgr->line_trivial_solution_case_3();
+      }
+      else if (strcmp(argv[1], "-case4") == 0)
+      {
+        cerr << "run skyline solution :>" << endl;
+        raMgr->skyline_solution_case_2();
       }
       break;
     }
