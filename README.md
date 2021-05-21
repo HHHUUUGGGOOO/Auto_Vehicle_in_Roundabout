@@ -4,7 +4,6 @@ Solve the automatic vehicles' scheduling in roundabout
 # Compile (MobaXterm)
 # How to build? 
 - cd Auto_Vehicle_in_Roundabout
-- cd src
 - make clean
 - make
 
@@ -14,7 +13,6 @@ Solve the automatic vehicles' scheduling in roundabout
 
 # How to eliminate binary file?
 - cd Auto_Vehicle_in_Roundabout
-- cd src
 - make clean
 
 # How to generate vehicle input file?
@@ -24,7 +22,7 @@ Solve the automatic vehicles' scheduling in roundabout
 - python3 ./generator/ra_input_generator.py
 
 # How to plot?
-- ./plotter/plot_answer.py
+- python3 ./plotter/plot_answer.py
 
 # How to check output file?
 - python3 ./checker/output_verifier.py input/v_input/<input_file_name> input/ra_input/<roundabout_infomation_file_name> output/<output_file_name>

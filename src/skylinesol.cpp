@@ -52,11 +52,11 @@ ra_mgr::skyline_solution_case_2()
 
         // TODO: check if can fit between _downSkyline and _upSkyline else put based on _skyline
         // if can -> insert
-        insertToEntry(answerList); // insert to _raSourceAngleList ans clear answerList
         updatePosition(wait_list[i], answerList);
+        insertToEntry(answerList); // insert to _raSourceAngleList ans clear answerList
         // if can't -> update answerList based on _skyline and insert
 
-        // TODO: check if need to update _skyline 
+        // TODO: check if need to update _skyline
 
     }
 }
