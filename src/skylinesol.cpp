@@ -84,8 +84,10 @@ ra_mgr::skyline_solution_case_2()
 
         // update _skyline //
         computeSkyline();
-
+        //printSkyline(_skyline);
     }
+    //for(int i = 0; i < _raSourceAngleList.size(); i++)
+    //    printSkyline(_raSourceAngleList[i]);
 }
 
 void 
@@ -125,8 +127,8 @@ ra_mgr::insertToEntry(vector<DLnode*> & answerList)
                     answerList[i]->setPrev(node);
                     answerList[i]->setNext(node->getNext());
 
-                    node->setNext(answerList[i]);
                     node->getNext()->setPrev(answerList[i]);
+                    node->setNext(answerList[i]);
                 }
             }
         }
@@ -296,8 +298,10 @@ ra_mgr::computeSkyline()
         }
         else
         {
-            node = _raSourceAngleList[i]->getPrev();
-            node = new DLnode(-1, node->getT1(), node->getT2(), node->getAngle());
+            //printSkyline(_raSourceAngleList[i]);
+            //printf("%lf\n",  _raSourceAngleList[i]->getPrev()->getT1());
+            DLnode *tmpNode = _raSourceAngleList[i]->getPrev();
+            node = new DLnode(-1, tmpNode->getT1(), tmpNode->getT2(), tmpNode->getAngle());
         }
 
         // insert to the last //
@@ -341,8 +345,10 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & answerList, const doub
 
 void ra_mgr::printSkyline(DLnode *node){
     DLnode *tmp = node;
-    for(int i = 0; i < _raSourceAngleList.size() && tmp != NULL; i++, tmp = tmp->getNext()){
+    DLnode *start = node;
+    while(tmp->getNext() != start){
         printf("%lf ", tmp->getT1());
+        tmp = tmp->getNext();
     }
-    printf("\n");
+    printf("%lf\n", tmp->getT1());
 }
