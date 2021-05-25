@@ -45,6 +45,9 @@ def main(filename_v, filename_ra):
             for i in range(1, len(tmp)-1, 2):
                 time.append(round(float(tmp[i]), 3))
                 pos.append(round(float(tmp[i+1]), 3))
+                if i+2 < len(tmp) -1 and float(tmp[i+1]) > float(tmp[i+3]):
+                    time.append(round(float(tmp[i+2]), 3))
+                    pos.append(360+round(float(tmp[i+3]), 3))
                 # find max time
                 if (round(float(tmp[i])) >= max_t):
                     max_t = round(float(tmp[i])+0.5)
