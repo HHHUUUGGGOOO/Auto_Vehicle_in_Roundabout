@@ -58,7 +58,7 @@ ra_mgr::skyline_solution_case_2()
         double safety_time_interval = ra_safety_margin / wait_list[i]->velocity;
         if( !canPlaceBetweenTwoSkyline(answerList, safety_time_interval)){
             // if can't -> update answerList based on _skyline and insert
-            printf("Can't Place Between Up and Down skyline\n");
+            printf("Vehicle %d can't Place Between Up and Down skyline\n", i);
             DLnode * node = _skyline;
             for (j = 0; j < enterAngleId; j++)
             {
@@ -300,8 +300,8 @@ ra_mgr::computeSkyline()
         {
             //printSkyline(_raSourceAngleList[i]);
             //printf("%lf\n",  _raSourceAngleList[i]->getPrev()->getT1());
-            DLnode *tmpNode = _raSourceAngleList[i]->getPrev();
-            node = new DLnode(-1, tmpNode->getT1(), tmpNode->getT2(), tmpNode->getAngle());
+            node = _raSourceAngleList[i]->getPrev();
+            node = new DLnode(-1, node->getT1(), node->getT2(), node->getAngle());
         }
 
         // insert to the last //
