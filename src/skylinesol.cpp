@@ -26,6 +26,7 @@ ra_mgr::skyline_solution_case_2()
     // assume same velocity // note: wait_list is sort by its time
     for (i = 0, v_size = wait_list.size(); i < v_size; i++)
     {
+        cerr << endl;
         cerr << "Vehicle id: " <<  wait_list[i]->id << endl;
         enterAngleId = _sourceAngletoId[int(wait_list[i]->source_angle)];
         double da = (wait_list[i]->destination_angle > 360)? (wait_list[i]->destination_angle-360):wait_list[i]->destination_angle;
@@ -56,16 +57,29 @@ ra_mgr::skyline_solution_case_2()
         // TODO: check if can fit between _downSkyline and _upSkyline else put based on _skyline
         // if can -> insert
         double safety_time_interval = ra_safety_margin / wait_list[i]->velocity;
+        double temp_t2;
         if( !canPlaceBetweenTwoSkyline(answerList, safety_time_interval)){
             // if can't -> update answerList based on _skyline and insert
-            printf("Vehicle %d can't Place Between Up and Down skyline\n", i);
+            printf("Vehicle %d can't Place Between Up and Down skyline\n", wait_list[i]->id);
             DLnode * node = _skyline;
             for (j = 0; j < enterAngleId; j++)
             {
                 node = node->getNext();
-            }
+            } // j = enterId
+
+            // decide t2
             t2 = max(node->getT1()+safety_time_interval, wait_list[i]->earliest_arrival_time); // start time
+            angle2 = node->getAngle();
             for (j = enterAngleId; j != exitAngleId; j = (j+1)%sa_size, node = node->getNext())
+            {
+                angle1 = node->getAngle();
+                if (angle1 < angle2) angle1 += 2*PI;
+                t1 = node->getT1()+safety_time_interval;
+                temp_t2 = t1-ra_radius*(angle1-angle2)/wait_list[i]->velocity;
+                if (temp_t2 > t2) t2 = temp_t2;
+            }
+
+            for (j = enterAngleId; j != exitAngleId; j = (j+1)%sa_size)
             {
                 angle1 = degree_to_rad(ra_valid_source_angle[j]);
                 angle2 = (j+1 == sa_size)? degree_to_rad(ra_valid_source_angle[0]) : degree_to_rad(ra_valid_source_angle[j+1]);
@@ -74,10 +88,10 @@ ra_mgr::skyline_solution_case_2()
                 t2 = t1 + ra_radius*(angle2-angle1)/wait_list[i]->velocity; // May appears bug when velocity is not fixed.
 
                 answerList[j] = new DLnode(wait_list[i]->id, t1, t2, angle1);
-
             }
             answerList[j] = new DLnode(wait_list[i]->id, t2, -1, degree_to_rad(ra_valid_source_angle[j]));
         }
+
 
         updatePosition(wait_list[i], answerList);
         insertToEntry(answerList); // insert to _raSourceAngleList ans clear answerList
