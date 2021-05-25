@@ -64,8 +64,8 @@ ra_mgr::skyline_solution_case_2()
             {
                 node = node->getNext();
             }
-            t2 = max(node->getT1()+safety_time_interval, wait_list[i]->earliest_arrival_time);
-            for (j = enterAngleId; j < exitAngleId; j = (j+1)%sa_size, node = node->getNext())
+            t2 = max(node->getT1()+safety_time_interval, wait_list[i]->earliest_arrival_time); // start time
+            for (j = enterAngleId; j != exitAngleId; j = (j+1)%sa_size, node = node->getNext())
             {
                 angle1 = degree_to_rad(ra_valid_source_angle[j]);
                 angle2 = (j+1 == sa_size)? degree_to_rad(ra_valid_source_angle[0]) : degree_to_rad(ra_valid_source_angle[j+1]);
