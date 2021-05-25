@@ -70,12 +70,12 @@ def main(filename_v, filename_ra):
 def parse_args():
     parser = ArgumentParser()
     parser.add_argument(
-            "output_file",
+            "--output_file",
             type=str,
             help="path to the output_file",
     )
     parser.add_argument(
-            "ra_file",
+            "--ra_file",
             type=str,
             help="path to the round-about file",
     )
