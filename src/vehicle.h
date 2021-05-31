@@ -36,9 +36,40 @@ public:
     _id(id), _t1(t1), _t2(t2), _angle(angle), _next(NULL), _prev(NULL) {}
   ~DLnode() {}
 
+    //place function
+    void placeNextTo(DLnode* node) 
+    {
+      this->setPrev(node);
+      this->setNext(node->getNext());
+      node->getNext()->setPrev(this);
+      node->setNext(this);
+    }
+    void placePreviousTo(DLnode* node) 
+    {
+      this->setNext(node);
+      this->setPrev(node->getPrev());
+      node->getPrev()->setNext(this);
+      node->setPrev(this);
+    }
+    void placeInFrontOf(DLnode* node) 
+    {
+      this->setBehind(node);
+      this->setFront(node->getNext());
+      node->getFront()->setBehind(this);
+      node->setFront(this);
+    }
+    void placePreviousTo(DLnode* node) 
+    {
+      this->setFront(node);
+      this->setBehind(node->getBehind());
+      node->getBehind()->setFront(this);
+      node->setBehind(this);
+    }    
     //set function
     void setNext(DLnode* next) {_next = next;}
     void setPrev(DLnode* prev) {_prev = prev;}
+    void setFront(DLnode* front) {_front = front;}
+    void setBehind(DLnode* behind) {_behind = behind;}
 
     //get function
     double getT1() {return _t1;}
@@ -47,10 +78,14 @@ public:
     int getId() {return _id;}
     DLnode* getNext() {return _next;}
     DLnode* getPrev() {return _prev;}
+    DLnode* getFront() {return _front;}
+    DLnode* getBehind() {return _behind;}
 
 private:
     DLnode* _next;
     DLnode* _prev;
+    DLnode* _front;
+    DLnode* _behind;
     int _id;
     double _t1;
     double _t2;
