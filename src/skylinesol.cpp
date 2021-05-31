@@ -7,9 +7,9 @@
   Copyright    [ Copyleft(c) 2021, NTUEE, Taiwan ]
 ***************************************************************************************/
 
-#include <climits>
 #include "vehicle.h"
 #include "ra_mgr.h"
+#include <climits>
 
 void 
 ra_mgr::skyline_solution_case_2()
