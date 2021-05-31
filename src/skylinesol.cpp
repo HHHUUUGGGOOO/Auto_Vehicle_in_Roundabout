@@ -307,7 +307,7 @@ void ra_mgr::printSkyline(DLnode *node){
     printf("%lf\n", tmp->getT1());
 }
 
-void clearSkyline(DLnode* skyline){
+void ra_mgr::clearSkyline(DLnode* skyline){
     if (skyline != NULL) // for the first time
     {
         DLnode *node = skyline->getFront();
