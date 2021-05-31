@@ -33,7 +33,7 @@ class DLnode
 {
 public:
   DLnode(int id, double t1, double t2 = -1, double angle = -1):
-    _id(id), _t1(t1), _t2(t2), _angle(angle), _next(NULL), _prev(NULL) {}
+    _id(id), _t1(t1), _t2(t2), _angle(angle), _next(this), _prev(this), _front(this), _behind(this) {}
   ~DLnode() {}
 
     //place function
@@ -58,7 +58,7 @@ public:
       node->getFront()->setBehind(this);
       node->setFront(this);
     }
-    void placePreviousTo(DLnode* node) 
+    void placeBehindOf(DLnode* node) 
     {
       this->setFront(node);
       this->setBehind(node->getBehind());
