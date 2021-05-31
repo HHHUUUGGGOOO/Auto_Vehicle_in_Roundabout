@@ -233,19 +233,7 @@ ra_mgr::computeSkyline()
     // clear skyline //
     DLnode* node;
     DLnode* next;
-    if (_skyline != NULL)
-    {
-        node = _skyline->getFront();
-        next = NULL;
-        while(node != _skyline)
-        {
-            next = node->getFront();
-            free(node);
-            node = next;
-        }
-        free(_skyline);
-        _skyline = NULL;
-    }
+    clearSkyline(_skyline);
 
     int i;
     for (i = 0; i < _raSourceAngleList.size(); i++)
@@ -315,6 +303,9 @@ void ra_mgr::clearSkyline(DLnode* skyline){
 
         while(node != skyline)
         {
+            if(node == NULL){
+                printf("Something goes wrong ...");
+            }
             next = node->getFront();
             free(node);
             node = next;
