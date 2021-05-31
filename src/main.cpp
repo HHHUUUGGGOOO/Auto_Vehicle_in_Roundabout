@@ -12,6 +12,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include "ra_mgr.h"
 
 using namespace std;
@@ -85,6 +86,10 @@ int main(int argc, char** argv)
     cin >> in;
     if (in == "y")
     {
+      // Calculate operation time
+      clock_t start , end;
+      start = clock();
+      // Main algorithm
       if (strcmp(argv[1], "-case1") == 0)
       {
         cerr << "run case1 :>" << endl;
@@ -105,6 +110,14 @@ int main(int argc, char** argv)
         cerr << "run skyline solution :>" << endl;
         raMgr->skyline_solution_case_2();
       }
+      // Calculate end time
+      end = clock();
+      double time = end - start;
+      cout << "====" << endl;
+      cout << "Time" << endl;
+      cout << "====" << endl;
+      cout << "time = " << time/CLOCKS_PER_SEC << " (sec)" <<endl;
+      cout << endl;
       break;
     }
     else if (in == "n")
