@@ -64,7 +64,7 @@ ra_mgr::skyline_solution_case_2()
             DLnode * node = _skyline;
             for (j = 0; j < enterAngleId; j++)
             {
-                node = node->getNext();
+                node = node->getFront();
             } // j = enterId
 
             // decide t2
@@ -226,29 +226,25 @@ ra_mgr::computeUDSkyline(const vector<DLnode*> & answerList)
         if (_upSkyline == NULL)
         {
             _upSkyline = nodeU;
-            _upSkyline->setPrev(_upSkyline);
-            _upSkyline->setNext(_upSkyline);
         }
         else
         {   
-            nodeU->setPrev(_upSkyline->getPrev());
-            nodeU->setNext(_upSkyline);
-            _upSkyline->getPrev()->setNext(nodeU);
-            _upSkyline->setPrev(nodeU);
+            nodeU->setBehind(_upSkyline->getBehind());
+            nodeU->setFront(_upSkyline);
+            _upSkyline->getBehind()->setFront(nodeU);
+            _upSkyline->setBehind(nodeU);
         }
 
         if (_downSkyline == NULL)
         {
             _downSkyline = nodeD;
-            _downSkyline->setPrev(_downSkyline);
-            _downSkyline->setNext(_downSkyline);
         }
         else
         {   
-            nodeD->setPrev(_downSkyline->getPrev());
-            nodeD->setNext(_downSkyline);
-            _downSkyline->getPrev()->setNext(nodeD);
-            _downSkyline->setPrev(nodeD);
+            nodeD->setBehind(_downSkyline->getBehind());
+            nodeD->setFront(_downSkyline);
+            _downSkyline->getBehind()->setFront(nodeD);
+            _downSkyline->setBehind(nodeD);
         }
     }
 
@@ -283,15 +279,13 @@ ra_mgr::computeSkyline()
         if (_skyline == NULL)
         {
             _skyline = node;
-            _skyline->setNext(_skyline);
-            _skyline->setPrev(_skyline);
         }
         else
         {
-            node->setPrev(_skyline->getPrev());
-            node->setNext(_skyline);
-            _skyline->getPrev()->setNext(node);
-            _skyline->setPrev(node);
+            node->setBehind(_skyline->getBehind());
+            node->setFront(_skyline);
+            _skyline->getBehind()->setFront(node);
+            _skyline->setBehind(node);
         }
     }
 
@@ -312,8 +306,8 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & answerList, const doub
             if(upNode->getT1() - answerList[i]->getT1() < time_interval) return false;
             if(answerList[i]->getT1() - downNode->getT1() < time_interval) return false;
         }
-        upNode = upNode->getNext();
-        downNode = downNode->getNext();
+        upNode = upNode->getFront();
+        downNode = downNode->getFront();
     }
     return true;
 }
@@ -321,9 +315,9 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & answerList, const doub
 void ra_mgr::printSkyline(DLnode *node){
     DLnode *tmp = node;
     DLnode *start = node;
-    while(tmp->getNext() != start){
+    while(tmp->getFront() != start){
         printf("%lf ", tmp->getT1());
-        tmp = tmp->getNext();
+        tmp = tmp->getFront();
     }
     printf("%lf\n", tmp->getT1());
 }
@@ -331,12 +325,12 @@ void ra_mgr::printSkyline(DLnode *node){
 DLnode* ra_mgr::clearSkyline(DLnode *skyline){
     if (skyline!= NULL) // for the first time
     {
-        DLnode *curNode = skyline->getNext();
+        DLnode *curNode = skyline->getFront();
         DLnode *nextNode = NULL;
 
         while(curNode != skyline)
         {
-            nextNode = curNode->getNext();
+            nextNode = curNode->getFront();
             free(curNode);
             curNode = nextNode;
         }
