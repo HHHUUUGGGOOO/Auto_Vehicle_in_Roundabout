@@ -55,7 +55,7 @@ public:
     void placeInFrontOf(DLnode* node) 
     {
       this->setBehind(node);
-      this->setFront(node->getNext());
+      this->setFront(node->getFront());
       node->getFront()->setBehind(this);
       node->setFront(this);
     }

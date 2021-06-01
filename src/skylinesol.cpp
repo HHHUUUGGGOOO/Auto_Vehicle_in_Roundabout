@@ -203,7 +203,7 @@ ra_mgr::insertToEntry(vector<DLnode*> & answerList)
                     {
                         node = node->getNext();
                     }
-                    answerList[i]->placePreviousTo(node);
+                    answerList[i]->placeNextTo(node);
                 }
             }
         }
