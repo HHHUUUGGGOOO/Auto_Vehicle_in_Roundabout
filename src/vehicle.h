@@ -32,8 +32,8 @@ enum Vehicle_status
 class DLnode
 {
 public:
-  DLnode(int id, double t1, double t2 = -1, double angle = -1):
-    _id(id), _t1(t1), _t2(t2), _angle(angle), _next(NULL), _prev(NULL) {}
+  DLnode(int id, double t1, double t2 = -1, double angle = -1, bool exit = false):
+    _id(id), _t1(t1), _t2(t2), _angle(angle), _next(NULL), _prev(NULL), is_exit(exit) {}
   ~DLnode() {}
 
     //set function
@@ -45,6 +45,7 @@ public:
     double getT2() {return _t2;}
     double getAngle() {return _angle;} //angle at t1
     int getId() {return _id;}
+    bool IsExit() {return is_exit;}
     DLnode* getNext() {return _next;}
     DLnode* getPrev() {return _prev;}
 
@@ -55,6 +56,7 @@ private:
     double _t1;
     double _t2;
     double _angle;
+    bool is_exit;
 };
 
 class Vehicle

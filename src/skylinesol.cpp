@@ -10,6 +10,7 @@
 #include "vehicle.h"
 #include "ra_mgr.h"
 #include <climits>
+#include <cmath>
 
 void 
 ra_mgr::skyline_solution_case_2()
@@ -48,7 +49,7 @@ ra_mgr::skyline_solution_case_2()
             j++;
             if (j == sa_size) j = 0;
         }
-        answerList[j] = new DLnode(wait_list[i]->id, t2, -1, degree_to_rad(ra_valid_source_angle[j])); //dest // actually need to consider destination angle QQ
+        answerList[j] = new DLnode(wait_list[i]->id, t2, -1, degree_to_rad(ra_valid_source_angle[j]), true); //dest // actually need to consider destination angle QQ
         cerr << "Out: t2: " << t2 << " angle: " << degree_to_rad(ra_valid_source_angle[j]) << endl;
         
         // compute upward and downward skyline //
@@ -58,9 +59,73 @@ ra_mgr::skyline_solution_case_2()
         // if can -> insert
         double safety_time_interval = ra_safety_margin / wait_list[i]->velocity;
         double temp_t2;
-        if( !canPlaceBetweenTwoSkyline(answerList, safety_time_interval)){
-            // if can't -> update answerList based on _skyline and insert
-            printf("Vehicle %d can't Place Between Up and Down skyline\n", wait_list[i]->id);
+        bool noAnswer = false;
+        DLnode *nodeU, *nodeD;
+        double timeUnit = 1e-3;
+        while(!canPlaceBetweenTwoSkyline(answerList, safety_time_interval, enterAngleId)){
+            
+            nodeD = _raSourceAngleList[enterAngleId];
+            if ((nodeD->getT1()-safety_time_interval) > answerList[enterAngleId]->getT1())
+            {
+                t2 = answerList[enterAngleId]->getT1() + timeUnit;
+            }
+            else
+            {
+                while(nodeD->getNext() != _raSourceAngleList[enterAngleId] && nodeD->getNext()->getT1() < answerList[enterAngleId]->getT1())
+                {
+                    nodeD = nodeD->getNext();
+                    while (nodeD->IsExit() && nodeD->getNext() != _raSourceAngleList[enterAngleId])
+                        nodeD = nodeD->getNext();
+                }
+                nodeU = nodeD->getNext();
+                if (nodeU == _raSourceAngleList[enterAngleId])
+                {
+                    noAnswer = true;
+                    break;
+                }
+                else
+                {
+                    if (nodeU->getT1() > answerList[enterAngleId]->getT1() + timeUnit + safety_time_interval)
+                        t2 = answerList[enterAngleId]->getT1() + timeUnit;
+                    else t2 = nodeU->getT1() + safety_time_interval;
+                }
+            }
+
+            // free answerlist //
+            for (j = 0; j < sa_size; j++)
+            {
+                if (answerList[j] != NULL)
+                {
+                    free(answerList[j]);
+                }
+            }
+
+
+            // compute new answerlist and check if it can put between skyline //
+            j = enterAngleId;
+
+            while(j != exitAngleId)
+            {
+                angle1 = degree_to_rad(ra_valid_source_angle[j]);
+                angle2 = (j+1 == sa_size)? degree_to_rad(ra_valid_source_angle[0]): degree_to_rad(ra_valid_source_angle[j+1]);
+                if (angle2 < angle1) angle2 += 2*PI;
+                t1 = t2;
+                t2 = t1 + ra_radius*(angle2-angle1)/wait_list[i]->velocity;
+                answerList[j] = new DLnode(wait_list[i]->id,t1, t2, angle1);
+                // cerr << "t1: " << t1 << " t2: " << t2 << " angle: " << angle1 << endl;
+
+                j++;
+                if (j == sa_size) j = 0;
+            }
+            answerList[j] = new DLnode(wait_list[i]->id, t2, -1, degree_to_rad(ra_valid_source_angle[j]), true); //dest // actually need to consider destination angle QQ
+            // cerr << "New out: t2: " << t2 << " angle: " << degree_to_rad(ra_valid_source_angle[j]) << endl;
+            computeUDSkyline(answerList);
+        }
+    
+        if (noAnswer)
+        {
+            // update answerList based on _skyline and insert
+            printf("Vehicle %d can't place between skyline\n", wait_list[i]->id);
             DLnode * node = _skyline;
             for (j = 0; j < enterAngleId; j++)
             {
@@ -91,7 +156,6 @@ ra_mgr::skyline_solution_case_2()
             }
             answerList[j] = new DLnode(wait_list[i]->id, t2, -1, degree_to_rad(ra_valid_source_angle[j]));
         }
-
 
         updatePosition(wait_list[i], answerList);
         insertToEntry(answerList); // insert to _raSourceAngleList ans clear answerList
@@ -339,7 +403,7 @@ ra_mgr::computeSkyline()
 
 
 bool
-ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & answerList, const double time_interval)
+ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & answerList, const double time_interval, const int entryId)
 {
     // printf("\ncanPlaceBetweenTwoSkyline\n");
     int i, sa_size;
@@ -347,9 +411,9 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & answerList, const doub
     for (i = 0, sa_size = _raSourceAngleList.size(); i < sa_size; i++)
     {
         if (answerList[i] != NULL)
-        {
-            if(upNode->getT1() - answerList[i]->getT1() < time_interval) return false;
-            if(answerList[i]->getT1() - downNode->getT1() < time_interval) return false;
+        {   
+            if ((upNode->getT1() - answerList[i]->getT1() < time_interval) && !(i == entryId && upNode->IsExit())) return false;
+            if ((answerList[i]->getT1() - downNode->getT1() < time_interval) && !(i == entryId && downNode->IsExit())) return false;
         }
         upNode = upNode->getNext();
         downNode = downNode->getNext();
