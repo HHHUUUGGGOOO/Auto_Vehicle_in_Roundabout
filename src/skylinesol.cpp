@@ -90,6 +90,13 @@ ra_mgr::skyline_solution_case_2()
                 answerList[j] = new DLnode(wait_list[i]->id, t1, t2, angle1);
             }
             answerList[j] = new DLnode(wait_list[i]->id, t2, -1, degree_to_rad(ra_valid_source_angle[j]));
+            
+        }
+
+        for (j = enterAngleId; j != exitAngleId; j = (j+1)%sa_size)
+        {
+            int nextJ = (j+1)%sa_size;
+            answerList[j]->placeBehindOf(answerList[nextJ]);
         }
 
 
@@ -117,19 +124,12 @@ ra_mgr::insertToEntry(vector<DLnode*> & answerList)
             if (node == NULL)
             {
                 _raSourceAngleList[i] = answerList[i];
-                _raSourceAngleList[i] -> setPrev(_raSourceAngleList[i]);
-                _raSourceAngleList[i] -> setNext(_raSourceAngleList[i]);
             }
             else
             {
                 if (node->getT1() > answerList[i]->getT1()) // first
                 {
-                    answerList[i]->setPrev(node->getPrev());
-                    answerList[i]->setNext(node);
-
-                    node->getPrev()->setNext(answerList[i]);
-                    node->setPrev(answerList[i]);
-
+                    answerList[i]->placePreviousTo(node);
                     _raSourceAngleList[i] = answerList[i];
                 }
                 else
@@ -138,11 +138,7 @@ ra_mgr::insertToEntry(vector<DLnode*> & answerList)
                     {
                         node = node->getNext();
                     }
-                    answerList[i]->setPrev(node);
-                    answerList[i]->setNext(node->getNext());
-
-                    node->getNext()->setPrev(answerList[i]);
-                    node->setNext(answerList[i]);
+                    answerList[i]->placePreviousTo(node);
                 }
             }
         }
@@ -179,10 +175,6 @@ ra_mgr::computeUDSkyline(const vector<DLnode*> & answerList)
     // printf("\nCompute UD skyline\n");
 
     // clear skyline //
-    DLnode* nodeU;
-    DLnode* nodeD;
-    DLnode* nextU;
-    DLnode* nextD;
     _upSkyline = clearSkyline(_upSkyline);
     _downSkyline = clearSkyline(_downSkyline);
 
@@ -190,6 +182,8 @@ ra_mgr::computeUDSkyline(const vector<DLnode*> & answerList)
 
     // construct skyline //
     int i;
+    DLnode* nodeU;
+    DLnode* nodeD;
     for (i = 0; i < _raSourceAngleList.size(); i++)
     {
         // find up and down //
@@ -229,10 +223,7 @@ ra_mgr::computeUDSkyline(const vector<DLnode*> & answerList)
         }
         else
         {   
-            nodeU->setBehind(_upSkyline->getBehind());
-            nodeU->setFront(_upSkyline);
-            _upSkyline->getBehind()->setFront(nodeU);
-            _upSkyline->setBehind(nodeU);
+            nodeU->placeBehindOf(_upSkyline);
         }
 
         if (_downSkyline == NULL)
@@ -241,10 +232,7 @@ ra_mgr::computeUDSkyline(const vector<DLnode*> & answerList)
         }
         else
         {   
-            nodeD->setBehind(_downSkyline->getBehind());
-            nodeD->setFront(_downSkyline);
-            _downSkyline->getBehind()->setFront(nodeD);
-            _downSkyline->setBehind(nodeD);
+            nodeD->placeBehindOf(_downSkyline);
         }
     }
 
@@ -282,10 +270,7 @@ ra_mgr::computeSkyline()
         }
         else
         {
-            node->setBehind(_skyline->getBehind());
-            node->setFront(_skyline);
-            _skyline->getBehind()->setFront(node);
-            _skyline->setBehind(node);
+            node->placeBehindOf(_skyline);
         }
     }
 
