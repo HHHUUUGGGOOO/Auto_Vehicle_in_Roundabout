@@ -70,7 +70,7 @@ ra_mgr::skyline_solution_case_2()
             // decide t2
             t2 = max(node->getT1()+safety_time_interval, wait_list[i]->earliest_arrival_time); // start time
             angle2 = node->getAngle();
-            for (j = enterAngleId; j != exitAngleId; j = (j+1)%sa_size, node = node->getNext())
+            for (j = enterAngleId; j != exitAngleId; j = (j+1)%sa_size, node = node->getFront())
             {
                 angle1 = node->getAngle();
                 if (angle1 < angle2) angle1 += 2*PI;
@@ -99,6 +99,10 @@ ra_mgr::skyline_solution_case_2()
             answerList[j]->placeBehindOf(answerList[nextJ]);
         }
 
+        for (j = enterAngleId; j != exitAngleId; j = (j+1)%sa_size){
+            int nextJ = (j+1)%sa_size;
+            answerList[j]->placeBehindOf(answerList[nextJ]);
+        }
 
         updatePosition(wait_list[i], answerList);
         insertToEntry(answerList); // insert to _raSourceAngleList ans clear answerList
@@ -217,23 +221,11 @@ ra_mgr::computeUDSkyline(const vector<DLnode*> & answerList)
 
         // insert to the last //
         // printf("\nInsert to the last\n");
-        if (_upSkyline == NULL)
-        {
-            _upSkyline = nodeU;
-        }
-        else
-        {   
-            nodeU->placeBehindOf(_upSkyline);
-        }
+        if (_upSkyline == NULL) { _upSkyline = nodeU; }
+        else { nodeU->placeBehindOf(_upSkyline); }
 
-        if (_downSkyline == NULL)
-        {
-            _downSkyline = nodeD;
-        }
-        else
-        {   
-            nodeD->placeBehindOf(_downSkyline);
-        }
+        if (_downSkyline == NULL) { _downSkyline = nodeD; }
+        else { nodeD->placeBehindOf(_downSkyline); }
     }
 
     // printf("End Compute UD skyline\n");
