@@ -183,34 +183,8 @@ ra_mgr::computeUDSkyline(const vector<DLnode*> & answerList)
     DLnode* nodeD;
     DLnode* nextU;
     DLnode* nextD;
-    if (_upSkyline != NULL && _downSkyline != NULL) // for the first time
-    {
-        nodeU = _upSkyline->getNext();
-        nextU = NULL;
-        nodeD = _downSkyline->getNext();
-        nextD = NULL;
-
-        while(nodeU != _upSkyline || nodeD != _downSkyline)
-        {
-            if (nodeU != _upSkyline)
-            {
-                nextU = nodeU->getNext();
-                free(nodeU);
-                nodeU = nextU;
-            }
-
-            if (nodeD != _downSkyline)
-            {
-                nextD = nodeD->getNext();
-                free(nodeD);
-                nodeD = nextD;
-            }
-        }
-        free(_upSkyline);
-        free(_downSkyline);
-        _upSkyline = NULL;
-        _downSkyline = NULL;
-    }
+    _upSkyline = clearSkyline(_upSkyline);
+    _downSkyline = clearSkyline(_downSkyline);
 
     // printf("\nEnd free\n");
 
@@ -286,23 +260,10 @@ ra_mgr::computeSkyline()
 {
     // printf("\nCompute skyline\n");
     // clear skyline //
-    DLnode* node;
-    DLnode* next;
-    if (_skyline != NULL)
-    {
-        node = _skyline->getNext();
-        next = NULL;
-        while(node != _skyline)
-        {
-            next = node->getNext();
-            free(node);
-            node = next;
-        }
-        free(_skyline);
-        _skyline = NULL;
-    }
+    _skyline = clearSkyline(_skyline);
 
     int i;
+    DLnode* node;
     for (i = 0; i < _raSourceAngleList.size(); i++)
     {
         // find overall skyline (each entry's prev) //
@@ -365,4 +326,21 @@ void ra_mgr::printSkyline(DLnode *node){
         tmp = tmp->getNext();
     }
     printf("%lf\n", tmp->getT1());
+}
+
+DLnode* ra_mgr::clearSkyline(DLnode *skyline){
+    if (skyline!= NULL) // for the first time
+    {
+        DLnode *curNode = skyline->getNext();
+        DLnode *nextNode = NULL;
+
+        while(curNode != skyline)
+        {
+            nextNode = curNode->getNext();
+            free(curNode);
+            curNode = nextNode;
+        }
+        free(skyline);
+    }
+    return NULL;
 }
