@@ -1,6 +1,5 @@
 [line segment / consider acceleration, deceleration]
 
-P.S. 我複製同樣一個case5.cpp到src資料夾compile
 P.S. 新增東西的前一行有註記 "new add (Hugo): <description>"
 
     - DLnode*
