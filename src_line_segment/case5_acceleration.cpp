@@ -20,13 +20,11 @@ ra_mgr::acceleration_solution_case_4()
     int sa_size = ra_valid_source_angle.size();
     int v_size = wait_list.size();
     _raSourceAngleList.resize(sa_size);
-    vector<DLnode*> answerList(sa_size); // temp answer list for one vehicle,       answerList[0]: intersection_0 -> intersection_1, ... , answerList[sa_size-1] = intersection_{sa_size} -> intersection_0
+    vector<DLnode*> answerList(sa_size); // temp answer list for one vehicle, answerList[0]: intersection_0 -> intersection_1, ... , answerList[sa_size-1] = intersection_{sa_size} -> intersection_0
     
     // assume same velocity // note: wait_list is sort by its time
     for (int current_v_id = 0; current_v_id < v_size; current_v_id++)
     {
-        
-        cerr << endl;
         cerr << "Vehicle id: " <<  wait_list[current_v_id]->id << endl;
         double  startTime, endTime, startAngle, endAngle;
 
@@ -38,10 +36,8 @@ ra_mgr::acceleration_solution_case_4()
         int exitAngleId = _destAngletoId[int(da)];
 
         // compute answerList //
-        
         for(int currentAngleId = enterAngleId; currentAngleId != exitAngleId; currentAngleId = (currentAngleId+1)%sa_size)
         {
-
             startAngle = degree_to_rad(ra_valid_source_angle[currentAngleId]);
             int nextIntersectionId = (currentAngleId + 1 == sa_size)? 0:currentAngleId+1; 
             endAngle = degree_to_rad(ra_valid_source_angle[nextIntersectionId]);
@@ -49,7 +45,7 @@ ra_mgr::acceleration_solution_case_4()
             startTime = (currentAngleId == enterAngleId)? wait_list[current_v_id]->earliest_arrival_time : endTime;
             endTime = startTime + ra_radius*(endAngle-startAngle)/wait_list[current_v_id]->velocity;
             // new add (Hugo): add "endAngle" to the new node
-            answerList[currentAngleId] = new DLnode(wait_list[current_v_id]->id, startTime, endTime, startAngle, endAngle, (currentAngleId == enterAngleId)/*start*/, (currentAngleId == exitAngleId)/*exit*/);
+            answerList[currentAngleId] = new DLnode(wait_list[current_v_id]->id, startTime, endTime, startAngle, endAngle, (currentAngleId == enterAngleId)/*start*/, (((currentAngleId+1)%sa_size) == exitAngleId)/*exit*/);
             cerr << "Start time: " << startTime << ", end time: " << endTime << ", start angle: " << startAngle << ", end angle" << endAngle << endl;
         }
         

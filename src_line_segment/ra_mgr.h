@@ -65,7 +65,7 @@ class ra_mgr
     void                line_trivial_solution_case_1();
     void                line_trivial_solution_case_2();
     void                line_trivial_solution_case_3();
-    void                skyline_solution_case_2();
+    // void                skyline_solution_case_2();
     void                acceleration_solution_case_4();
 
     // newly add in skyline //

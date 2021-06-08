@@ -105,11 +105,11 @@ int main(int argc, char** argv)
         cerr << "run case3 :>" << endl;
         raMgr->line_trivial_solution_case_3();
       }
-      else if (strcmp(argv[1], "-case4") == 0)
-      {
-        cerr << "run skyline solution :>" << endl;
-        raMgr->skyline_solution_case_2();
-      }
+      // else if (strcmp(argv[1], "-case4") == 0)
+      // {
+      //   cerr << "run skyline solution :>" << endl;
+      //   raMgr->skyline_solution_case_2();
+      // }
       else if (strcmp(argv[1], "-case5") == 0)
       {
         cerr << "run acceleration solution :>" << endl;
