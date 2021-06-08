@@ -32,7 +32,7 @@ enum Vehicle_status
 class DLnode
 {
 public:
-  DLnode(int id, double startTime, double endTime = -1, double startAngle = -1, double endAngle = -1, bool start=false, bool exit = false):
+  DLnode(int id, double startTime, double endTime = -1, double startAngle = -1, double endAngle = -1, bool start = false, bool exit = false):
     _id(id), _startTime(startTime), _endTime(endTime), _startAngle(startAngle), _endAngle(endAngle), _next(this), _prev(this), _front(this), _behind(this), is_start(start), is_exit(exit){}
 
   ~DLnode() {}

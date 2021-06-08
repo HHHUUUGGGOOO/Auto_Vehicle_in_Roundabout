@@ -66,6 +66,7 @@ class ra_mgr
     void                line_trivial_solution_case_2();
     void                line_trivial_solution_case_3();
     void                skyline_solution_case_2();
+    void                acceleration_solution_case_4();
 
     // newly add in skyline //
     vector< DLnode* > _raSourceAngleList;
@@ -79,7 +80,7 @@ class ra_mgr
     void updatePosition(Vehicle* , const vector<DLnode*> &);
     void computeUDSkyline(const vector<DLnode*> &);
     void computeSkyline();
-    bool canPlaceBetweenTwoSkyline(const vector<DLnode*> &, const double, const int);
+    bool canPlaceBetweenTwoSkyline(const vector<DLnode*> &, const double, const int, const int);
     DLnode* clearSkyline(DLnode*);
 
     // newly add in segment implimentation of skyline;
@@ -100,6 +101,10 @@ class ra_mgr
     vector<Vehicle*>     in_list;
     vector<double>       in_ra_time; // time that a car needs to go through the ra
     vector<double>       real_enter_time; // real time that a car enters the ra
+    /* new add (Hugo): velocity limitation */
+    const double         v_min = 5;
+    const double         v_normal = 10;
+    const double         v_max = 15;
     
     // roundabout information //
     // string              ra_purpose;

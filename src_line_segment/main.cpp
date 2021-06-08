@@ -110,6 +110,11 @@ int main(int argc, char** argv)
         cerr << "run skyline solution :>" << endl;
         raMgr->skyline_solution_case_2();
       }
+      else if (strcmp(argv[1], "-case5") == 0)
+      {
+        cerr << "run acceleration solution :>" << endl;
+        raMgr->acceleration_solution_case_4();
+      }
       // Calculate end time
       end = clock();
       double time = end - start;

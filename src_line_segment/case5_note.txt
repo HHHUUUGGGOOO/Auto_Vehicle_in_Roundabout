@@ -1,0 +1,34 @@
+[line segment / consider acceleration, deceleration]
+
+P.S. 我複製同樣一個case5.cpp到src資料夾compile
+P.S. 新增東西的前一行有註記 "new add (Hugo): <description>"
+
+    - DLnode*
+        -- 其中的 "start_angle / end_angle / start_time / end_time" 分別代表 "angle1 / angle2 / t1 / t2"
+        -- 所以每個 DLnode 視為一個橫跨90度的線段
+        -- getBehind / getInFront 是連接同一台車的解
+        -- getNext / getPrev 是連接兩個不同台車的解
+
+    - velocity limitation
+        -- v_min = 5 (m/s) = 18 (km/hr)
+        -- v_default = 10 (m/s) = 36 (km/hr)
+        -- v_max = 15 (m/s) = 54 (km/hr)
+
+< Algorithm > 
+
+P.S. 我打上去的部分是有check完改過的, 所謂改過是考慮到 line segment 的解法和不等速的判斷 (或是該部分不須判斷)
+
+1. 初始變數
+2. for loop 跑每台車的解
+    (a) compute answerList(angle_1, angle_2, t_1, t_2) 先預設等速前進的解
+    (b) computeUpDownSkyline()
+
+    (c) canplacebetweenUpDownSkyline()
+        (i) Yes
+            => updatePosition(anserList)
+            => insertToEntry(answerList)
+            => computeSkyline()
+        (ii) No
+            => 在 canplace() 的函數中做"加速"或"減速"的運算, 並更新其 answerList 再重跑 canplace() 檢查
+                --> 若 canplace() == True, 更新成這個 answerList
+                --> 若 canplace() == False, 回傳 False 去繼續做 case4 的事
