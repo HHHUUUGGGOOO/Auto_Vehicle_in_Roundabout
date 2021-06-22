@@ -20,7 +20,7 @@ ra_mgr::acceleration_solution_case_4()
     int sa_size = ra_valid_source_angle.size();
     int v_size = wait_list.size();
     _raSourceAngleList.resize(sa_size);
-    vector<DLnode*> answerList(sa_size); // temp answer list for one vehicle, answerList[0]: intersection_0 -> intersection_1, ... , answerList[sa_size-1] = intersection_{sa_size} -> intersection_0
+    answerList.resize(sa_size); // temp answer list for one vehicle, answerList[0]: intersection_0 -> intersection_1, ... , answerList[sa_size-1] = intersection_{sa_size} -> intersection_0
     
     // assume same velocity // note: wait_list is sort by its time
     for (int current_v_id = 0; current_v_id < v_size; current_v_id++)
@@ -50,7 +50,7 @@ ra_mgr::acceleration_solution_case_4()
         }
         
         // compute upward and downward skyline //
-        computeUDSkyline(answerList);
+        computeUDSkyline();
 
         // TODO: check if can fit between _downSkyline and _upSkyline else put based on _skyline
         // if can -> insert
@@ -58,7 +58,7 @@ ra_mgr::acceleration_solution_case_4()
         bool noAnswer = false;
         DLnode *nodeU, *nodeD;
         double timeUnit = 1e-3;
-        while(!canPlaceBetweenTwoSkyline(answerList, safety_time_interval, enterAngleId, exitAngleId)){
+        while(!canPlaceBetweenTwoSkyline(safety_time_interval, enterAngleId, exitAngleId)){
             
             nodeD = _raSourceAngleList[enterAngleId];
             if ((nodeD->getStartTime()-safety_time_interval) > answerList[enterAngleId]->getStartTime())
@@ -111,7 +111,7 @@ ra_mgr::acceleration_solution_case_4()
                 // cerr << "startTime: " << startTime << " endTime: " << endTime << " angle: " << startAngle << endl;
             }
             // cerr << "New out: endTime: " << endTime << " angle: " << degree_to_rad(ra_valid_source_angle[j]) << endl;
-            computeUDSkyline(answerList);
+            computeUDSkyline();
         }
     
         if (noAnswer)
@@ -159,9 +159,9 @@ ra_mgr::acceleration_solution_case_4()
         }
 
         cout << "update position" << endl;
-        updatePosition(wait_list[current_v_id], answerList);
+        updatePosition(wait_list[current_v_id]);
         cout << "insert to entry" << endl;
-        insertToEntry(answerList); // insert to _raSourceAngleList ans clear answerList
+        insertToEntry(); // insert to _raSourceAngleList ans clear answerList
 
         // update _skyline //
         cout << "computeskyline" << endl;
@@ -174,7 +174,7 @@ ra_mgr::acceleration_solution_case_4()
 }
 
 void 
-ra_mgr::insertToEntry(vector<DLnode*> & answerList)
+ra_mgr::insertToEntry()
 {
     int sa_size = _raSourceAngleList.size();
     for (int currentAngleId = 0; currentAngleId < sa_size; currentAngleId++)
@@ -209,7 +209,7 @@ ra_mgr::insertToEntry(vector<DLnode*> & answerList)
 }
 
 void
-ra_mgr::updatePosition(Vehicle* v, const vector<DLnode*> & answerList)
+ra_mgr::updatePosition(Vehicle* v)
 {
     // printf("\nUpdate position\n");
     // store answer to every vehicle //
@@ -242,7 +242,7 @@ ra_mgr::updatePosition(Vehicle* v, const vector<DLnode*> & answerList)
 }
 
 void
-ra_mgr::computeUDSkyline(const vector<DLnode*> & answerList)
+ra_mgr::computeUDSkyline()
 {
     // skyline must be new node different from _raSourceAngleList
     // skyline use cycle list for easy implement purpose
@@ -355,7 +355,7 @@ ra_mgr::computeSkyline()
 
 
 bool
-ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & answerList, const double time_interval, const int entryId, const int exitId)
+ra_mgr::canPlaceBetweenTwoSkyline(const double time_interval, const int entryId, const int exitId)
 {
     // printf("\ncanPlaceBetweenTwoSkyline\n");
     int sa_size = _raSourceAngleList.size();
@@ -450,7 +450,7 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & answerList, const doub
     }
     else {
         cout << "12" << endl;
-        if (!canPlaceBetweenTwoSkyline(tmp_answerList, time_interval, entryId, exitId)) { return false; }
+        if (!canPlaceBetweenTwoSkyline(time_interval, entryId, exitId)) { return false; }
         cout << "13" << endl;
     }
 }

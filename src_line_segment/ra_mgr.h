@@ -76,12 +76,14 @@ class ra_mgr
     DLnode* _downSkyline;
     DLnode* _skyline;
 
-    void insertToEntry(vector<DLnode*> & );
-    void updatePosition(Vehicle* , const vector<DLnode*> &);
-    void computeUDSkyline(const vector<DLnode*> &);
+    void insertToEntry();
+    void updatePosition(Vehicle*);
+    void computeUDSkyline();
     void computeSkyline();
-    bool canPlaceBetweenTwoSkyline(const vector<DLnode*> &, const double, const int, const int);
+    bool canPlaceBetweenTwoSkyline(const double, const int, const int);
     DLnode* clearSkyline(DLnode*);
+    vector<DLnode*>     answerList;
+
 
     // newly add in segment implimentation of skyline;
     bool LinesConflicted(DLnode*, DLnode*);
