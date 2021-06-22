@@ -123,12 +123,10 @@ ra_mgr::acceleration_solution_case_4()
             {
                 node = node->getFront();
             } // node is the correspondant node on _skyline wrt. enterAngleId
-
             // decide endTime
             endTime = max(node->getStartTime()+safety_time_interval, wait_list[current_v_id]->earliest_arrival_time); // start time
             endAngle = node->getEndAngle();
             // Find end time at Intersection_enterAngleId
-
             for (int currentAngleId = enterAngleId; currentAngleId != exitAngleId; currentAngleId = (currentAngleId+1)%sa_size, node = node->getFront())
             {
                 startAngle = node->getStartAngle();
@@ -152,12 +150,15 @@ ra_mgr::acceleration_solution_case_4()
         }
 
         cout << "has answer" << endl;
-        for (int currentAngleId = enterAngleId; currentAngleId != exitAngleId; currentAngleId = (currentAngleId+1)%sa_size)
+        
+        for (int currentAngleId = enterAngleId; true ; currentAngleId = (currentAngleId+1)%sa_size)
         {
             int nextAngleId = (currentAngleId+1)%sa_size;
+            if(nextAngleId == exitAngleId)
+                break;
             answerList[currentAngleId]->placeBehindOf(answerList[nextAngleId]);
         }
-
+        
         cout << "update position" << endl;
         updatePosition(wait_list[current_v_id]);
         cout << "insert to entry" << endl;
