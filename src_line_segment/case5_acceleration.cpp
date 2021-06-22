@@ -151,18 +151,22 @@ ra_mgr::acceleration_solution_case_4()
             
         }
 
-
+        cout << "has answer" << endl;
         for (int currentAngleId = enterAngleId; currentAngleId != exitAngleId; currentAngleId = (currentAngleId+1)%sa_size)
         {
             int nextAngleId = (currentAngleId+1)%sa_size;
             answerList[currentAngleId]->placeBehindOf(answerList[nextAngleId]);
         }
 
+        cout << "update position" << endl;
         updatePosition(wait_list[current_v_id], answerList);
+        cout << "insert to entry" << endl;
         insertToEntry(answerList); // insert to _raSourceAngleList ans clear answerList
 
         // update _skyline //
+        cout << "computeskyline" << endl;
         computeSkyline();
+
         //printSkyline(_skyline);
     }
     //for(int i = 0; i < _raSourceAngleList.size(); i++)
@@ -357,29 +361,42 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & answerList, const doub
     int sa_size = _raSourceAngleList.size();
     DLnode* upNode = _upSkyline, *downNode = _downSkyline;
     // new add (Hugo): begin at "source angle"
+    cout << "1" << endl;
     for(int currentAngleId = 0; currentAngleId != entryId; currentAngleId++)
     {
         upNode = upNode->getFront();
         downNode = downNode->getFront();
     }
+    cout << "2" << endl;
 
     vector<DLnode*> tmp_answerList(sa_size);
     bool isAccelerate = false;
+
+    for (int i = entryId; i != exitId; i = (i+1)%sa_size) { tmp_answerList[i] = answerList[i]; }
+
     for (int i = entryId; i != exitId; i = (i+1)%sa_size)
     {
+        cout << "3" << endl;
         if (answerList[i] != NULL)
         {   
+            cout << "4" << endl;
             if ((upNode->getStartTime() - answerList[i]->getStartTime() < time_interval) && !(i == entryId && upNode->IsExit())) {
                 // new add (Hugo): acceleration
+                cout << "5" << endl;
                 if (i == entryId) { return false; }
                 if (LinesConflicted(upNode, answerList[i])) { return false; }
                 else {
+                    cout << "6" << endl;
                     int i_prevId = (i == 0) ? sa_size-1 : i-1;
                     double v_acc = (answerList[i_prevId]->getEndAngle() - answerList[i_prevId]->getStartAngle()) / (upNode->getStartTime() - time_interval - answerList[i_prevId]->getStartTime());
                     // if cannot accelerate
-                    if (v_acc > v_max) { return false; }
+                    if ((v_acc > v_max) || (upNode->getStartTime()-time_interval < downNode->getStartTime()+time_interval))
+                    { 
+                        return false; 
+                    }
                     // if can accelerate, update answerList
                     else {
+                        cout << "7" << endl;
                         tmp_answerList[i_prevId] = new DLnode(answerList[i_prevId]->getId(), answerList[i_prevId]->getStartTime(), (upNode->getStartTime()-time_interval), answerList[i_prevId]->getStartAngle(), answerList[i_prevId]->getEndAngle(), (i_prevId == entryId)/*start*/, (i_prevId == exitId)/*exit*/);
                         // update "start_time" and "end_time"
                         for (int j = i ; j != exitId; j = (j+1)%sa_size) {
@@ -394,15 +411,21 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & answerList, const doub
             }
             if ((answerList[i]->getStartTime() - downNode->getStartTime() < time_interval) && !(i == entryId && downNode->IsExit())) {
                 // new add (Hugo): deceleration
+                cout << "8" << endl;
                 if (i == entryId) { return false; }
                 if (LinesConflicted(downNode, answerList[i])) { return false; }
                 else {
+                    cout << "9" << endl;
                     int i_prevId = (i == 0) ? sa_size-1 : i-1;
                     double v_decc = (answerList[i_prevId]->getEndAngle() - answerList[i_prevId]->getStartAngle()) / (downNode->getStartTime() + time_interval - answerList[i_prevId]->getStartTime());
                     // if cannot decelerate
-                    if (v_decc < v_min) { return false; }
+                    if ((v_decc < v_min) || (downNode->getStartTime()+time_interval > upNode->getStartTime()-time_interval))
+                    { 
+                        return false; 
+                    }
                     // if can decelerate, update answerList
                     else {
+                        cout << "10" << endl;
                         tmp_answerList[i_prevId] = new DLnode(answerList[i_prevId]->getId(), answerList[i_prevId]->getStartTime(), (downNode->getStartTime()+time_interval), answerList[i_prevId]->getStartAngle(), answerList[i_prevId]->getEndAngle(), (i_prevId == entryId)/*start*/, (i_prevId == exitId)/*exit*/);
                         // update "start_time" and "end_time"
                         for (int j = i ; j != exitId; j = (j+1)%sa_size) {
@@ -416,13 +439,19 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & answerList, const doub
                 }
             }
         }
-        tmp_answerList[i] = answerList[i];
+        cout << "11" << endl;
         upNode = upNode->getFront();
         downNode = downNode->getFront();
     }
-    if (!isAccelerate) { return true; }
+    cout << "accelerate ? " << isAccelerate << endl;
+    if (!isAccelerate) 
+    { 
+        return true; 
+    }
     else {
+        cout << "12" << endl;
         if (!canPlaceBetweenTwoSkyline(tmp_answerList, time_interval, entryId, exitId)) { return false; }
+        cout << "13" << endl;
     }
 }
 
