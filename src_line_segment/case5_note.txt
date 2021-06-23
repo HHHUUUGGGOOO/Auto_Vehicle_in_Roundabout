@@ -31,3 +31,5 @@ P.S. 我打上去的部分是有check完改過的, 所謂改過是考慮到 line
             => 在 canplace() 的函數中做"加速"或"減速"的運算, 並更新其 answerList 再重跑 canplace() 檢查
                 --> 若 canplace() == True, 更新成這個 answerList
                 --> 若 canplace() == False, 回傳 False 去繼續做 case4 的事
+
+

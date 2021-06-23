@@ -80,7 +80,7 @@ class ra_mgr
     void updatePosition(Vehicle*);
     void computeUDSkyline();
     void computeSkyline();
-    bool canPlaceBetweenTwoSkyline(const double, const int, const int);
+    bool canPlaceBetweenTwoSkyline(const vector<DLnode*> &, const double, const int, const int);
     DLnode* clearSkyline(DLnode*);
     vector<DLnode*>     answerList;
 
