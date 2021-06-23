@@ -152,7 +152,7 @@ ra_mgr::acceleration_solution_case_4()
         }
 
         cout << "has answer" << endl;
-        for (int currentAngleId = enterAngleId; currentAngleId != exitAngleId; currentAngleId = (currentAngleId+1)%sa_size)
+        for (int currentAngleId = enterAngleId; currentAngleId != exitAngleId-1; currentAngleId = (currentAngleId+1)%sa_size)
         {
             int nextAngleId = (currentAngleId+1)%sa_size;
             answerList[currentAngleId]->placeBehindOf(answerList[nextAngleId]);
