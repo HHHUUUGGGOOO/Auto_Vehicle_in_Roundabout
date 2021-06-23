@@ -389,7 +389,7 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & input_answerList, cons
                 else {
                     // cout << "6" << endl;
                     int i_prevId = (i == 0) ? sa_size-1 : i-1;
-                    double v_acc = (input_answerList[i_prevId]->getEndAngle() - input_answerList[i_prevId]->getStartAngle()) / (upNode->getStartTime() - time_interval - input_answerList[i_prevId]->getStartTime());
+                    double v_acc = ra_radius*(input_answerList[i_prevId]->getEndAngle() - input_answerList[i_prevId]->getStartAngle()) / (upNode->getStartTime() - time_interval - input_answerList[i_prevId]->getStartTime());
                     // if cannot accelerate
                     if ((v_acc > v_max) || (upNode->getStartTime()-time_interval < downNode->getStartTime()+time_interval))
                     { 
@@ -402,7 +402,7 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & input_answerList, cons
                         // update "start_time" and "end_time"
                         for (int j = i ; j != exitId; j = (j+1)%sa_size) {
                             int j_prevId = (j == 0) ? sa_size-1 : j-1; 
-                            double ENDTIME = tmp_answerList[j_prevId]->getEndTime() + ((input_answerList[j]->getEndAngle() - input_answerList[j]->getStartAngle()) / (v_normal));
+                            double ENDTIME = tmp_answerList[j_prevId]->getEndTime() + (ra_radius*(input_answerList[j]->getEndAngle() - input_answerList[j]->getStartAngle()) / (v_normal));
                             tmp_answerList[j] = new DLnode(input_answerList[j_prevId]->getId(), tmp_answerList[j_prevId]->getEndTime(), ENDTIME, input_answerList[j]->getStartAngle(), input_answerList[j]->getEndAngle(), (j == entryId)/*start*/, (j == exitId)/*exit*/);
                         }
                         isAccelerate = true;
@@ -418,7 +418,7 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & input_answerList, cons
                 else {
                     // cout << "9" << endl;
                     int i_prevId = (i == 0) ? sa_size-1 : i-1;
-                    double v_decc = (input_answerList[i_prevId]->getEndAngle() - input_answerList[i_prevId]->getStartAngle()) / (downNode->getStartTime() + time_interval - input_answerList[i_prevId]->getStartTime());
+                    double v_decc = ra_radius*(input_answerList[i_prevId]->getEndAngle() - input_answerList[i_prevId]->getStartAngle()) / (downNode->getStartTime() + time_interval - input_answerList[i_prevId]->getStartTime());
                     // if cannot decelerate
                     if ((v_decc < v_min) || (downNode->getStartTime()+time_interval > upNode->getStartTime()-time_interval))
                     { 
@@ -431,7 +431,7 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & input_answerList, cons
                         // update "start_time" and "end_time"
                         for (int j = i ; j != exitId; j = (j+1)%sa_size) {
                             int j_prevId = (j == 0) ? sa_size-1 : j-1; 
-                            double ENDTIME = tmp_answerList[j_prevId]->getEndTime() + ((input_answerList[j]->getEndAngle() - input_answerList[j]->getStartAngle()) / (v_normal));
+                            double ENDTIME = tmp_answerList[j_prevId]->getEndTime() + (ra_radius*(input_answerList[j]->getEndAngle() - input_answerList[j]->getStartAngle()) / (v_normal));
                             tmp_answerList[j] = new DLnode(input_answerList[j_prevId]->getId(), tmp_answerList[j_prevId]->getEndTime(), ENDTIME, input_answerList[j]->getStartAngle(), input_answerList[j]->getEndAngle(), (j == entryId)/*start*/, (j == exitId)/*exit*/);
                         }
                         isAccelerate = true;
