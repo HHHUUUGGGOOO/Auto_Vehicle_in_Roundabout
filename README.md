@@ -22,11 +22,11 @@ Solve the automatic vehicles' scheduling in roundabout
 - python3 ./generator/ra_input_generator.py
 
 # How to plot?
-- python3 ./plotter/plot_answer.py --output_file <output_file_name> --ra_file <ra_file_name>
-- python3 ./plotter/plot_scheduling_time.py --input_file <vehicle_input_file_name>
+- python3 ./plotter/plot_answer.py --output_file output/<output_file_name> --ra_file input/ra_in/<ra_file_name>
+- python3 ./plotter/plot_scheduling_time.py --input_file input/v_in/<vehicle_input_file_name>
 
 # How to check output file?
-- python3 ./checker/output_verifier.py input/v_input/<input_file_name> input/ra_input/<roundabout_infomation_file_name> output/<output_file_name>
+- python3 ./checker/output_verifier.py input/v_in/<input_file_name> input/ra_in/<roundabout_infomation_file_name> output/<output_file_name>
 
 
 
