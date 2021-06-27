@@ -23,7 +23,8 @@ ra_mgr::ra_mgr()
   ra_time_unit = 0.1; // unit: sec 
   ra_angle_unit =  degree_to_rad(1.5); // unit: 1.5 degree = 0.025 rad
   ra_radius = 20; // unit: m
-  ra_safety_velocity = 7; // unit: m/s
+  ra_upper_velocity = 10; // unit: m/s
+  ra_lower_velocity = 0; // unit: m/s
   ra_safety_margin = 3; // unit: m
   ra_max_capacity = 0;
 }
@@ -97,15 +98,8 @@ ra_mgr::read_vehicle(const string& infile)
 bool
 ra_mgr::read_ra_info(const string& rafile)
 {
-  double r, sv, sm;
-  int mc;
-  string va;
   fstream fin(rafile.c_str()); // To MobaXTerm, I need to use 'c_str()' to make it successfully compile
-  fin >> r >> sv >> sm >> mc;
-  ra_radius = r;
-  ra_safety_velocity = sv*1000/3600;
-  ra_safety_margin = sm;
-  ra_max_capacity = mc;
+  fin >> ra_radius >> ra_lower_velocity >> ra_upper_velocity >> ra_safety_margin >> ra_max_capacity;
 
   // read ra_valid_source_angle //
   int num_of_entry, num_of_exit;
@@ -167,7 +161,8 @@ ra_mgr::Roundabout_information()
   cerr << "Roundabout information" << endl;
   // cerr << "Purpose: " << ra_purpose << endl;
   cerr << "Roundabout ra_radius: " << ra_radius << " (m)" << endl;
-  cerr << "Safety Velocity: " << ra_safety_velocity << " (m/s)" << endl;
+  cerr << "Safety upper Velocity: " << ra_upper_velocity << " (m/s)" << endl;
+  cerr << "Safety lower Velocity: " << ra_lower_velocity << " (m/s)" << endl;
   cerr << "Safety margin: " << ra_safety_margin << " (m)" << endl;
   cerr << "Maximum capacity: " << ra_max_capacity << " (unit)" << endl;
   cerr << "ra_valid source angles: ";
@@ -269,6 +264,7 @@ ra_mgr::output_solution(const string &path)
 {
     // <t_1, angle_1>
     ofstream fout(path.c_str());
+    fout << wait_list.size() << endl;
     for(int i = 0; i < wait_list.size(); i++){
         fout << wait_list[i]->id << " ";
         for(int j = 0; j < wait_list[i]->position.size(); j++){

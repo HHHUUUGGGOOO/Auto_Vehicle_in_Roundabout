@@ -40,6 +40,8 @@ def main(filename_v, filename_ra):
         for line in f:
             time, pos = [], []
             tmp = line.split(' ')
+            if (len(tmp) == 1):
+                continue
             tmp_id = tmp[0] #string
             # construct (x, y) for each vehicle, delete the '\n'
             for i in range(1, len(tmp)-1, 2):

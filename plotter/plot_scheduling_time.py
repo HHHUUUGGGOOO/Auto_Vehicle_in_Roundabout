@@ -33,6 +33,8 @@ def main(filename_v):
         print("Read case 1 output file......")
         for line in f_1:
             tmp = line.split(' ')
+            if (len(tmp) == 1):
+                continue; 
             x_id.append(int(tmp[0]))
             t_case1.append(round(float(tmp[-3]), 3))
     # case 2
@@ -40,18 +42,24 @@ def main(filename_v):
         print("Read case 2 output file......")
         for line in f_2:
             tmp = line.split(' ')
+            if (len(tmp) == 1):
+                continue; 
             t_case2.append(round(float(tmp[-3]), 3))        
     # case 3
     with open(output_case_3, 'r') as f_3:
         print("Read case 3 output file......")
         for line in f_3:
             tmp = line.split(' ')
+            if (len(tmp) == 1):
+                continue; 
             t_case3.append(round(float(tmp[-3]), 3)) 
     # case 4
     with open(output_case_4, 'r') as f_4:
         print("Read case 4 output file......")
         for line in f_4:
             tmp = line.split(' ')
+            if (len(tmp) == 1):
+                continue; 
             t_case4.append(round(float(tmp[-3]), 3)) 
     # plot
     t_case = [t_case1, t_case2, t_case3, t_case4]

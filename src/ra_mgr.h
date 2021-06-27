@@ -102,7 +102,8 @@ class ra_mgr
     double               ra_time_unit; // unit : s
     double               ra_angle_unit; // unit : degree
     double               ra_radius;
-    double               ra_safety_velocity;
+    double               ra_upper_velocity;
+    double               ra_lower_velocity;
     double               ra_safety_margin; // 小型車至少要保持「車速/2」距離(單位：公尺)；大型車至少要保持「車速-20」距離(單位：公尺)
     int                  ra_max_capacity;
     vector<double>       ra_valid_source_angle; // 0 <= angle < 2*pi

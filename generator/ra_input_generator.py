@@ -40,7 +40,7 @@ def main(args):
             print("Stop generating file ...")
             return
     with open(file_name, 'w+') as f:
-        f.write("{:.1f} {:.1f} {:.1f} {:d}\n".format(args.ra_radius, args.ra_safety_velocity, args.ra_safety_margin, ra_max_capacity))
+        f.write("{:.1f} {:.1f} {:.1f} {:.1f} {:d}\n".format(args.ra_radius, args.ra_lower_velocity,args.ra_upper_velocity, args.ra_safety_margin, ra_max_capacity))
         f.write('{:d}\n'.format(args.num_of_entry))
         for i in range(args.num_of_entry):
             f.write("{:.1f} ".format(entry_list[i]))
@@ -74,7 +74,8 @@ def parse_args() -> Namespace:
     parser.add_argument('--num_of_exit',  type=int, default=4, help='NUmber of exits in roundabout')
     parser.add_argument('--ra_file_name', type=str,  default='ra1.in', help='file name of the ra input file')
     parser.add_argument('--ra_radius', type=float, default=20.0, help='Radius of roundabout (unit:m)')
-    parser.add_argument('--ra_safety_velocity', type=float, default=25.0)
+    parser.add_argument('--ra_lower_velocity', type=float, default=0.0)
+    parser.add_argument('--ra_upper_velocity', type=float, default=10.0)
     parser.add_argument('--ra_safety_margin', type=float, default=0.0)
 
     args = parser.parse_args()

@@ -12,7 +12,7 @@
            All valid source angles with one space between,
            All valid destination angles with one space between ]
        - (Range/Unit): 
-         [(any real number/m) (any real number/ km/hr) (any real number/m) (any integer/)
+         [(any real number/m) (any real number/ m/s) (any real number/m) (any integer/)
          (0-360/degree)
          (0-360/degree)]
        - 建一個'input_ra'的資料夾, 所有測資.in都放裡面       
