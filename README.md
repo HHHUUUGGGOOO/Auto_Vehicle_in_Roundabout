@@ -26,7 +26,10 @@ Solve the automatic vehicles' scheduling in roundabout
 - python3 ./plotter/plot_scheduling_time.py --input_file input/v_in/<vehicle_input_file_name>
 
 # How to check output file?
-- python3 ./checker/output_verifier.py --input_vehicle_dir input/v_in/<vehicle_input_file_name> --input_ra_dir input/ra_in/<roundabout_infomation_file_name> --output output/<output_file_name>
+- cd checker
+- make clean
+- make
+- ./checker ../input/v_in/<vehicle_input_file_name> ../input/ra_in/<roundabout_infomation_file_name> ../output/<output_file_name>
 
 
 

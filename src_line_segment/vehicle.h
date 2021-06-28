@@ -38,6 +38,13 @@ public:
   ~DLnode() {}
 
     //place function
+    /* 
+                    next
+                     | 
+      NOTE: behind - o - front
+                     |
+                    prev
+    */
     void placeNextTo(DLnode* node) 
     {
       this->setPrev(node);
@@ -79,6 +86,7 @@ public:
     double getEndAngle() {return _endAngle;} //angle at end time
     int getId() {return _id;}
     bool IsExit() {return is_exit;}
+    bool IsStart() {return is_start;}
     DLnode* getNext() {return _next;}
     DLnode* getPrev() {return _prev;}
     DLnode* getFront() {return _front;}
