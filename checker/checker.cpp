@@ -13,6 +13,39 @@ bool sortByAngle1(Segment* a, Segment* b)
     return (a->angle1() < b->angle1());
 }
 
+void Checker::print_timeSeglist()
+{
+    printf("print_timeSeglist\n");
+    for (int i = 0; i < _timeSeglist.size(); i++)
+    {
+        cerr << "==========================" << endl;
+        cerr << "timtlist: " << _timelist[i]/10000.0 << endl;
+
+        for (int j = 0; j < _timeSeglist[i].size(); j++)
+        {
+            cerr << "-------------------" << endl;
+            cerr << "id: " << _timeSeglist[i][j]->id() << endl;
+            cerr << "(t1,t2) - (" << _timeSeglist[i][j]->t1() << "," << _timeSeglist[i][j]->t2() << ")" << endl; 
+            cerr << "(angle1,angle2) - (" << _timeSeglist[i][j]->angle1() << "," << _timeSeglist[i][j]->angle2() << ")" << endl;
+            switch (_timeSeglist[i][j]->status())
+            {
+                case ENTRY:
+                    cerr << "status: ENTRY" << endl;
+                    break;
+                case EXIT:
+                    cerr << "status: EXIT" << endl;
+                    break;
+                case IN:
+                    cerr << "status: IN" << endl;
+                    break;
+            }  
+            cerr << "-------------------" << endl;
+        }
+        cerr << "==========================" << endl;
+    }
+    printf("End print_timeSeglist\n");
+}
+
 void Checker::check(const string& vFile, const string& raFile, const string& outFile)
 {
     // read roundabout information //
@@ -37,20 +70,28 @@ void Checker::check(const string& vFile, const string& raFile, const string& out
                 if (((seg->t1()-error/100) < (_timelist[t]/10000.0)) && ((seg->t2()+error/100) > (_timelist[t]/10000.0)))
                 {
                     _timeSeglist[t].push_back(seg);
-                    break;
                 }
-            }        
+            }  
+
+    print_timeSeglist();      
 
     double anglePrev, angleNext, timeUnit, angleUnit;
     for (int i = 0; i < _timeSeglist.size(); i++)
     {
         if (_timeSeglist[i].size() < 2) continue;
         sort(_timeSeglist[i].begin(), _timeSeglist[i].end(), sortByAngle1);
+
+        
         for (int j = 0; j < _timeSeglist[i].size(); j++)
         {
             for (int k = j+1; k < _timeSeglist[i].size(); k++)
             {
                 if (_timeSeglist[i][j]->status() == EXIT && _timeSeglist[i][k]->status() == IN)
+                {
+                    if ((_timeSeglist[i][j]->t2() > _timeSeglist[i][k]->t1()-error) && (_timeSeglist[i][j]->t2() < _timeSeglist[i][k]->t1()+error))
+                    continue;
+                }
+                if (_timeSeglist[i][j]->id() == _timeSeglist[i][k]->id())
                     continue;
                 
                 angleUnit = _timeSeglist[i][j]->angle2() - _timeSeglist[i][j]->angle1();
@@ -68,14 +109,12 @@ void Checker::check(const string& vFile, const string& raFile, const string& out
                 if ((_raRadius*(abs(angleNext-anglePrev)*(PI/180.0)) < _safetyMargin-error)
                     || (_raRadius*(abs(angleNext-anglePrev+360.0)*(PI/180.0)) < _safetyMargin-error))
                 {
-                    cerr << "wrong" << endl;
-                    cerr << _raRadius*(abs(angleNext-anglePrev)*(PI/180.0)) << endl;
-                    cerr << _safetyMargin << endl; 
-                    cerr << _timelist[i]/10000.0 << endl;
-                    cerr << _timeSeglist[i][j]->id() << endl;
-                    cerr << anglePrev << endl;
-                    cerr << _timeSeglist[i][k]->id() << endl;
-                    cerr << angleNext << endl;
+                    cout << "---------------------" << endl;
+                    cout << "at: " << _timelist[i]/10000.0 << endl;
+                    cout << "vehicle id: "<< _timeSeglist[i][j]->id() << " and " <<  _timeSeglist[i][k]->id() << " violate safety margin constraint." << endl;
+                    cout << "Their angle: " << anglePrev << " and " << angleNext << "(degree)" << endl;
+                    cout << "Their distance: " << _raRadius*(abs(angleNext-anglePrev)*(PI/180.0)) << "(m) (constraint: "<< _safetyMargin << " m) ( ´･ω･)" << endl;
+                    cout << "---------------------" << endl;
                     return;
                 }
             }

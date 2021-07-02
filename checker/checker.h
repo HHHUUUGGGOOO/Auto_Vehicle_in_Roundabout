@@ -58,6 +58,9 @@ public:
     bool read_outFile(const string&);
     bool read_vFile(const string&);
 
+    // print // 
+    void print_timeSeglist();
+
 private:
     // error // 
     double error = 0.01;

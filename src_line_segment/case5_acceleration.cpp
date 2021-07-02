@@ -12,6 +12,14 @@
 #include <climits>
 #include <cmath>
 
+inline double velocity(DLnode* const n, double _raRadius)
+{
+    if (n->getStartAngle()>n->getEndAngle())
+        return(_raRadius*((n->getEndAngle()+2*PI-n->getStartAngle())*(PI/180))/(n->getEndTime()-n->getStartTime()));
+    else 
+        return(_raRadius*((n->getEndAngle()-n->getStartAngle())*(PI/180))/(n->getEndTime()-n->getStartTime()));
+}
+
 void 
 ra_mgr::acceleration_solution_case_4()
 {
@@ -367,6 +375,7 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & input_answerList, cons
     vector<DLnode*> tmp_answerList(sa_size);
     bool isAccelerate = false;
     bool isChange = false;
+    double v_acc, v_decc, ENDTIME;
     for (int i = entryId; i != exitId; i = (i+1)%sa_size) { tmp_answerList[i] = input_answerList[i]; }
 
     for (int i = entryId; i != exitId; i = (i+1)%sa_size)
@@ -382,14 +391,13 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & input_answerList, cons
                 else {
                     // cout << "6" << endl;
                     int i_prevId = (i == 0) ? sa_size-1 : i-1;
-                    double v_acc;
                     if (input_answerList[i_prevId]->getEndAngle() < input_answerList[i_prevId]->getStartAngle())
                         v_acc = ra_radius*(input_answerList[i_prevId]->getEndAngle() + (2*PI) - input_answerList[i_prevId]->getStartAngle())/(upNode->getStartTime() - time_interval - input_answerList[i_prevId]->getStartTime());
                     else
                         v_acc = ra_radius*(input_answerList[i_prevId]->getEndAngle() - input_answerList[i_prevId]->getStartAngle())/(upNode->getStartTime() - time_interval - input_answerList[i_prevId]->getStartTime());
 
                     // if cannot accelerate
-                    if ((v_acc > v_max) || (upNode->getStartTime()-time_interval < downNode->getStartTime()+time_interval))
+                    if ((v_acc > ra_upper_velocity) || (upNode->getStartTime()-time_interval < downNode->getStartTime()+time_interval))
                     { 
                         cout << "cannot accelerate" << endl;
                         return false; 
@@ -401,7 +409,6 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & input_answerList, cons
                         // update "start_time" and "end_time"
                         for (int j = i ; j != exitId; j = (j+1)%sa_size) {
                             int j_prevId = (j == 0) ? sa_size-1 : j-1;
-                            double ENDTIME;
                             if (input_answerList[j]->getEndAngle() < input_answerList[j]->getStartAngle())
                                 ENDTIME = tmp_answerList[j_prevId]->getEndTime() + (ra_radius*(input_answerList[j]->getEndAngle() + (2*PI) - input_answerList[j]->getStartAngle()) / (v_normal));
                             else
@@ -422,13 +429,12 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & input_answerList, cons
                 else {
                     // cout << "9" << endl;
                     int i_prevId = (i == 0) ? sa_size-1 : i-1;
-                    double v_decc;
                     if (input_answerList[i_prevId]->getEndAngle() < input_answerList[i_prevId]->getStartAngle())
                         v_decc = ra_radius*(input_answerList[i_prevId]->getEndAngle() + (2*PI) - input_answerList[i_prevId]->getStartAngle()) / (downNode->getStartTime() + time_interval - input_answerList[i_prevId]->getStartTime());
                     else
                         v_decc = ra_radius*(input_answerList[i_prevId]->getEndAngle() - input_answerList[i_prevId]->getStartAngle()) / (downNode->getStartTime() + time_interval - input_answerList[i_prevId]->getStartTime());
                     // if cannot decelerate
-                    if ((v_decc < v_min) || (downNode->getStartTime()+time_interval > upNode->getStartTime()-time_interval))
+                    if ((v_decc < ra_lower_velocity) || (downNode->getStartTime()+time_interval > upNode->getStartTime()-time_interval))
                     { 
                         cout << "cannot decelerate" << endl;
                         return false; 
@@ -440,7 +446,6 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & input_answerList, cons
                         // update "start_time" and "end_time"
                         for (int j = i ; j != exitId; j = (j+1)%sa_size) {
                             int j_prevId = (j == 0) ? sa_size-1 : j-1; 
-                            double ENDTIME;
                             if (input_answerList[j]->getEndAngle() < input_answerList[j]->getStartAngle())
                                 ENDTIME = tmp_answerList[j_prevId]->getEndTime() + (ra_radius*(input_answerList[j]->getEndAngle() + (2*PI) - input_answerList[j]->getStartAngle()) / (v_normal));
                             else
@@ -452,6 +457,83 @@ ra_mgr::canPlaceBetweenTwoSkyline(const vector<DLnode*> & input_answerList, cons
                     }
                 }
             }
+
+            if ((input_answerList[i]->getEndTime() - downNode->getEndTime() < time_interval)) // accelerate
+            {
+                // ENDTIME & acc //
+                // if (input_answerList[i]->getEndAngle() < input_answerList[i]->getStartAngle())
+                //     ENDTIME = (downNode->getEndTime() - input_answerList[i]->getStartTime())*(ra_safety_margin/ra_radius)/(input_answerList[i]->getEndAngle() + (2*PI) - input_answerList[i]->getStartAngle()-(ra_safety_margin/ra_radius));
+                // else
+                //     ENDTIME = (downNode->getEndTime() - input_answerList[i]->getStartTime())*(ra_safety_margin/ra_radius)/(input_answerList[i]->getEndAngle() - input_answerList[i]->getStartAngle()-(ra_safety_margin/ra_radius));
+
+                // v_acc = ra_safety_margin/ENDTIME;
+
+                if (!downNode->IsExit())
+                {
+                    // wrong!! // downNode->getFront() is not the same vehicle
+                    ENDTIME = ra_safety_margin/velocity(downNode->getFront(), ra_radius);
+                }
+                cerr << "here" << endl;
+                if (input_answerList[i]->getEndAngle() < input_answerList[i]->getStartAngle())
+                    v_acc = ra_radius*(input_answerList[i]->getEndAngle() + (2*PI) - input_answerList[i]->getStartAngle())/(downNode->getEndTime() + ENDTIME - input_answerList[i]->getStartTime());
+                else
+                    v_acc = ra_radius*(input_answerList[i]->getEndAngle() - input_answerList[i]->getStartAngle())/(downNode->getEndTime() + ENDTIME - input_answerList[i]->getStartTime());
+
+                // if cannot accelerate
+                if ((v_acc > ra_upper_velocity) || (upNode->getEndTime()-time_interval < downNode->getEndTime()+time_interval))
+                { 
+                    cout << "cannot accelerate" << endl;
+                    return false; 
+                }
+                // if can accelerate, update answerList
+                else {
+                    cout << "accelerate" << endl;
+                    cerr << time_interval << endl;
+                    tmp_answerList[i] = new DLnode(input_answerList[i]->getId(), input_answerList[i]->getStartTime(), (downNode->getEndTime()+ENDTIME), input_answerList[i]->getStartAngle(), input_answerList[i]->getEndAngle(), input_answerList[i]->IsStart(), false);
+                    // update "start_time" and "end_time"
+                    for (int j = (i+1)%sa_size ; j != exitId; j = (j+1)%sa_size) {
+                        int j_prevId = (j == 0) ? sa_size-1 : j-1;
+                        if (input_answerList[j]->getEndAngle() < input_answerList[j]->getStartAngle())
+                            ENDTIME = tmp_answerList[j_prevId]->getEndTime() + (ra_radius*(input_answerList[j]->getEndAngle() + (2*PI) - input_answerList[j]->getStartAngle()) / (v_normal));
+                        else
+                            ENDTIME = tmp_answerList[j_prevId]->getEndTime() + (ra_radius*(input_answerList[j]->getEndAngle() - input_answerList[j]->getStartAngle()) / (v_normal));
+                        cerr << "ENDTIME: " << ENDTIME << endl;
+                        tmp_answerList[j] = new DLnode(input_answerList[j]->getId(), tmp_answerList[j_prevId]->getEndTime(), ENDTIME, input_answerList[j]->getStartAngle(), input_answerList[j]->getEndAngle(), false, input_answerList[j]->IsExit());
+                    }
+                    isAccelerate = true;
+                    isChange = true;
+                }
+            }
+            if ((upNode->getEndTime() - input_answerList[i]->getEndTime() < time_interval)) // deaccelerate
+            {
+                ENDTIME = max(ra_safety_margin/velocity(upNode, ra_radius), ra_safety_margin/velocity(input_answerList[i], ra_radius));
+                tmp_answerList[i] = new DLnode(input_answerList[i]->getId(), input_answerList[i]->getStartTime(), (upNode->getEndTime()-ENDTIME), input_answerList[i]->getStartAngle(), input_answerList[i]->getEndAngle(), input_answerList[i]->IsStart(), false);
+                v_decc = velocity(tmp_answerList[i], ra_radius);
+                // if cannot decelerate
+                if ((v_decc < ra_lower_velocity) || (upNode->getEndTime()-time_interval < downNode->getEndTime()+time_interval))
+                { 
+                    cout << "cannot decelerate" << endl;
+                    return false; 
+                }
+                // if can decelerate, update answerList
+                else
+                {
+                    cout << "decelerate" << endl;
+                    // update "start_time" and "end_time"
+                    for (int j = j = (i+1)%sa_size ; j != exitId; j = (j+1)%sa_size) {
+                        int j_prevId = (j == 0) ? sa_size-1 : j-1; 
+                        if (input_answerList[j]->getEndAngle() < input_answerList[j]->getStartAngle())
+                            ENDTIME = tmp_answerList[j_prevId]->getEndTime() + (ra_radius*(input_answerList[j]->getEndAngle() + (2*PI) - input_answerList[j]->getStartAngle()) / (v_normal));
+                        else
+                            ENDTIME = tmp_answerList[j_prevId]->getEndTime() + (ra_radius*(input_answerList[j]->getEndAngle() - input_answerList[j]->getStartAngle()) / (v_normal));
+                        tmp_answerList[j] = new DLnode(input_answerList[j_prevId]->getId(), tmp_answerList[j_prevId]->getEndTime(), ENDTIME, input_answerList[j]->getStartAngle(), input_answerList[j]->getEndAngle(), false, input_answerList[j]->IsExit());
+                    }
+                    isAccelerate = true;
+                    isChange = true;
+                }
+
+            }
+
         }
         // cout << "11" << endl;
         upNode = upNode->getFront();
