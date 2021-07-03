@@ -45,12 +45,12 @@ ra_mgr::acceleration_solution_case_5()
     _raSourceAngleList.resize(sa_size);
     answerList.resize(sa_size); // temp answer list for one vehicle, answerList[0]: intersection_0 -> intersection_1, ... , answerList[sa_size-1] = intersection_{sa_size} -> intersection_0
     
+    double  startTime, endTime, startAngle, endAngle;
     // note: v_total is sort by its time
     for (int current_v_id = 0; current_v_id < v_size; current_v_id++)
     {
         cerr << endl;
         cerr << "Vehicle id: " <<  v_total[current_v_id]->id << endl;
-        double  startTime, endTime, startAngle, endAngle;
         // new added (Hugo)
         v_total[current_v_id]->velocityList.resize(sa_size);
 
@@ -84,9 +84,9 @@ ra_mgr::acceleration_solution_case_5()
             }
             else { startTime = endTime; }
             // new added (Hugo): v_total[current_v_id]->velocity 改成 v_total[current_v_id]->velocityList[currentAngleId]   
-            endTime = startTime + ra_radius*(endAngle-startAngle)/v_total[current_v_id]->velocityList[currentAngleId];
+            endTime = startTime + ra_radius*degree_to_rad(endAngle-startAngle)/v_total[current_v_id]->velocityList[currentAngleId];
             // add "endAngle" to the new node
-            answerList[currentAngleId] = new DLnode(v_total[current_v_id]->id, startTime, endTime, startAngle, endAngle, (currentAngleId == enterAngleId)/*start*/, (((currentAngleId+1)%sa_size) == exitAngleId)/*exit*/);
+            answerList[currentAngleId] = new DLnode(v_total[current_v_id]->id, startTime, endTime, ra_valid_source_angle[currentAngleId], ra_valid_source_angle[nextIntersectionId], (currentAngleId == enterAngleId)/*start*/, (((currentAngleId+1)%sa_size) == exitAngleId)/*exit*/);
             // connect answerList
             if(currentAngleId != enterAngleId){
                 int prevAngleId = (currentAngleId == 0)? sa_size - 1 : currentAngleId - 1;
@@ -104,7 +104,6 @@ ra_mgr::acceleration_solution_case_5()
         DLnode *nodeU, *nodeD;
         double timeUnit = 1e-3;
         while(!canPlaceBetweenTwoSkyline(enterAngleId, exitAngleId)) {
-            
             nodeD = _raSourceAngleList[enterAngleId];
             if ((nodeD->getStartTime()-safety_time_interval(ra_safety_margin, v_total[current_v_id]->velocity)-timeUnit) > answerList[enterAngleId]->getStartTime()) {
                 endTime = answerList[enterAngleId]->getStartTime() + timeUnit;
@@ -128,43 +127,31 @@ ra_mgr::acceleration_solution_case_5()
                 }
             }
 
-            // free answerlist //
-            for (int j = 0; j < sa_size; j++)
-            {
-                if (answerList[j] != NULL)
-                {
-                    free(answerList[j]);
-                }
-            }
-
             // compute new answerlist and check if it can put between skyline //
             for(int currentAngleId = enterAngleId; currentAngleId != exitAngleId; currentAngleId = (currentAngleId+1)%sa_size)
             {
-                startAngle = degree_to_rad(ra_valid_source_angle[currentAngleId]);
-                endAngle = (currentAngleId+1 == sa_size)? degree_to_rad(ra_valid_source_angle[0]): degree_to_rad(ra_valid_source_angle[currentAngleId+1]);
-                if (endAngle < startAngle) endAngle += 2*PI;
                 startTime = endTime;
                 // new added (Hugo): v_total[current_v_id]->velocity 不用改成 v_total[current_v_id]->velocityList[currentAngleId] 
-                endTime = startTime + ra_radius*(endAngle-startAngle)/v_total[current_v_id]->velocity;
-                answerList[currentAngleId] = new DLnode(v_total[current_v_id]->id, startTime, endTime, startAngle, endAngle);
-                // cerr << "startTime: " << startTime << " endTime: " << endTime << " angle: " << startAngle << endl;
+                endTime = startTime + ra_radius*degree_to_rad(answerList[currentAngleId]->getAngleInterval())/v_total[current_v_id]->velocity;
+                answerList[currentAngleId]->setStartTime(startTime);
+                answerList[currentAngleId]->setEndTime(endTime);
+                // cerr << "startTime: " << startTime << " endTime: " << endTime << " angle: " << answerList[currentAngleId]->getStartAngle() << endl;
             }
-            // cerr << "New out: endTime: " << endTime << " angle: " << degree_to_rad(ra_valid_source_angle[j]) << endl;
             computeUDSkyline();
         }
     
         if (noAnswer)
         {
+            // new method to find answer //
             // update answerList based on _skyline and insert
             printf("Vehicle %s can't place between skyline\n", v_total[current_v_id]->id.c_str());
             printSkyline(_skyline);
             DLnode * node = _skyline;
-            for (int j = 0; j < enterAngleId; j++)
-            {
+            for (int j = 0; j < enterAngleId; j++) {
                 node = node->getFront();
             } // node is the correspondant node on _skyline wrt. enterAngleId
-            // newly add (method to find answer) //
-            // decide answerList at entry
+
+            // decide startTime, endTime based on skyline //
             endTime = v_total[current_v_id]->earliest_arrival_time;
             for (int currentAngleId = enterAngleId; currentAngleId != exitAngleId; currentAngleId = (currentAngleId+1)%sa_size, node = node->getFront())
             {
@@ -178,25 +165,41 @@ ra_mgr::acceleration_solution_case_5()
             for (int currentAngleId = enterAngleId; currentAngleId != exitAngleId; currentAngleId = (currentAngleId+1)%sa_size)
             {
                 int nextAngleId = (currentAngleId+1)%sa_size;
-                answerList[currentAngleId]->setEndTime(answerList[nextAngleId]->getStartTime());
-                if (velocity(answerList[currentAngleId], ra_radius) > ra_upper_velocity)
+                if (answerList[currentAngleId]->getEndTime() < answerList[nextAngleId]->getStartTime())
                 {
-                    // adjest endTime
+                    answerList[nextAngleId]->setStartTime(answerList[currentAngleId]->getEndTime());
+                    endTime = answerList[nextAngleId]->getStartTime() + ra_radius*answerList[nextAngleId]->getAngleInterval()*ra_upper_velocity;
+                    answerList[nextAngleId]->setEndTime(endTime);
                 }
-                else if (velocity(answerList[currentAngleId], ra_radius) < ra_lower_velocity)
+                else
                 {
-                    // adjust startTime
+                    answerList[currentAngleId]->setEndTime(answerList[nextAngleId]->getStartTime());
+                    if (velocity(answerList[currentAngleId], ra_radius) > ra_upper_velocity)
+                    {
+                        endTime = answerList[currentAngleId]->getStartTime() + ra_radius*answerList[currentAngleId]->getAngleInterval()*ra_upper_velocity;
+                        answerList[currentAngleId]->setEndTime(endTime);
+                        // adjest next: only need to adjust next one //
+                        answerList[nextAngleId]->setStartTime(answerList[currentAngleId]->getEndTime());
+                        endTime = answerList[nextAngleId]->getStartTime() + ra_radius*answerList[nextAngleId]->getAngleInterval()*ra_upper_velocity;
+                        answerList[nextAngleId]->setEndTime(endTime);
+                    }
+                    else if (velocity(answerList[currentAngleId], ra_radius) < ra_lower_velocity)
+                    {
+                        startTime = answerList[currentAngleId]->getEndTime() - ra_radius*answerList[currentAngleId]->getAngleInterval()*ra_lower_velocity;
+                        answerList[currentAngleId]->setStartTime(startTime);
+                        // adjust prev: need to adjust all prev //
+                        endTime = startTime;
+                        for (int prevAngleId = ((currentAngleId)?currentAngleId-1:sa_size-1); prevAngleId != enterAngleId; prevAngleId = ((prevAngleId)?prevAngleId-1:sa_size-1))
+                        {
+                            answerList[prevAngleId]->setEndTime(endTime);
+                            startTime = answerList[prevAngleId]->getEndTime() - ra_radius*answerList[prevAngleId]->getAngleInterval()*ra_lower_velocity;
+                            answerList[prevAngleId]->setStartTime(startTime);
+                            endTime = startTime;
+                        }   
+                    }
                 }
             }
             
-        }
-
-        cout << "has answer" << endl;
-        for (int currentAngleId = enterAngleId; true ; currentAngleId = (currentAngleId+1)%sa_size)
-        {
-            int nextAngleId = (currentAngleId+1)%sa_size;
-            if (nextAngleId == exitAngleId) { break; }
-            answerList[currentAngleId]->placeBehindOf(answerList[nextAngleId]);
         }
         
         cout << "update position" << endl;
@@ -207,7 +210,6 @@ ra_mgr::acceleration_solution_case_5()
         // update _skyline //
         cout << "computeskyline" << endl;
         computeSkyline();
-
         //printSkyline(_skyline);
     }
     //for(int i = 0; i < _raSourceAngleList.size(); i++)
@@ -393,9 +395,9 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
                 else {
                     // cout << "6" << endl;
                     int i_prevId = (i == 0) ? sa_size-1 : i-1;
-                    v_acc = ra_radius * degree_to_rad(answerList[i_prevId]->getAngleInterval()) / (upNode->getStartTime() - time_interval - answerList[i_prevId]->getStartTime());
+                    v_acc = ra_radius * degree_to_rad(answerList[i_prevId]->getAngleInterval()) / (upNode->getStartTime() - _timeInterval - answerList[i_prevId]->getStartTime());
                     // if cannot accelerate
-                    if ((v_acc > ra_upper_velocity) || (upNode->getStartTime() - _timeInterval < downNode->getStartTime() + time_interval))
+                    if ((v_acc > ra_upper_velocity) || (upNode->getStartTime() - _timeInterval < downNode->getStartTime() + ra_safety_margin/velocity(downNode, ra_radius)))
                     { 
                         cout << "cannot accelerate" << endl;
                         return false; 
