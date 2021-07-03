@@ -45,51 +45,46 @@ class ra_mgr
     bool                read_ra_info(const string&);
 
     // utility -> call in schedule  //
-    // bool                check_capacity() {return (v_in_ra_now >= ra_max_capacity);}    
     bool                verify_angle(double, double); // verify if vehicle's input angle is valid in roundabout
     void                find_ra_angle_unit(double, double); // use radius and safety velocity to compute angle unit
-    void                current_situation(vector<Vehicle*>& ,vector<Vehicle*>&); // see the current situation when scheduling
-    bool                check_intersection(double); // now_angle and next_angle 
-    bool                check_conflict(int, vector<Vehicle*>&, vector<Vehicle*>&); 
-    bool                check_conflict_by_wait(Vehicle const *, vector<Vehicle*>&);
-    double               degree_to_rad(double degree) { return (degree*PI/180); }
-    double               rad_to_degree(double rad) { return (rad*180/PI); }
-    double               v_min_angle_unit(double angle) { return ((ceil(angle/ra_angle_unit))*ra_angle_unit); }
-
+    double              degree_to_rad(double degree) { return (degree*PI/180); }
+    double              rad_to_degree(double rad) { return (rad*180/PI); }
 
     // information for check //
     void                Roundabout_information();
     void                Vehicle_information();
 
     // solution //
+    short               _case; // case index
     void                line_trivial_solution_case_1();
     void                line_trivial_solution_case_2();
     void                line_trivial_solution_case_3();
-    // void                skyline_solution_case_2();
-    void                acceleration_solution_case_4();
+    void                acceleration_solution_case_5();
 
     // newly add in skyline //
-    vector< DLnode* > _raSourceAngleList;
-    map<int, int> _sourceAngletoId;
-    map<int, int> _destAngletoId;
-    DLnode* _upSkyline;
-    DLnode* _downSkyline;
-    DLnode* _skyline;
+    vector< DLnode* >       _raSourceAngleList; 
+    map<int, int>           _sourceAngletoId;
+    map<int, int>           _destAngletoId;
+    DLnode*                 _upSkyline;
+    DLnode*                 _downSkyline;
+    DLnode*                 _skyline;
+    // new added
+    map<string, Vehicle*>   _vId2VehicleMap;
 
-    void insertToEntry();
-    void updatePosition(Vehicle*);
-    void computeUDSkyline();
-    void computeSkyline();
-    bool canPlaceBetweenTwoSkyline(const vector<DLnode*> &, const double, const int, const int);
-    DLnode* clearSkyline(DLnode*);
+    void                insertToEntry();
+    void                updatePosition(Vehicle*);
+    void                computeUDSkyline();
+    void                computeSkyline();
+    bool                canPlaceBetweenTwoSkyline(const int, const int);
+    bool                checkIfBetweenUDSkyline(const double, const int, const int);
+    DLnode*             clearSkyline(DLnode*);
+
     vector<DLnode*>     answerList;
-
+    // new added (Hugo)
+    vector<Vehicle*>    sourceLatestVehicle;
 
     // newly add in segment implimentation of skyline;
     bool LinesConflicted(DLnode*, DLnode*);
-
-    //map<int, int> vehicletoId;
-
 
     // output the final solution //
     // output format: v1 t1 p1 t2 p2 t3 p3 ....
@@ -98,18 +93,14 @@ class ra_mgr
     void                                 output_solution(const string&);
 
     // vehicle variables //
-    vector<Vehicle*>     v_total; // store each vehicle's properties, sort by Vehicle_ID
-    vector<Vehicle*>     wait_list; // sort by eat
-    vector<Vehicle*>     in_list;
+    vector<Vehicle*>     v_total; // store each vehicle's properties, sort by eat
+    // vector<Vehicle*>     wait_list; // sort by eat
     vector<double>       in_ra_time; // time that a car needs to go through the ra
     vector<double>       real_enter_time; // real time that a car enters the ra
 
-    const double         v_normal = 10;
+    // const double         v_normal = 10;
     
     // roundabout information //
-    // string              ra_purpose;
-    double               ra_time_unit; // unit : s
-    double               ra_angle_unit; // unit : degree
     double               ra_radius;
     double               ra_upper_velocity; // (v_max)
     double               ra_lower_velocity; // (v_min)
