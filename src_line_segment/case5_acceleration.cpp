@@ -98,7 +98,6 @@ ra_mgr::acceleration_solution_case_5()
         DLnode *nodeU, *nodeD;
         double timeUnit = 1e-3;
         while(!canPlaceBetweenTwoSkyline(enterAngleId, exitAngleId)) {
-            cerr << "Hi" << endl;
             nodeD = _raSourceAngleList[enterAngleId];
             if ((nodeD->getStartTime()-safety_time_interval(ra_safety_margin, v_total[current_v_id]->velocity)-timeUnit) > answerList[enterAngleId]->getStartTime()) {
                 endTime = answerList[enterAngleId]->getStartTime() + timeUnit;
