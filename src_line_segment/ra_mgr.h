@@ -65,9 +65,11 @@ class ra_mgr
     vector< DLnode* >       _raSourceAngleList; 
     map<int, int>           _sourceAngletoId;
     map<int, int>           _destAngletoId;
-    DLnode*                 _upSkyline;
-    DLnode*                 _downSkyline;
-    DLnode*                 _skyline;
+    vector<DLnode*>         _upSkyline;
+    vector<DLnode*>         _downSkyline;
+    vector<DLnode*>         _skyline;
+    vector<DLnode*>         _upperBoundSkyline;
+    vector<DLnode*>         _lowerBoundSkyline;
     // new added
     map<string, Vehicle*>   _vId2VehicleMap;
 
@@ -76,8 +78,9 @@ class ra_mgr
     void                computeUDSkyline();
     void                computeSkyline();
     bool                canPlaceBetweenTwoSkyline(const int, const int);
-    bool                checkIfBetweenUDSkyline(const double, const int, const int);
-    DLnode*             clearSkyline(DLnode*);
+    bool                checkIfBetweenUDSkyline(const int, const int);
+    void                clearSkyline(vector<DLnode*>&);
+    void                initGlobalVariables();
 
     vector<DLnode*>     answerList;
     // new added (Hugo)
@@ -106,13 +109,14 @@ class ra_mgr
     double               ra_lower_velocity; // (v_min)
     double               ra_safety_margin; // 小型車至少要保持「車速/2」距離(單位：公尺)；大型車至少要保持「車速-20」距離(單位：公尺)
     int                  ra_max_capacity;
+    int                  sa_size;
     vector<double>       ra_valid_source_angle; // 0 <= angle < 2*pi
     vector<double>       ra_valid_destination_angle; // Si <= Di < Si + 2*pi ; D_i > 0
     
     void                reset();
 
     // Debug
-    void                  printSkyline(DLnode*);
+    void                  printSkyline(vector<DLnode*>&);
     
 };
 

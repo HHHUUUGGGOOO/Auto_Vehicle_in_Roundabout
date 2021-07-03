@@ -176,13 +176,16 @@ ra_mgr::output_solution(const string &path)
         fout << v_total[i]->id << " ";
         node = v_total[i]->answer_head;
         fout << node->getStartTime() << " " << node->getStartAngle() << " ";
-        while(node != NULL)
+        while(1)
         {
           fout << node->getEndTime() << " " << node->getEndAngle() << " ";
-          // double check //
-          if (node->getEndTime() != node->getFront()->getStartTime())
+          if (node == node->getFront()) break; // only one node in this answerList
+          if (node->getFront() == v_total[i]->answer_head) break;
+          // double check // 
+          if (node->getEndTime() != node->getFront()->getStartTime()) // always occurs when an answerList end ( 0 -> 1 -> 2 -> 0)
           {
             cerr << "something wrong at answer!" << endl;
+            cerr << node->getEndTime() << " / " << node->getFront()->getStartTime() << endl;
             return;
           }
           node = node->getFront();
