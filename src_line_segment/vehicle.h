@@ -47,6 +47,7 @@ public:
                      |
                     prev
     */
+   // Alert: Should use single node -> placeXXX(The node list)
     void placeNextTo(DLnode* node) 
     {
       this->setPrev(node);

@@ -90,15 +90,14 @@ ra_mgr::acceleration_solution_case_5()
         // if can -> insert
         bool noAnswer = false;
         DLnode *nodeU, *nodeD;
-        double timeUnit = 1e-3;
         while(!canPlaceBetweenTwoSkyline(enterAngleId, exitAngleId)) {
             nodeD = _raSourceAngleList[enterAngleId];
             if (nodeD == NULL)
             {
-                endTime = answerList[enterAngleId]->getStartTime() + timeUnit;
+                endTime = answerList[enterAngleId]->getStartTime() + TIMEUNIT;
             }
-            else if ((nodeD->getStartTime()-safety_time_interval(ra_safety_margin, v_total[current_v_id]->velocity)-timeUnit) > answerList[enterAngleId]->getStartTime()) {
-                endTime = answerList[enterAngleId]->getStartTime() + timeUnit;
+            else if ((nodeD->getStartTime()-safety_time_interval(ra_safety_margin, v_total[current_v_id]->velocity)-TIMEUNIT) > answerList[enterAngleId]->getStartTime()) {
+                endTime = answerList[enterAngleId]->getStartTime() + TIMEUNIT;
             }
             else
             {
@@ -113,8 +112,8 @@ ra_mgr::acceleration_solution_case_5()
                     break; // break while(!canPlaceBetweenTwoSkyline(enterAngleId, exitAngleId))
                 }
                 else {
-                    if (nodeU->getStartTime() > answerList[enterAngleId]->getStartTime() + safety_time_interval(ra_safety_margin, v_total[current_v_id]->velocity) + timeUnit)
-                        endTime = answerList[enterAngleId]->getStartTime() + timeUnit;
+                    if (nodeU->getStartTime() > answerList[enterAngleId]->getStartTime() + safety_time_interval(ra_safety_margin, v_total[current_v_id]->velocity) + TIMEUNIT)
+                        endTime = answerList[enterAngleId]->getStartTime() + TIMEUNIT;
                     else endTime = nodeU->getStartTime() + safety_time_interval(ra_safety_margin, velocity(nodeU, ra_radius)); // depend on nodeU
                 }
             }
@@ -123,7 +122,7 @@ ra_mgr::acceleration_solution_case_5()
             for(int currentAngleId = enterAngleId; currentAngleId != exitAngleId; currentAngleId = (currentAngleId+1)%sa_size)
             {
                 startTime = endTime;
-                endTime = startTime + ra_radius*degree_to_rad(answerList[currentAngleId]->getAngleInterval())/v_total[current_v_id]->velocity;
+                endTime = startTime + computeNeededTime(ra_radius, degree_to_rad(answerList[currentAngleId]->getAngleInterval()), v_total[current_v_id]->velocity);
                 answerList[currentAngleId]->setStartTime(startTime);
                 answerList[currentAngleId]->setEndTime(endTime);
                 // cerr << "startTime: " << startTime << " endTime: " << endTime << " angle: " << answerList[currentAngleId]->getStartAngle() << endl;
@@ -143,11 +142,11 @@ ra_mgr::acceleration_solution_case_5()
             {
                 if (_skyline[currentAngleId] == _lowerBoundSkyline[currentAngleId]) { 
                     startTime = endTime; 
-                    endTime = startTime + ra_radius* degree_to_rad(_skyline[currentAngleId]->getAngleInterval())/ra_upper_velocity;
+                    endTime = startTime + computeNeededTime(ra_radius, degree_to_rad(_skyline[currentAngleId]->getAngleInterval()), ra_upper_velocity);
                 }
                 else { 
-                    startTime = _skyline[currentAngleId]->getStartTime()+safety_time_interval(ra_safety_margin, velocity(_skyline[currentAngleId], ra_radius)); 
-                    endTime = startTime + ra_radius* degree_to_rad(_skyline[currentAngleId]->getAngleInterval())/velocity(_skyline[currentAngleId], ra_radius);
+                    startTime = _skyline[currentAngleId]->getStartTime() + safety_time_interval(ra_safety_margin, velocity(_skyline[currentAngleId], ra_radius)); 
+                    endTime = startTime + computeNeededTime(ra_radius, degree_to_rad(_skyline[currentAngleId]->getAngleInterval()), velocity(_skyline[currentAngleId], ra_radius));
                 }
                 answerList[currentAngleId]->setStartTime(startTime);                        
                 answerList[currentAngleId]->setEndTime(endTime);
@@ -158,39 +157,41 @@ ra_mgr::acceleration_solution_case_5()
             for (int currentAngleId = enterAngleId; currentAngleId != exitAngleId; currentAngleId = (currentAngleId+1)%sa_size)
             {
                 int nextAngleId = (currentAngleId+1) % sa_size;
-                if (nextAngleId == exitAngleId) break;
+                if (nextAngleId == exitAngleId) { break; }
                 if (answerList[currentAngleId]->getEndTime() > answerList[nextAngleId]->getStartTime())
                 {
                     answerList[nextAngleId]->setStartTime(answerList[currentAngleId]->getEndTime());
-                    endTime = answerList[nextAngleId]->getStartTime() + ra_radius*degree_to_rad(answerList[nextAngleId]->getAngleInterval())/ra_upper_velocity;
+                    endTime = answerList[nextAngleId]->getStartTime() + computeNeededTime(ra_radius, degree_to_rad(answerList[nextAngleId]->getAngleInterval()), ra_upper_velocity);
                     answerList[nextAngleId]->setEndTime(endTime);
                 }
                 else
                 {
                     answerList[currentAngleId]->setEndTime(answerList[nextAngleId]->getStartTime());
-                    if (velocity(answerList[currentAngleId], ra_radius) > ra_upper_velocity-DELTA)
+                    if (velocity(answerList[currentAngleId], ra_radius) > ra_upper_velocity - DELTA)
                     {
-                        endTime = answerList[currentAngleId]->getStartTime() + ra_radius*degree_to_rad(answerList[currentAngleId]->getAngleInterval())/ra_upper_velocity;
+                        endTime = answerList[currentAngleId]->getStartTime() + computeNeededTime(ra_radius, degree_to_rad(answerList[currentAngleId]->getAngleInterval()), ra_upper_velocity);
                         answerList[currentAngleId]->setEndTime(endTime);
                         // adjest next: only need to adjust next one //
                         answerList[nextAngleId]->setStartTime(answerList[currentAngleId]->getEndTime());
-                        endTime = answerList[nextAngleId]->getStartTime() + ra_radius*degree_to_rad(answerList[nextAngleId]->getAngleInterval())/ra_upper_velocity;
+                        endTime = answerList[nextAngleId]->getStartTime() + computeNeededTime(ra_radius, degree_to_rad(answerList[nextAngleId]->getAngleInterval()), ra_upper_velocity);
                         answerList[nextAngleId]->setEndTime(endTime);
                     }
-                    else if (velocity(answerList[currentAngleId], ra_radius) < ra_lower_velocity+DELTA)
+                    else if (velocity(answerList[currentAngleId], ra_radius) < ra_lower_velocity + DELTA)
                     {
-                        startTime = answerList[currentAngleId]->getEndTime() - ra_radius*degree_to_rad(answerList[currentAngleId]->getAngleInterval())/ra_lower_velocity;
+                        startTime = answerList[currentAngleId]->getEndTime() - computeNeededTime(ra_radius, degree_to_rad(answerList[currentAngleId]->getAngleInterval()), ra_lower_velocity);
                         answerList[currentAngleId]->setStartTime(startTime);
                         // adjust prev: need to adjust all prev //
                         endTime = startTime;
-                        if (currentAngleId != enterAngleId)
+                        if (currentAngleId != enterAngleId){
                             for (int prevAngleId = ((currentAngleId)?currentAngleId-1:sa_size-1); prevAngleId != enterAngleId; prevAngleId = ((prevAngleId)?prevAngleId-1:sa_size-1))
                             {
                                 answerList[prevAngleId]->setEndTime(endTime);
-                                startTime = answerList[prevAngleId]->getEndTime() - ra_radius*degree_to_rad(answerList[prevAngleId]->getAngleInterval())/ra_lower_velocity;
+                                startTime = answerList[prevAngleId]->getEndTime() - computeNeededTime(ra_radius, degree_to_rad(answerList[prevAngleId]->getAngleInterval()), ra_lower_velocity);
                                 answerList[prevAngleId]->setStartTime(startTime);
                                 endTime = startTime;
-                            }   
+                            }
+                            answerList[enterAngleId]->setEndTime(endTime);   
+                        }
                     }
                 }
             }   

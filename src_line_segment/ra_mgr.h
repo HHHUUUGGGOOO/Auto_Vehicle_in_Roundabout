@@ -26,8 +26,9 @@ class ra_mgr;
 extern ra_mgr* raMgr;
 
 // define the value of PI //
-#define PI      3.14159265357
-#define DELTA   1e-6   
+#define PI       3.14159265357
+#define DELTA    1e-6   
+#define TIMEUNIT 1e-3
 
 
 //----------------------------------------------------------------------------------------
