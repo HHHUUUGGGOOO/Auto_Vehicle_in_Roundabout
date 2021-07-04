@@ -19,7 +19,7 @@ void Checker::print_timeSeglist()
     for (int i = 0; i < _timeSeglist.size(); i++)
     {
         cerr << "==========================" << endl;
-        cerr << "timtlist: " << _timelist[i]/10000.0 << endl;
+        cerr << "timelist: " << _timelist[i]/10000.0 << endl;
 
         for (int j = 0; j < _timeSeglist[i].size(); j++)
         {
@@ -61,12 +61,7 @@ void Checker::check(const string& vFile, const string& raFile, const string& out
                 {
                     _timeSeglist[t].push_back(seg);
                 }
-            }  
-
-    print_timeSeglist(); 
-
-    string str;
-    cin >> str;     
+            }       
 
     double anglePrev, angleNext, timeUnit, angleUnit;
     for (int i = 0; i < _timeSeglist.size(); i++)
@@ -82,7 +77,12 @@ void Checker::check(const string& vFile, const string& raFile, const string& out
                 if (_timeSeglist[i][j]->isExit() && _timeSeglist[i][k]->isEntry())
                 {
                     if ((_timeSeglist[i][j]->t2() > _timeSeglist[i][k]->t1()-error) || (_timeSeglist[i][j]->t2() < _timeSeglist[i][k]->t1()+error))
-                    continue;
+                        continue;
+                }
+                if (_timeSeglist[i][j]->isEntry() && _timeSeglist[i][k]->isExit() && _timeSeglist[i][k]->angle2() == _timeSeglist[i][j]->angle1())
+                {
+                    if ((_timeSeglist[i][j]->t1() > _timeSeglist[i][k]->t2()-error) || (_timeSeglist[i][j]->t1() < _timeSeglist[i][k]->t2()+error))
+                        continue;
                 }
                 if (_timeSeglist[i][j]->id() == _timeSeglist[i][k]->id())
                     continue;
@@ -102,6 +102,8 @@ void Checker::check(const string& vFile, const string& raFile, const string& out
                 if ((_raRadius*(abs(angleNext-anglePrev)*(PI/180.0)) < _safetyMargin-error)
                     || (_raRadius*(abs(angleNext-anglePrev+360.0)*(PI/180.0)) < _safetyMargin-error))
                 {
+                    if (_timeSeglist[i][j]->isExit() && angleNext > _timeSeglist[i][j]->angle2()) continue;
+                    print_timeSeglist();
                     cout << "---------------------" << endl;
                     cout << "at: " << _timelist[i]/10000.0 << endl;
                     cout << "vehicle id: "<< _timeSeglist[i][j]->id() << " and " <<  _timeSeglist[i][k]->id() << " violate safety margin constraint." << endl;

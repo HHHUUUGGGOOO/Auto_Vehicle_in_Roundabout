@@ -157,7 +157,33 @@ ra_mgr::acceleration_solution_case_5()
             for (int currentAngleId = enterAngleId; currentAngleId != exitAngleId; currentAngleId = (currentAngleId+1)%sa_size)
             {
                 int nextAngleId = (currentAngleId+1) % sa_size;
-                if (nextAngleId == exitAngleId) { break; }
+                if (nextAngleId == exitAngleId) { 
+                    if (velocity(answerList[currentAngleId], ra_radius) * (answerList[currentAngleId]->getEndTime() - _skyline[currentAngleId]->getEndTime()) < ra_safety_margin) {
+                        answerList[currentAngleId]->setEndTime(answerList[currentAngleId]->getStartTime() + computeNeededTime(ra_radius, degree_to_rad(answerList[currentAngleId]->getAngleInterval()), velocity(_skyline[currentAngleId], ra_radius)));
+                    }
+                    break;
+                }
+                if (velocity(answerList[nextAngleId], ra_radius)*(answerList[currentAngleId]->getEndTime()-_skyline[nextAngleId]->getStartTime()) < ra_safety_margin)
+                {
+                    double vel = velocity(answerList[currentAngleId], ra_radius);
+                    answerList[currentAngleId]->setEndTime(_skyline[nextAngleId]->getStartTime() + ra_safety_margin/vel);
+                    startTime = answerList[currentAngleId]->getEndTime() - ra_radius*degree_to_rad(answerList[currentAngleId]->getAngleInterval())/vel;
+                    answerList[currentAngleId]->setStartTime(startTime);
+                    // adjust prev: need to adjust all prev //
+                    endTime = startTime;
+                    if (currentAngleId != enterAngleId){
+                        for (int prevAngleId = ((currentAngleId)?currentAngleId-1:sa_size-1); prevAngleId != enterAngleId; prevAngleId = ((prevAngleId)?prevAngleId-1:sa_size-1))
+                        {
+                            vel = velocity(answerList[prevAngleId], ra_radius);
+                            answerList[prevAngleId]->setEndTime(endTime);
+                            startTime = answerList[prevAngleId]->getEndTime() - computeNeededTime(ra_radius, degree_to_rad(answerList[prevAngleId]->getAngleInterval()), vel);
+                            answerList[prevAngleId]->setStartTime(startTime);
+                            endTime = startTime;
+                        }
+                        answerList[enterAngleId]->setEndTime(endTime);   
+                    }
+                }
+
                 if (answerList[currentAngleId]->getEndTime() > answerList[nextAngleId]->getStartTime())
                 {
                     answerList[nextAngleId]->setStartTime(answerList[currentAngleId]->getEndTime());
@@ -327,19 +353,21 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
     short head_upNode_conflict = 1, head_downNode_conflict = 2, tail_upNode_conflict = 3, tail_downNode_conflict = 4;
     // begin at "source angle"
     bool isChange = false;
-    printSkyline(_upSkyline);
-    printSkyline(_downSkyline);
-    printSkyline(answerList);
+    // printSkyline(_upSkyline);
+    // printSkyline(_downSkyline);
+    // printSkyline(answerList);
+    if (!(_upSkyline[entryId]->IsStart()) && velocity(_upSkyline[entryId]->getBehind(), ra_radius) * (_upSkyline[entryId]->getStartTime() - answerList[entryId]->getStartTime()) < ra_safety_margin) 
+        return false; 
     for (int i = entryId; i != exitId; i = (i+1)%sa_size)
     {
         if (answerList[i] != NULL)
         {   
+            int i_prevId = (i) ? i-1 : sa_size-1; 
             // case 1: head_upNode_conflict //
             if ( _upSkyline[i] != _upperBoundSkyline[i] && velocity(answerList[i], ra_radius)*(_upSkyline[i]->getStartTime()-answerList[i]->getStartTime()) < ra_safety_margin ) { 
                 cout << "status: 1" << endl;
                 if (i == entryId) { return false; }
                 if (status == tail_downNode_conflict) { return false; } 
-                int i_prevId = (i) ? i-1: sa_size-1;
                 answerList[i_prevId]->setEndTime(_upSkyline[i]->getStartTime()-safety_time_interval(ra_safety_margin, _vId2VehicleMap[answerList[i]->getId()]->velocity));
                 // if cannot accelerate
                 if (velocity(answerList[i_prevId], ra_radius) > ra_upper_velocity+DELTA) { return false; }
@@ -363,13 +391,43 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
                 status = head_upNode_conflict;
                 isChange = true;   
             }
-            // case 2: head_downNode_conflict //
-            if ( _downSkyline[i] != _lowerBoundSkyline[i] && velocity(_downSkyline[i], ra_radius)*(answerList[i]->getStartTime() - _downSkyline[i]->getStartTime()) < ra_safety_margin) { 
-                cout << "status: 2" << endl;
+            // case 2-1: _downSkyline[i] is entry // (Too dirty here...= =)
+            if ((i != entryId) && (_downSkyline[i]->IsStart()) && (velocity(answerList[i_prevId], ra_radius)*(answerList[i_prevId]->getEndTime() - _downSkyline[i]->getStartTime()) < ra_safety_margin)) {
+                cout << "status: 2-1" << endl;
+                // cout << velocity(answerList[i_prevId], ra_radius)*(answerList[i_prevId]->getEndTime() - _downSkyline[i]->getStartTime()) << endl;
+                // string str;
+                // cin >> str;
                 if (status == head_upNode_conflict) { return false; } // cannot acceleration and deceleration both 
                 if (status == tail_upNode_conflict) { return false; }
                 if (i == entryId) { return false; }
-                int i_prevId = (i) ? i-1 : sa_size-1;
+                answerList[i_prevId]->setEndTime(_downSkyline[i]->getStartTime() + ra_safety_margin*(_downSkyline[i]->getStartTime() - answerList[i_prevId]->getStartTime())/(ra_radius*degree_to_rad(answerList[i_prevId]->getAngleInterval())-ra_safety_margin));
+                // if cannot decelerate
+                if (velocity(answerList[i_prevId], ra_radius) < ra_lower_velocity-DELTA) { return false; }
+                // if can decelerate, update answerList
+                cout << "decelerate" << endl;                
+                for (int j = i ; j != exitId; j = (j+1)%sa_size) {
+                    int j_prevId = (j == 0) ? sa_size-1 : j-1;
+                    answerList[j]->setStartTime(answerList[j_prevId]->getEndTime());
+                    double timeNeeded = computeNeededTime(ra_radius,  degree_to_rad(answerList[j]->getAngleInterval()), _vId2VehicleMap[answerList[j]->getId()]->velocity);
+                    answerList[j]->setEndTime(answerList[j]->getStartTime() + timeNeeded);
+                }
+                // update and check UDskyline 
+                computeUDSkyline();
+                if (velocity(answerList[i_prevId], ra_radius)*(answerList[i_prevId]->getEndTime() - _downSkyline[i_prevId]->getEndTime()) < ra_safety_margin) 
+                    return false; 
+                if (_upSkyline[i_prevId] != _upperBoundSkyline[i_prevId] && velocity(_upSkyline[i_prevId], ra_radius)*(_upSkyline[i_prevId]->getEndTime() - answerList[i_prevId]->getEndTime()) < ra_safety_margin) 
+                    return false; 
+
+                printSkyline(answerList);
+                status = head_downNode_conflict;
+                isChange = true;  
+            }
+            // case 2-2: head_downNode_conflict //
+            if (_downSkyline[i] != _lowerBoundSkyline[i] && velocity(_downSkyline[i], ra_radius)*(answerList[i]->getStartTime() - _downSkyline[i]->getStartTime()) < ra_safety_margin) { 
+                cout << "status: 2-2" << endl;
+                if (status == head_upNode_conflict) { return false; } // cannot acceleration and deceleration both 
+                if (status == tail_upNode_conflict) { return false; }
+                if (i == entryId) { return false; }
                 answerList[i_prevId]->setEndTime(_downSkyline[i]->getStartTime() + safety_time_interval(ra_safety_margin, velocity(_downSkyline[i], ra_radius)));
                 // if cannot decelerate
                 if (velocity(answerList[i_prevId], ra_radius) < ra_lower_velocity-DELTA) { return false; }
@@ -383,10 +441,10 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
                 }
                 // update and check UDskyline 
                 computeUDSkyline();
-                if (velocity(answerList[i_prevId], ra_radius)*(answerList[i_prevId]->getEndTime() - _downSkyline[i_prevId]->getEndTime()) < ra_safety_margin) {
-                    return false; }
-                if (_upSkyline[i_prevId] != _upperBoundSkyline[i_prevId] && velocity(_upSkyline[i_prevId], ra_radius)*(_upSkyline[i_prevId]->getEndTime() - answerList[i_prevId]->getEndTime()) < ra_safety_margin) {
-                    return false; }
+                if (velocity(answerList[i_prevId], ra_radius)*(answerList[i_prevId]->getEndTime() - _downSkyline[i_prevId]->getEndTime()) < ra_safety_margin) 
+                    return false; 
+                if (_upSkyline[i_prevId] != _upperBoundSkyline[i_prevId] && velocity(_upSkyline[i_prevId], ra_radius)*(_upSkyline[i_prevId]->getEndTime() - answerList[i_prevId]->getEndTime()) < ra_safety_margin) 
+                    return false; 
 
                 status = head_downNode_conflict;
                 isChange = true;    
