@@ -1,0 +1,26 @@
+{
+	"folders": [
+		{
+			"path": "..\\..\\..\\..\\卡伯Cardbo\\cardbo-useraction-analysis"
+		},
+		{
+			"path": "..\\..\\..\\..\\Ric專題\\CAD_Contest_A_2021"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"ostream": "cpp",
+			"iostream": "cpp",
+			"vector": "cpp",
+			"mappinggate.h": "c",
+			"atomic": "c",
+			"bitset": "c",
+			"cstring": "c",
+			"memory": "c",
+			"xmemory": "c",
+			"xstring": "c",
+			"xutility": "c",
+			"iomanip": "cpp"
+		}
+	}
+}
