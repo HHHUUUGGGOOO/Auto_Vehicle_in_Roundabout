@@ -9,6 +9,7 @@
 
 #include "ra_mgr.h"
 #include <climits>
+#include <typeinfo>
 
 inline double velocity(DLnode* const n, double _raRadius)
 {
@@ -26,16 +27,7 @@ inline double computeNeededTime(double _raRadius, double radiun, double velocity
 
 /*
     TODO:
-(EG)   1. Insert checkUDskyline 在需要的地方 (54)
-(胖呆)  2. 拔除 wait_ist, 只需 v_total \done
-(Hugo)  3. 要考慮到 FCFS, 不能把後來的車排在先來的車前面 --> Vehicle 若 status = IN, priority 就是 eat, 所以進去某路口要判斷是否前面下面的車子 eat 都比他早,  可從 line 65 startTime 那邊開始找, 必須放在 eat 比他早的後面
-            (可在每個路口存現在最晚被插進來的車的pointer (get時間), 再加上 (safety_margin / velocity)會是可插入的時間, velocity 直接 call INLINE)
-(胖呆)  4. isAccelerate / isChange 要改 \done                                                 
-(EG)    5. tmp_answerList 要刪掉改成 answer_list, canplacebetween 有些要改成 checkIfBetweenUDskyline 
-(胖呆)  6. readfile 的 id 改成 string \done
-(胖呆)  7. output file 或是中間存 position 的改成 answer_head (output 時要判斷是哪個 case 去看要用 position 還是 answer_head) \done but need furthur check (cannot compile now)
-        8. 需要考慮到 capacity ??? capacity < (圓周/safety_margin)
-(胖呆)  9. construct map & remove v_normal \done bot need furthur check      
+        1. 需要考慮到 capacity ??? capacity < (圓周/safety_margin)   
 */
 
 void 
@@ -88,6 +80,8 @@ ra_mgr::acceleration_solution_case_5()
             }
             cerr << "Start time: " << startTime << ", end time: " << endTime << ", start angle: " << startAngle << ", end angle: " << endAngle << endl;
         }
+        string str;
+        // cin >> str;
         
         // compute upward and downward skyline //
         computeUDSkyline();
@@ -99,7 +93,11 @@ ra_mgr::acceleration_solution_case_5()
         double timeUnit = 1e-3;
         while(!canPlaceBetweenTwoSkyline(enterAngleId, exitAngleId)) {
             nodeD = _raSourceAngleList[enterAngleId];
-            if ((nodeD->getStartTime()-safety_time_interval(ra_safety_margin, v_total[current_v_id]->velocity)-timeUnit) > answerList[enterAngleId]->getStartTime()) {
+            if (nodeD == NULL)
+            {
+                endTime = answerList[enterAngleId]->getStartTime() + timeUnit;
+            }
+            else if ((nodeD->getStartTime()-safety_time_interval(ra_safety_margin, v_total[current_v_id]->velocity)-timeUnit) > answerList[enterAngleId]->getStartTime()) {
                 endTime = answerList[enterAngleId]->getStartTime() + timeUnit;
             }
             else
@@ -138,7 +136,7 @@ ra_mgr::acceleration_solution_case_5()
             // new method to find answer //
             // update answerList based on _skyline and insert
             printf("Vehicle %s can't place between skyline\n", v_total[current_v_id]->id.c_str());
-            printSkyline(_skyline);
+            // printSkyline(_skyline);
             // decide startTime, endTime based on skyline //
             endTime = v_total[current_v_id]->earliest_arrival_time;
             for (int currentAngleId = enterAngleId; currentAngleId != exitAngleId; currentAngleId = (currentAngleId+1)%sa_size)
@@ -148,50 +146,51 @@ ra_mgr::acceleration_solution_case_5()
                     endTime = startTime + ra_radius* degree_to_rad(_skyline[currentAngleId]->getAngleInterval())/ra_upper_velocity;
                 }
                 else { 
-                    startTime = max(endTime, _skyline[currentAngleId]->getStartTime()+safety_time_interval(ra_safety_margin, velocity(_skyline[currentAngleId], ra_radius))); 
+                    startTime = _skyline[currentAngleId]->getStartTime()+safety_time_interval(ra_safety_margin, velocity(_skyline[currentAngleId], ra_radius)); 
                     endTime = startTime + ra_radius* degree_to_rad(_skyline[currentAngleId]->getAngleInterval())/velocity(_skyline[currentAngleId], ra_radius);
                 }
                 answerList[currentAngleId]->setStartTime(startTime);                        
                 answerList[currentAngleId]->setEndTime(endTime);
             }
 
+
             // from entry update answer list //
             for (int currentAngleId = enterAngleId; currentAngleId != exitAngleId; currentAngleId = (currentAngleId+1)%sa_size)
             {
-                // next is exit -> got some problems //
                 int nextAngleId = (currentAngleId+1) % sa_size;
                 if (nextAngleId == exitAngleId) break;
-                if (answerList[currentAngleId]->getEndTime() < answerList[nextAngleId]->getStartTime())
+                if (answerList[currentAngleId]->getEndTime() > answerList[nextAngleId]->getStartTime())
                 {
                     answerList[nextAngleId]->setStartTime(answerList[currentAngleId]->getEndTime());
-                    endTime = answerList[nextAngleId]->getStartTime() + ra_radius*answerList[nextAngleId]->getAngleInterval()*ra_upper_velocity;
+                    endTime = answerList[nextAngleId]->getStartTime() + ra_radius*degree_to_rad(answerList[nextAngleId]->getAngleInterval())/ra_upper_velocity;
                     answerList[nextAngleId]->setEndTime(endTime);
                 }
                 else
                 {
                     answerList[currentAngleId]->setEndTime(answerList[nextAngleId]->getStartTime());
-                    if (velocity(answerList[currentAngleId], ra_radius) > ra_upper_velocity)
+                    if (velocity(answerList[currentAngleId], ra_radius) > ra_upper_velocity-DELTA)
                     {
-                        endTime = answerList[currentAngleId]->getStartTime() + ra_radius*answerList[currentAngleId]->getAngleInterval()*ra_upper_velocity;
+                        endTime = answerList[currentAngleId]->getStartTime() + ra_radius*degree_to_rad(answerList[currentAngleId]->getAngleInterval())/ra_upper_velocity;
                         answerList[currentAngleId]->setEndTime(endTime);
                         // adjest next: only need to adjust next one //
                         answerList[nextAngleId]->setStartTime(answerList[currentAngleId]->getEndTime());
-                        endTime = answerList[nextAngleId]->getStartTime() + ra_radius*answerList[nextAngleId]->getAngleInterval()*ra_upper_velocity;
+                        endTime = answerList[nextAngleId]->getStartTime() + ra_radius*degree_to_rad(answerList[nextAngleId]->getAngleInterval())/ra_upper_velocity;
                         answerList[nextAngleId]->setEndTime(endTime);
                     }
-                    else if (velocity(answerList[currentAngleId], ra_radius) < ra_lower_velocity)
+                    else if (velocity(answerList[currentAngleId], ra_radius) < ra_lower_velocity+DELTA)
                     {
-                        startTime = answerList[currentAngleId]->getEndTime() - ra_radius*answerList[currentAngleId]->getAngleInterval()*ra_lower_velocity;
+                        startTime = answerList[currentAngleId]->getEndTime() - ra_radius*degree_to_rad(answerList[currentAngleId]->getAngleInterval())/ra_lower_velocity;
                         answerList[currentAngleId]->setStartTime(startTime);
                         // adjust prev: need to adjust all prev //
                         endTime = startTime;
-                        for (int prevAngleId = ((currentAngleId)?currentAngleId-1:sa_size-1); prevAngleId != enterAngleId; prevAngleId = ((prevAngleId)?prevAngleId-1:sa_size-1))
-                        {
-                            answerList[prevAngleId]->setEndTime(endTime);
-                            startTime = answerList[prevAngleId]->getEndTime() - ra_radius*answerList[prevAngleId]->getAngleInterval()*ra_lower_velocity;
-                            answerList[prevAngleId]->setStartTime(startTime);
-                            endTime = startTime;
-                        }   
+                        if (currentAngleId != enterAngleId)
+                            for (int prevAngleId = ((currentAngleId)?currentAngleId-1:sa_size-1); prevAngleId != enterAngleId; prevAngleId = ((prevAngleId)?prevAngleId-1:sa_size-1))
+                            {
+                                answerList[prevAngleId]->setEndTime(endTime);
+                                startTime = answerList[prevAngleId]->getEndTime() - ra_radius*degree_to_rad(answerList[prevAngleId]->getAngleInterval())/ra_lower_velocity;
+                                answerList[prevAngleId]->setStartTime(startTime);
+                                endTime = startTime;
+                            }   
                     }
                 }
             }   
@@ -258,8 +257,6 @@ ra_mgr::computeUDSkyline()
     // skyline must be new node different from _raSourceAngleList
     // skyline use cycle list for easy implement purpose
 
-    printf("\nCompute UD skyline\n");
-
     // clear skyline //
     clearSkyline(_upSkyline);
     clearSkyline(_downSkyline);
@@ -300,7 +297,6 @@ ra_mgr::computeUDSkyline()
         _upSkyline[i] = nodeU;
         _downSkyline[i] = nodeD;
     }
-    printf("End Compute UD skyline\n");
 }
 
 void
@@ -332,6 +328,7 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
     bool isChange = false;
     printSkyline(_upSkyline);
     printSkyline(_downSkyline);
+    printSkyline(answerList);
     for (int i = entryId; i != exitId; i = (i+1)%sa_size)
     {
         if (answerList[i] != NULL)
@@ -344,7 +341,7 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
                 int i_prevId = (i) ? i-1: sa_size-1;
                 answerList[i_prevId]->setEndTime(_upSkyline[i]->getStartTime()-safety_time_interval(ra_safety_margin, _vId2VehicleMap[answerList[i]->getId()]->velocity));
                 // if cannot accelerate
-                if (velocity(answerList[i_prevId], ra_radius) > ra_upper_velocity) { return false; }
+                if (velocity(answerList[i_prevId], ra_radius) > ra_upper_velocity+DELTA) { return false; }
                 // if can accelerate, update answerList
                 cout << "accelerate" << endl;
                 for (int j = i ; j != exitId; j = (j+1)%sa_size) {
@@ -358,7 +355,7 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
                 if (velocity(answerList[i_prevId], ra_radius)*(answerList[i_prevId]->getEndTime() - _downSkyline[i_prevId]->getEndTime()) < ra_safety_margin){
                     return false; 
                 }
-                if (velocity(_upSkyline[i_prevId], ra_radius)*(_upSkyline[i_prevId]->getEndTime() - answerList[i_prevId]->getEndTime()) < ra_safety_margin){
+                if (_upSkyline[i_prevId] != _upperBoundSkyline[i_prevId] && velocity(_upSkyline[i_prevId], ra_radius)*(_upSkyline[i_prevId]->getEndTime() - answerList[i_prevId]->getEndTime()) < ra_safety_margin){
                     return false; 
                 }
                 
@@ -374,7 +371,7 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
                 int i_prevId = (i) ? i-1 : sa_size-1;
                 answerList[i_prevId]->setEndTime(_downSkyline[i]->getStartTime() + safety_time_interval(ra_safety_margin, velocity(_downSkyline[i], ra_radius)));
                 // if cannot decelerate
-                if (velocity(answerList[i_prevId], ra_radius) < ra_lower_velocity) { return false; }
+                if (velocity(answerList[i_prevId], ra_radius) < ra_lower_velocity-DELTA) { return false; }
                 // if can decelerate, update answerList
                 cout << "decelerate" << endl;                
                 for (int j = i ; j != exitId; j = (j+1)%sa_size) {
@@ -387,11 +384,11 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
                 computeUDSkyline();
                 if (velocity(answerList[i_prevId], ra_radius)*(answerList[i_prevId]->getEndTime() - _downSkyline[i_prevId]->getEndTime()) < ra_safety_margin) {
                     return false; }
-                if (velocity(_upSkyline[i_prevId], ra_radius)*(_upSkyline[i_prevId]->getEndTime() - answerList[i_prevId]->getEndTime()) < ra_safety_margin) {
+                if (_upSkyline[i_prevId] != _upperBoundSkyline[i_prevId] && velocity(_upSkyline[i_prevId], ra_radius)*(_upSkyline[i_prevId]->getEndTime() - answerList[i_prevId]->getEndTime()) < ra_safety_margin) {
                     return false; }
 
                 status = head_downNode_conflict;
-                isChange = true;   
+                isChange = true;    
             }
             status = 0;
             // case 3: tail_upNode_conflict //
@@ -399,7 +396,7 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
                 answerList[i]->setEndTime(_upSkyline[i]->getEndTime()-safety_time_interval(ra_safety_margin, velocity(_upSkyline[i], ra_radius)));
                 // if cannot accelerate
                 cout << "status: 3" << endl;
-                if (velocity(answerList[i], ra_radius) > ra_upper_velocity) { return false; }
+                if (velocity(answerList[i], ra_radius) > ra_upper_velocity+DELTA) { return false; }
                 // if can accelerate, update answerList
                 cout << "accelerate" << endl;
                 for (int j = (i+1)%sa_size ; j != exitId; j = (j+1)%sa_size) {
@@ -411,17 +408,21 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
                 computeUDSkyline();
                 if (velocity(answerList[i], ra_radius)*(answerList[i]->getEndTime() - _downSkyline[i]->getEndTime()) < ra_safety_margin)
                     return false;
-                if (velocity(_upSkyline[i], ra_radius)*(_upSkyline[i]->getEndTime() - answerList[i]->getEndTime()) < ra_safety_margin)
+                if (_upSkyline[i] != _upperBoundSkyline[i] && velocity(_upSkyline[i], ra_radius)*(_upSkyline[i]->getEndTime() - answerList[i]->getEndTime()) < ra_safety_margin)
                     return false;
                 status = tail_upNode_conflict;
                 isChange = true;    
             }
             // case 4: tail_downNode_conflict // 
-            if ( _upSkyline[i] != _upperBoundSkyline[i] && velocity(answerList[i], ra_radius)*(answerList[i]->getEndTime()-_downSkyline[i]->getEndTime()) < ra_safety_margin) {
+            if ( _downSkyline[i] != _lowerBoundSkyline[i] && velocity(answerList[i], ra_radius)*(answerList[i]->getEndTime()-_downSkyline[i]->getEndTime()) < ra_safety_margin) {
                 cout << "status: 4" << endl;
+                answerList[i]->setEndTime((_downSkyline[i]->getEndTime() - answerList[i]->getStartTime())*ra_safety_margin/(ra_radius*degree_to_rad(answerList[i]->getAngleInterval())-ra_safety_margin)+ _downSkyline[i]->getEndTime());
                 if (status == tail_upNode_conflict) { return false; }
                 // if cannot decelerate
-                if (velocity(answerList[i], ra_radius) < ra_lower_velocity) { return false; }
+                cout << "check if can decelerate" << endl;
+                if (velocity(answerList[i], ra_radius) < ra_lower_velocity-DELTA) { 
+                    cout << velocity(answerList[i], ra_radius) << ", " << ra_lower_velocity << endl;
+                    return false; }
                 // if can decelerate, update answerList
                 cout << "decelerate" << endl;
                 for (int j = (i+1)%sa_size ; j != exitId; j = (j+1)%sa_size) {
@@ -430,13 +431,11 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
                     double timeNeeded = computeNeededTime(ra_radius,  degree_to_rad(answerList[j]->getAngleInterval()), _vId2VehicleMap[answerList[j]->getId()]->velocity);
                     answerList[j]->setEndTime( answerList[j]->getStartTime() + timeNeeded);
                 }
-                computeUDSkyline();
-                if (velocity(answerList[i], ra_radius)*(answerList[i]->getEndTime() - _downSkyline[i]->getEndTime()) < ra_safety_margin)
-                    return false;
-                if (velocity(_upSkyline[i], ra_radius)*(_upSkyline[i]->getEndTime() - answerList[i]->getEndTime()) < ra_safety_margin)
-                    return false;
+                computeUDSkyline(); 
+                if (velocity(answerList[i], ra_radius)*(answerList[i]->getEndTime() - _downSkyline[i]->getEndTime()) < ra_safety_margin) { return false; }
+                if (_upSkyline[i] != _upperBoundSkyline[i] && velocity(_upSkyline[i], ra_radius)*(_upSkyline[i]->getEndTime() - answerList[i]->getEndTime()) < ra_safety_margin) { return false; }
                 status = tail_downNode_conflict;
-                isChange = true;
+                isChange = true;  
             }
         }
     }
@@ -448,6 +447,8 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
 
 bool 
 ra_mgr::checkIfBetweenUDSkyline(const int entryId, const int exitId){
+    printSkyline(_downSkyline);
+    printSkyline(answerList);
     for (int i = 0; i < sa_size; i ++){ 
         if(exitId > entryId && i >= entryId && i < exitId && answerList[i] == NULL){ cerr << "Error: answerList[" << i << "] should not be NULL."; } 
         else if(exitId < entryId && (i >= entryId || i < exitId ) && answerList[i] == NULL){ cerr << "Error: answerList[" << i << "] should not be NULL."; }
@@ -464,7 +465,8 @@ ra_mgr::checkIfBetweenUDSkyline(const int entryId, const int exitId){
 void 
 ra_mgr::printSkyline(vector<DLnode*> &skyline){
     for(int i = 0; i < sa_size; i++){
-        printf("(%d, %lf -> %lf) %c", i, skyline[i]->getStartTime(), skyline[i]->getEndTime(), (i == sa_size-1)? '\n':' ');
+        if (skyline[i] == NULL) printf("(NULL) %c ", (i == sa_size-1)? '\n':' ');
+        else printf("(%d, %lf -> %lf, %lf) %c ", i, skyline[i]->getStartTime(), skyline[i]->getEndTime(), velocity(skyline[i], ra_radius),  (i == sa_size-1)? '\n':' ');
     }
 }
 
