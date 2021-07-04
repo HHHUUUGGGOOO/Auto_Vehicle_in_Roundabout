@@ -10,7 +10,7 @@ def plot_time(x_id: list, t_case: list, title_name: str):
     plt.title('Exit Time for Each Vehicle (%s)' % (title_name.replace('.out', '')))
     plt.xlabel('vehicle id')
     plt.ylabel('Time (unit: sec)')
-    case_label = ['case 1', 'case 2', 'case 3', 'case 4']
+    case_label = ['case 1', 'case 2', 'case 3', 'case 4', 'case 5']
     # plot
     for i in range(len(case_label)):
         plt.plot(x_id, t_case[i], marker='o', markersize=3)
@@ -25,9 +25,10 @@ def main(filename_v):
     output_case_2 = 'output/case2_' + file_name
     output_case_3 = 'output/case3_' + file_name
     output_case_4 = 'output/case4_' + file_name
+    output_case_5 = 'output/case5_' + file_name
     # parameter
     x_id = []
-    t_case1, t_case2, t_case3, t_case4 = [], [], [], []
+    t_case1, t_case2, t_case3, t_case4, t_case5  = [], [], [], [], []
     # case 1
     with open(output_case_1, 'r') as f_1:
         print("Read case 1 output file......")
@@ -61,8 +62,16 @@ def main(filename_v):
             if (len(tmp) == 1):
                 continue; 
             t_case4.append(round(float(tmp[-3]), 3)) 
+    # case 5
+    with open(output_case_5, 'r') as f_5:
+        print("Read case 5 output file......")
+        for line in f_5:
+            tmp = line.split(' ')
+            if (len(tmp) == 1):
+                continue; 
+            t_case5.append(round(float(tmp[-3]), 3)) 
     # plot
-    t_case = [t_case1, t_case2, t_case3, t_case4]
+    t_case = [t_case1, t_case2, t_case3, t_case4, t_case5]
     plot_time(x_id, t_case, file_name)
 
 def parse_args():
