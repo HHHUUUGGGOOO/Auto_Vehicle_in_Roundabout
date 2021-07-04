@@ -27,18 +27,8 @@ void Checker::print_timeSeglist()
             cerr << "id: " << _timeSeglist[i][j]->id() << endl;
             cerr << "(t1,t2) - (" << _timeSeglist[i][j]->t1() << "," << _timeSeglist[i][j]->t2() << ")" << endl; 
             cerr << "(angle1,angle2) - (" << _timeSeglist[i][j]->angle1() << "," << _timeSeglist[i][j]->angle2() << ")" << endl;
-            switch (_timeSeglist[i][j]->status())
-            {
-                case ENTRY:
-                    cerr << "status: ENTRY" << endl;
-                    break;
-                case EXIT:
-                    cerr << "status: EXIT" << endl;
-                    break;
-                case IN:
-                    cerr << "status: IN" << endl;
-                    break;
-            }  
+            if (_timeSeglist[i][j]->isEntry()) cerr << "status: ENTRY" << endl;
+            if (_timeSeglist[i][j]->isExit()) cerr << "status: EXIT" << endl;   
             cerr << "-------------------" << endl;
         }
         cerr << "==========================" << endl;
@@ -73,7 +63,10 @@ void Checker::check(const string& vFile, const string& raFile, const string& out
                 }
             }  
 
-    print_timeSeglist();      
+    print_timeSeglist(); 
+
+    string str;
+    cin >> str;     
 
     double anglePrev, angleNext, timeUnit, angleUnit;
     for (int i = 0; i < _timeSeglist.size(); i++)
@@ -86,9 +79,9 @@ void Checker::check(const string& vFile, const string& raFile, const string& out
         {
             for (int k = j+1; k < _timeSeglist[i].size(); k++)
             {
-                if (_timeSeglist[i][j]->status() == EXIT && _timeSeglist[i][k]->status() == IN)
+                if (_timeSeglist[i][j]->isExit() && _timeSeglist[i][k]->isEntry())
                 {
-                    if ((_timeSeglist[i][j]->t2() > _timeSeglist[i][k]->t1()-error) && (_timeSeglist[i][j]->t2() < _timeSeglist[i][k]->t1()+error))
+                    if ((_timeSeglist[i][j]->t2() > _timeSeglist[i][k]->t1()-error) || (_timeSeglist[i][j]->t2() < _timeSeglist[i][k]->t1()+error))
                     continue;
                 }
                 if (_timeSeglist[i][j]->id() == _timeSeglist[i][k]->id())
@@ -259,6 +252,7 @@ bool Checker::read_outFile(const string& outFile)
             entryNextAngle = 360.0;
         else
             entryNextAngle = _entrylist[indextmp+1];
+        
 
         while(tokens >> t2 >> angle2)
         {
@@ -287,11 +281,21 @@ bool Checker::read_outFile(const string& outFile)
 
         for (auto seg: _vSeglist[index])
         {
-            // update status //
-            if (seg->angle2() <= entryNextAngle && seg->angle2() > entryAngle)
-                seg->setStatus(ENTRY);
-            else if (seg->angle1() < exitAngle && seg->angle1() >= exitPrevAngle)
-                seg->setStatus(EXIT);
+            // cerr << seg->angle1() << ", " << seg->angle2() << endl;
+            // cerr << "entry: " << entryAngle << ", " << entryNextAngle << endl;
+            // cerr << "exit: " << exitAngle << ", " << exitPrevAngle << endl;
+            // if (id == 5)
+            // {
+            //     string str;
+            //     cin >> str;
+            // }
+
+            angle2 = seg->angle2() + ((seg->angle2() < seg->angle1())? 360.0 : 0);
+            // update entry or exit //
+            if (angle2 < entryNextAngle+error && angle2 > entryAngle-error)
+                seg->setEntry();
+            if (seg->angle1() < exitAngle+error && seg->angle1() >= exitPrevAngle-error)
+                seg->setExit();
             
             // check velocity //
             vel = velocity(seg, _raRadius);
