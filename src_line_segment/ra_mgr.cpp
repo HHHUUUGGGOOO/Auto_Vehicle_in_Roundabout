@@ -169,7 +169,7 @@ ra_mgr::output_solution(const string &path)
 {
   ofstream fout(path.c_str());
   fout << v_total.size() << endl;
-  if (_case == 5)
+  if (_case == 5 || _case == 4)
   {
     DLnode* node;
     for(int i = 0; i < v_total.size(); i++){

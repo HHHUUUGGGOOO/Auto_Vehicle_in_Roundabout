@@ -180,8 +180,9 @@ ra_mgr::acceleration_solution_case_5()
                             answerList[prevAngleId]->setStartTime(startTime);
                             endTime = startTime;
                         }
-                        // no need to set start time ? //
-                        answerList[enterAngleId]->setEndTime(endTime);   
+                        answerList[enterAngleId]->setEndTime(endTime);
+                        startTime = answerList[enterAngleId]->getEndTime() - computeNeededTime(ra_radius, degree_to_rad(answerList[enterAngleId]->getAngleInterval()), velocity(answerList[enterAngleId], ra_radius));
+                        answerList[enterAngleId]->setStartTime(startTime);  
                     }
                 }
 
@@ -217,8 +218,9 @@ ra_mgr::acceleration_solution_case_5()
                                 answerList[prevAngleId]->setStartTime(startTime);
                                 endTime = startTime;
                             }
-                            // no need to set start time ? //
-                            answerList[enterAngleId]->setEndTime(endTime);   
+                            answerList[enterAngleId]->setEndTime(endTime);
+                            startTime = answerList[enterAngleId]->getEndTime() - computeNeededTime(ra_radius, degree_to_rad(answerList[enterAngleId]->getAngleInterval()), velocity(answerList[enterAngleId], ra_radius));
+                            answerList[enterAngleId]->setStartTime(startTime);     
                         }
                     }
                 }
@@ -509,8 +511,8 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
 
 bool 
 ra_mgr::checkIfBetweenUDSkyline(const int entryId, const int exitId){
-    printSkyline(_downSkyline);
-    printSkyline(answerList);
+    // printSkyline(_downSkyline);
+    // printSkyline(answerList);
     for (int i = 0; i < sa_size; i ++){ 
         if(exitId > entryId && i >= entryId && i < exitId && answerList[i] == NULL){ cerr << "Error: answerList[" << i << "] should not be NULL."; } 
         else if(exitId < entryId && (i >= entryId || i < exitId ) && answerList[i] == NULL){ cerr << "Error: answerList[" << i << "] should not be NULL."; }

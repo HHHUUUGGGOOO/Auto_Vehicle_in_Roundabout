@@ -306,6 +306,7 @@ bool Checker::read_outFile(const string& outFile)
                 cout << "---------------------" << endl;
                 cout << "vehicle id: "<< seg->id() << " violate velocity constraint with velocity: " << vel << endl;
                 cout << "under safety velocity range(" << _upperVelocity << "," << _lowerVelocity << ") ( ´･ω･)" << endl;
+                cout << "in segment: " << seg->angle1() << ", " << seg->angle2() << " (degree)" << endl;
                 cout << "---------------------" << endl;
                 return false;
             }

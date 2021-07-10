@@ -62,7 +62,7 @@ public:
 
 private:
     // error // 
-    double error = 0.01;
+    double error = 0.02;
 
     // roundabout information //
     double _upperVelocity;

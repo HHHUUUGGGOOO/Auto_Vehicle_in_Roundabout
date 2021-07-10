@@ -111,6 +111,7 @@ int main(int argc, char** argv)
       else if (strcmp(argv[1], "-case4") == 0)
       {
         cerr << "run constant skyline solution case4 :>" << endl;
+        raMgr->_case = 4;
         raMgr->constant_velocity_skyline_solution_case_4();
       }
       else if (strcmp(argv[1], "-case5") == 0)

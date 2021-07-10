@@ -152,34 +152,12 @@ ra_mgr::constant_velocity_skyline_solution_case_4()
                 answerList[currentAngleId]->setEndTime(endTime);
             }
 
-
             // from entry update answer list //
             // difference : velocity constraint (constant velocity) //
             for (int currentAngleId = enterAngleId; currentAngleId != exitAngleId; currentAngleId = (currentAngleId+1)%sa_size)
             {
                 int nextAngleId = (currentAngleId+1) % sa_size;
-                // TODO here //
-                if (velocity(answerList[nextAngleId], ra_radius)*(answerList[currentAngleId]->getEndTime()-_skyline[nextAngleId]->getStartTime()) < ra_safety_margin)
-                {
-                    double vel = velocity(answerList[currentAngleId], ra_radius);
-                    answerList[currentAngleId]->setEndTime(_skyline[nextAngleId]->getStartTime() + ra_safety_margin/vel);
-                    startTime = answerList[currentAngleId]->getEndTime() - ra_radius*degree_to_rad(answerList[currentAngleId]->getAngleInterval())/vel;
-                    answerList[currentAngleId]->setStartTime(startTime);
-                    // adjust prev: need to adjust all prev //
-                    endTime = startTime;
-                    if (currentAngleId != enterAngleId){
-                        for (int prevAngleId = ((currentAngleId)?currentAngleId-1:sa_size-1); prevAngleId != enterAngleId; prevAngleId = ((prevAngleId)?prevAngleId-1:sa_size-1))
-                        {
-                            vel = velocity(answerList[prevAngleId], ra_radius);
-                            answerList[prevAngleId]->setEndTime(endTime);
-                            startTime = answerList[prevAngleId]->getEndTime() - computeNeededTime(ra_radius, degree_to_rad(answerList[prevAngleId]->getAngleInterval()), vel);
-                            answerList[prevAngleId]->setStartTime(startTime);
-                            endTime = startTime;
-                        }
-                        answerList[enterAngleId]->setEndTime(endTime);   
-                    }
-                }
-
+                if (nextAngleId == exitAngleId) break;
                 if (answerList[currentAngleId]->getEndTime() > answerList[nextAngleId]->getStartTime())
                 {
                     answerList[nextAngleId]->setStartTime(answerList[currentAngleId]->getEndTime());
