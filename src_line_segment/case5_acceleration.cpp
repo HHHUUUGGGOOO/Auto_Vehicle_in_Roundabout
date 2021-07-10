@@ -8,7 +8,6 @@
 ***************************************************************************************/
 
 #include "ra_mgr.h"
-#include <climits>
 #include <typeinfo>
 
 inline double velocity(DLnode* const n, double _raRadius)
@@ -158,6 +157,7 @@ ra_mgr::acceleration_solution_case_5()
             {
                 int nextAngleId = (currentAngleId+1) % sa_size;
                 if (nextAngleId == exitAngleId) { 
+                    // NOTE: case5 !!!! if violate velocity constraint?? //
                     if (velocity(answerList[currentAngleId], ra_radius) * (answerList[currentAngleId]->getEndTime() - _skyline[currentAngleId]->getEndTime()) < ra_safety_margin) {
                         answerList[currentAngleId]->setEndTime(answerList[currentAngleId]->getStartTime() + computeNeededTime(ra_radius, degree_to_rad(answerList[currentAngleId]->getAngleInterval()), velocity(_skyline[currentAngleId], ra_radius)));
                     }
@@ -180,6 +180,7 @@ ra_mgr::acceleration_solution_case_5()
                             answerList[prevAngleId]->setStartTime(startTime);
                             endTime = startTime;
                         }
+                        // no need to set start time ? //
                         answerList[enterAngleId]->setEndTime(endTime);   
                     }
                 }
@@ -216,6 +217,7 @@ ra_mgr::acceleration_solution_case_5()
                                 answerList[prevAngleId]->setStartTime(startTime);
                                 endTime = startTime;
                             }
+                            // no need to set start time ? //
                             answerList[enterAngleId]->setEndTime(endTime);   
                         }
                     }
@@ -513,6 +515,10 @@ ra_mgr::checkIfBetweenUDSkyline(const int entryId, const int exitId){
         if(exitId > entryId && i >= entryId && i < exitId && answerList[i] == NULL){ cerr << "Error: answerList[" << i << "] should not be NULL."; } 
         else if(exitId < entryId && (i >= entryId || i < exitId ) && answerList[i] == NULL){ cerr << "Error: answerList[" << i << "] should not be NULL."; }
         if (answerList[i] != NULL){
+            // conflict constraint //
+            if ( _downSkyline[i] != _lowerBoundSkyline[i] && LinesConflicted(_downSkyline[i],answerList[i])) return false;
+            if ( _upSkyline[i] != _upperBoundSkyline[i] && LinesConflicted(_upSkyline[i],answerList[i])) return false;
+            // safety margin constraint //
             if ( _downSkyline[i] != _lowerBoundSkyline[i] && answerList[i]->getStartTime() < _downSkyline[i]->getStartTime() + safety_time_interval(ra_safety_margin, velocity(_downSkyline[i], ra_radius))) { return false; }
             if ( _upSkyline[i] != _upperBoundSkyline[i] && answerList[i]->getStartTime() > _upSkyline[i]->getStartTime() - safety_time_interval(ra_safety_margin, velocity(answerList[i], ra_radius))) { return false; }
             if ( _downSkyline[i] != _lowerBoundSkyline[i] && answerList[i]->getEndTime() < _downSkyline[i]->getEndTime() + safety_time_interval(ra_safety_margin, velocity(answerList[i], ra_radius))) { return false; }

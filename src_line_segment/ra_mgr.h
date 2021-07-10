@@ -18,6 +18,7 @@
 #include <utility>
 #include <cmath>
 #include <map>
+#include <climits>
 #include "vehicle.h"
 
 using namespace std;
@@ -61,6 +62,7 @@ class ra_mgr
     void                line_trivial_solution_case_1();
     void                line_trivial_solution_case_2();
     void                line_trivial_solution_case_3();
+    void                constant_velocity_skyline_solution_case_4();
     void                acceleration_solution_case_5();
 
     // newly add in skyline //
