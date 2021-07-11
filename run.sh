@@ -1,0 +1,1 @@
+./bin/runner -$1 input/v_in/ra$2_$3.in input/ra_in/ra$2.in output/$1_ra$2_$3.out
