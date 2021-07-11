@@ -12,24 +12,24 @@ all	: bin/runner
 	@echo -n ""
 
 # optimized version
-bin/runner		:src_line_segment/main_opt.o src_line_segment/ra_mgr.o src_line_segment/case1.o src_line_segment/case2.o src_line_segment/case3.o src_line_segment/case4.o src_line_segment/case5_acceleration.o
-				$(CC) $(OPTFLAGS) src_line_segment/main_opt.o src_line_segment/ra_mgr.o src_line_segment/case1.o src_line_segment/case2.o src_line_segment/case3.o src_line_segment/case4.o src_line_segment/case5_acceleration.o -o bin/runner
-src_line_segment/main_opt.o 		: src_line_segment/main.cpp
+bin/runner		:src/main_opt.o src/ra_mgr.o src/case1.o src/case2.o src/case3.o src/case4.o src/case5_acceleration.o
+				$(CC) $(OPTFLAGS) src/main_opt.o src/ra_mgr.o src/case1.o src/case2.o src/case3.o src/case4.o src/case5_acceleration.o -o bin/runner
+src/main_opt.o 		: src/main.cpp
 				$(CC) $(CFLAGS) $< -Ilib -o $@
-src_line_segment/ra_mgr.o    	: src_line_segment/ra_mgr.cpp src_line_segment/ra_mgr.h 
+src/ra_mgr.o    	: src/ra_mgr.cpp src/ra_mgr.h 
 				$(CC) $(CFLAGS) $< -Ilib -o $@
-src_line_segment/case1.o     	: src_line_segment/case1.cpp src_line_segment/ra_mgr.h
+src/case1.o     	: src/case1.cpp src/ra_mgr.h
 				$(CC) $(CFLAGS) $< -Ilib -o $@
-src_line_segment/case2.o     	: src_line_segment/case2.cpp src_line_segment/ra_mgr.h
+src/case2.o     	: src/case2.cpp src/ra_mgr.h
 				$(CC) $(CFLAGS) $< -Ilib -o $@
-src_line_segment/case3.o     	: src_line_segment/case3.cpp src_line_segment/ra_mgr.h
+src/case3.o     	: src/case3.cpp src/ra_mgr.h
 				$(CC) $(CFLAGS) $< -Ilib -o $@
-src_line_segment/case4.o    : src_line_segment/case4.cpp src_line_segment/ra_mgr.h
+src/case4.o    : src/case4.cpp src/ra_mgr.h
 				$(CC) $(CFLAGS) $< -Ilib -o $@
-src_line_segment/case5_acceleration.o    : src_line_segment/case5_acceleration.cpp src_line_segment/ra_mgr.h
+src/case5_acceleration.o    : src/case5_acceleration.cpp src/ra_mgr.h
 				$(CC) $(CFLAGS) $< -Ilib -o $@
 
 # clean all the .o and executable files
 clean:
-		rm -rf src_line_segment/*.o bin/*
+		rm -rf src/*.o bin/*
 

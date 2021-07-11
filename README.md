@@ -16,10 +16,10 @@ Solve the automatic vehicles' scheduling in roundabout
 - make clean
 
 # How to generate vehicle input file?
-- python3 ./generator/vechile_input_generator.py --ra_dir input/ra_in --ra_file_name <roundabout_infomation_file_name> --vehicles_dir input/v_in --vehicles_file_name <vehicle_input_file_name> --num_of_vehicles <number of vehicles> --expon_lamda <expon_lamda value>
+- Use 'python3 ./generator/vechile_input_generator.py -h' to get input arguments
 
 # How to generate roundabout information file?
-- python3 ./generator/ra_input_generator.py
+- Use 'python3 ./generator/ra_input_generator.py -h' to get input arguments
 
 # How to plot?
 - python3 ./plotter/plot_answer.py --output_file output/<output_file_name> --ra_file input/ra_in/<roundabout_infomation_file_name>

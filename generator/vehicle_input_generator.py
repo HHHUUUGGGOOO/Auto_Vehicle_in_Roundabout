@@ -1,4 +1,4 @@
-# input denerator #
+# vehicle input generator #
 
 import sys
 import math
@@ -10,16 +10,14 @@ from pathlib import Path
 import os
 
 def main(args):
-
     print('Read roundabout input file...')
-    ra_file_name = os.path.join(args.ra_dir, args.ra_file_name)
-    if not os.path.isfile(ra_file_name):
-        print(ra_file_name, 'not exists')
+    if not os.path.isfile(args.raFile):
+        print(args.raFile, 'not exists')
         return
-    with open(ra_file_name, 'r') as f:
+    with open(args.raFile, 'r') as f:
         line = f.readline()
         line = line.split()  # There are four item in the first line, split them first
-        ra_radius, ra_safety_velocity, ra_safety_margin, ra_max_capacity = float(line[0]), float(line[1]), float(line[2]), int(line[3])
+        ra_radius, ra_lower_velocity, ra_upper_velocity, ra_safety_margin, ra_max_capacity = float(line[0]), float(line[1]), float(line[2]), float(line[3]), int(line[4])
         # read num of entry
         line = f.readline()
         num_of_entry = int(line)
@@ -32,56 +30,45 @@ def main(args):
         line = f.readline()
         exit_list = [float(angle) for angle in line.split()]
         
-        #print(ra_radius, ra_safety_velocity, ra_safety_margin, ra_max_capacity)
+        print(ra_radius, ra_lower_velocity, ra_upper_velocity, ra_safety_margin, ra_max_capacity)
         #print(entry_list, exit_list)
 
-    # vehicle 
-    #num_of_v = int(input('Number of vehicles: '))
-    #num_of_v_file = int(input('Number of vehicle input files: '))
-
-    #expon_lamda=2
-
     print('Generate vehicles input file...')
-    prefix = args.ra_file_name.split('.')[0]  # set prefix ra1.in -> ra1
-    vehicle_file_name = os.path.join(args.vehicles_dir, prefix+'_' + args.vehicles_file_name)
-    print(vehicle_file_name)
-    
-    if os.path.isfile(vehicle_file_name):
-        print(vehicle_file_name, 'has already exist')
-        check = input('Do you want to overwrite '+vehicle_file_name+'?(y/n) ')
+    if os.path.isfile(args.vFile):
+        print(args.vFile, 'has already exist')
+        check = input('Do you want to overwrite '+args.vFile+'?(y/n) ')
         if check != 'y':
             print('Stop generating file ...')
             return
 
-    v_id = 1
-    v_earlist_arrival_time = 0
-    v_source_angle = 0
-    v_destination_angle = 0
-    v_initial_velocity = 10; #unit=km/hr
+    v_id = v_source_angle =  v_destination_angle = v_earlist_arrival_time = v_velocity = 0
 
-
-    with open(vehicle_file_name, "w+") as f:
-        for v_id in range(args.num_of_vehicles):
+    with open(args.vFile, "w+") as f:
+        print(args.NumOfVs)
+        for v_id in range(args.NumOfVs):
             v_source_angle = entry_list[ np.random.randint(0, num_of_entry)]
             v_destination_angle = exit_list[np.random.randint(0, num_of_entry)]
             while v_destination_angle == v_source_angle:
                 v_destination_angle = exit_list[np.random.randint(0, num_of_entry)]
             y=np.random.ranf(size=None)
-            k=stats.expon.ppf(y, loc=0 ,scale=1/args.expon_lamda)
+            k=stats.expon.ppf(y, loc=0 ,scale=1/args.exponLamda)
             v_earlist_arrival_time+=k
-            f.write("%i %.1f %.1f %.1f %.1f\n" %(v_id+1, v_earlist_arrival_time, v_source_angle, v_destination_angle, v_initial_velocity))    
+            if args.ConstantVel == 'T':
+                v_velocity = (ra_lower_velocity+ra_upper_velocity)/2
+                f.write("%i %.1f %.1f %.1f %.1f\n" %(v_id+1, v_earlist_arrival_time, v_source_angle, v_destination_angle, v_velocity))  
+            elif args.ConstantVel == 'F':
+                v_velocity =  np.random.uniform(ra_lower_velocity, ra_upper_velocity)
+                f.write("%i %.1f %.1f %.1f %.1f\n" %(v_id+1, v_earlist_arrival_time, v_source_angle, v_destination_angle, v_velocity)) 
     print('Vehicles input file generated.')
     return
 
 def parse_args() -> Namespace:
     parser = ArgumentParser()
-    parser.add_argument('--ra_dir', type=Path, default='./input/ra_in/', help='Directory to the ra input files')
-    parser.add_argument('--ra_file_name', type=str, default='ra1.in', help='Filename of the ra file')
-    parser.add_argument('--vehicles_dir', type=Path, default='./input/v_in', help='Directory to the vehicles input file')
-    parser.add_argument('--vehicles_file_name', type=str, default='1.in', help='Filename of the vehicle file (e.g. 1.in)')
-    parser.add_argument('--num_of_vehicles', type=int, default=5)
-    print('here')
-    parser.add_argument('--expon_lamda', type=float, default=2, help='Lamda of the exponantial distribution')
+    parser.add_argument('--raFile', type=str, required=True, help='File to the ra input files.')
+    parser.add_argument('--vFile', type=str, required=True, help='File to the vehicle file (user defined).')
+    parser.add_argument('--NumOfVs', type=int, default=10, help='Number of vehicles.')
+    parser.add_argument('--ConstantVel', type=str, default='T', help='Vehicles are constant velocity or not.(T/F)')
+    parser.add_argument('--exponLamda', type=float, default=2, help='Lamda of the exponantial distribution.')
 
     args = parser.parse_args()
     return args

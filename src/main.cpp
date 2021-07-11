@@ -93,22 +93,32 @@ int main(int argc, char** argv)
       if (strcmp(argv[1], "-case1") == 0)
       {
         cerr << "run case1 :>" << endl;
+        raMgr->_case = 1;
         raMgr->line_trivial_solution_case_1();
       }
       else if (strcmp(argv[1], "-case2") == 0)
       {
         cerr << "run case2 :>" << endl;
+        raMgr->_case = 2;
         raMgr->line_trivial_solution_case_2();
       }
       else if (strcmp(argv[1], "-case3") == 0)
       {
         cerr << "run case3 :>" << endl;
+        raMgr->_case = 3;
         raMgr->line_trivial_solution_case_3();
       }
       else if (strcmp(argv[1], "-case4") == 0)
       {
-        cerr << "run skyline solution :>" << endl;
-        raMgr->skyline_solution_case_2();
+        cerr << "run constant skyline solution case4 :>" << endl;
+        raMgr->_case = 4;
+        raMgr->constant_velocity_skyline_solution_case_4();
+      }
+      else if (strcmp(argv[1], "-case5") == 0)
+      {
+        cerr << "run acceleration solution :>" << endl;
+        raMgr->_case = 5;
+        raMgr->acceleration_solution_case_5();
       }
       // Calculate end time
       end = clock();

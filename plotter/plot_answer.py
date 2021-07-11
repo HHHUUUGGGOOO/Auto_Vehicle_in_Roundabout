@@ -27,7 +27,7 @@ def plot_line(all_v: dict, max_t: int, entry_list: list, exit_list: list):
         plt.vlines(exit, 0, max_t, colors = "r", linestyles = "dashed")
     plt.vlines(360, 0, max_t, colors = "r", linestyles = "dashed")
     # set name for every line
-    plt.legend(id_label)
+    plt.legend(id_label, loc='right')
     # show result, can comment it
     plt.show()
 

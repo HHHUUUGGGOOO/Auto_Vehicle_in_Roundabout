@@ -1,66 +1,51 @@
-# input denerator #
+# roundabout input generator #
 
 import sys
 import math
 import numpy as np
 from pathlib import Path
-#from scipy import stats
 from argparse import ArgumentParser, Namespace
 import os
 
 def main(args):
-
-
-    '''
-    # ra_info
-    num_of_entry = int(input('Number of entries in roundabout:'))
-    num_of_exit = int(input('Munber of exits in roundabout:'))
-    '''
     print('Generate roundabout input file...')
-    '''
-    ra_radius = 20 #unit = m
-    ra_safety_velocity = 25
-    ra_safety_margin = 0
-    '''
-    ra_max_capacity = int(2*math.pi*args.ra_radius/5) #radius/car length
+    ra_max_capacity = int(2*math.pi*args.radius/(args.carLen*2)) #radius/car length
     
-    #entry_space=360/num_of_entry
-    entry_list = [i*(360/args.num_of_entry) for i in range(args.num_of_entry)]
+    #entry_space=360/NumOfEntry
+    entry_list = [i*(360/args.NumOfEntry) for i in range(args.NumOfEntry)]
 
-    #exit_sapce = 360/num_of_exit
-    exit_list = [i*(360/args.num_of_exit) for i in range(args.num_of_exit)]
+    #exit_sapce = 360/NumOfExit
+    exit_list = [i*(360/args.NumOfExit) for i in range(args.NumOfExit)]
 
-    #ra_index=2
-    file_name = os.path.join(args.input_ra_dir, args.ra_file_name)
-    #file_name = './input_ra/ra' + str(ra_index) + ".in"
-    if os.path.isfile(file_name):
-        print(file_name, 'has already exist')
+    if os.path.isfile(args.raFile):
+        print(args.raFile, 'has already exist')
         check = input('Do you want to overwrite?(y/n): ')
         if check != 'y':
             print("Stop generating file ...")
             return
-    with open(file_name, 'w+') as f:
-        f.write("{:.1f} {:.1f} {:.1f} {:.1f} {:d}\n".format(args.ra_radius, args.ra_lower_velocity,args.ra_upper_velocity, args.ra_safety_margin, ra_max_capacity))
-        f.write('{:d}\n'.format(args.num_of_entry))
-        for i in range(args.num_of_entry):
+
+    with open(args.raFile, 'w+') as f:
+        f.write("{:.1f} {:.1f} {:.1f} {:.1f} {:d}\n".format(args.radius, args.lowerVel ,args.upperVel, args.safetyMargin, ra_max_capacity))
+        f.write('{:d}\n'.format(args.NumOfEntry))
+        for i in range(args.NumOfEntry):
             f.write("{:.1f} ".format(entry_list[i]))
         f.write('\n')
 
-        f.write('{:d}\n'.format(args.num_of_exit))
-        for i in range(args.num_of_exit):
+        f.write('{:d}\n'.format(args.NumOfExit))
+        for i in range(args.NumOfExit):
             f.write("{:.1f} ".format(exit_list[i]))
         f.write('\n')
 
     '''
-    f=open(file_name, "w+")
+    f=open(raFile, "w+")
 
     f.write("%.1f" %(entry_list[0]))
-    for i in range(num_of_entry-1):
+    for i in range(NumOfEntry-1):
             f.write(",%.1f" %(entry_list[i+1]))
     f.write('\n')
     
     f.write("%.1f" %(exit_list[0]))
-    for i in range(num_of_exit-1):
+    for i in range(NumOfExit-1):
             f.write(",%.1f" %(exit_list[i+1]))
     f.write('\n')
     f.close()
@@ -69,14 +54,14 @@ def main(args):
 
 def parse_args() -> Namespace:
     parser = ArgumentParser()
-    parser.add_argument('--input_ra_dir', type=Path, default='./input/ra_in', help='Directory to the roundabout input')
-    parser.add_argument('--num_of_entry', type=int, default=4, help='Number of entries in roundabout')
-    parser.add_argument('--num_of_exit',  type=int, default=4, help='NUmber of exits in roundabout')
-    parser.add_argument('--ra_file_name', type=str,  default='ra1.in', help='file name of the ra input file')
-    parser.add_argument('--ra_radius', type=float, default=20.0, help='Radius of roundabout (unit:m)')
-    parser.add_argument('--ra_lower_velocity', type=float, default=0.0)
-    parser.add_argument('--ra_upper_velocity', type=float, default=10.0)
-    parser.add_argument('--ra_safety_margin', type=float, default=0.0)
+    parser.add_argument('--NumOfEntry', type=int, default=4, help='Number of entries in roundabout.')
+    parser.add_argument('--NumOfExit',  type=int, default=4, help='NUmber of exits in roundabout.')
+    parser.add_argument('--raFile', type=str,  required = True, help='File to ra input file(user defined).')
+    parser.add_argument('--radius', type=float, default=20.0, help='Radius of roundabout (unit:m)')
+    parser.add_argument('--lowerVel', type=float, default=0.0, help='The minimum velocity allowed in roundabout (unit:m/s).')
+    parser.add_argument('--upperVel', type=float, default=10.0, help='The maximum velocity allowed in roundabout (unit:m/s).')
+    parser.add_argument('--safetyMargin', type=float, default=0.0, help='The minimum distance allowed in roundabout (unit:m).')
+    parser.add_argument('--carLen', type=float, default=2.0, help='Car length use in compute maximum capacity (unit:m).')
 
     args = parser.parse_args()
     return args
