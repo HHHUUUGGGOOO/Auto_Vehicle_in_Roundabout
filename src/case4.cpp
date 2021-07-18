@@ -94,8 +94,9 @@ ra_mgr::constant_velocity_skyline_solution_case_4()
             {
                 while(nodeD->getNext() != _raSourceAngleList[enterAngleId] && nodeD->getNext()->getStartTime() < answerList[enterAngleId]->getStartTime()) {
                     nodeD = nodeD->getNext();
-                    while (nodeD->IsExit() && nodeD->getNext() != _raSourceAngleList[enterAngleId])
-                        nodeD = nodeD->getNext();
+                    // FIXME: Newly removed 
+                    // while (nodeD->IsExit() && nodeD->getNext() != _raSourceAngleList[enterAngleId])
+                    //    nodeD = nodeD->getNext();
                 }
                 nodeU = nodeD->getNext();
                 if (nodeU == _raSourceAngleList[enterAngleId]) {

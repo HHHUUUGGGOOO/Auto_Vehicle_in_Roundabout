@@ -82,7 +82,6 @@ ra_mgr::acceleration_solution_case_5()
         
         // compute upward and downward skyline //
         computeUDSkyline();
-
         // check if can fit between _downSkyline and _upSkyline else put based on _skyline
         // if can -> insert
         bool noAnswer = false;
@@ -100,17 +99,22 @@ ra_mgr::acceleration_solution_case_5()
             {
                 while(nodeD->getNext() != _raSourceAngleList[enterAngleId] && nodeD->getNext()->getStartTime() < answerList[enterAngleId]->getStartTime()) {
                     nodeD = nodeD->getNext();
-                    while (nodeD->IsExit() && nodeD->getNext() != _raSourceAngleList[enterAngleId])
-                        nodeD = nodeD->getNext();
+                    // while (nodeD->IsExit() && nodeD->getNext() != _raSourceAngleList[enterAngleId])
+                    //     nodeD = nodeD->getNext();
                 }
                 nodeU = nodeD->getNext();
+                // cerr << "Endtime:"
+                cerr<< "NodeU: " << nodeU->getStartTime() << " || NodeD: " << nodeD->getStartTime() << endl;
                 if (nodeU == _raSourceAngleList[enterAngleId]) {
                     noAnswer = true;
                     break; // break while(!canPlaceBetweenTwoSkyline(enterAngleId, exitAngleId))
                 }
                 else {
-                    if (nodeU->getStartTime() > answerList[enterAngleId]->getStartTime() + safety_time_interval(ra_safety_margin, v_total[current_v_id]->velocity) + TIMEUNIT)
+                    cerr << "Hello" << endl;
+                    cerr << "node U start time : " << nodeU->getStartTime() << ", answer Start time:" << answerList[enterAngleId]->getStartTime() << ", safety time: " << safety_time_interval(ra_safety_margin, v_total[current_v_id]->velocity) << endl;
+                    if (nodeU->getStartTime() > answerList[enterAngleId]->getStartTime() + safety_time_interval(ra_safety_margin, v_total[current_v_id]->velocity) + TIMEUNIT){
                         endTime = answerList[enterAngleId]->getStartTime() + TIMEUNIT;
+                    }
                     else endTime = nodeU->getStartTime() + safety_time_interval(ra_safety_margin, velocity(nodeU, ra_radius)); // depend on nodeU
                 }
             }
@@ -373,9 +377,12 @@ ra_mgr::canPlaceBetweenTwoSkyline(const int entryId, const int exitId)
     short head_upNode_conflict = 1, head_downNode_conflict = 2, tail_upNode_conflict = 3, tail_downNode_conflict = 4;
     // begin at "source angle"
     bool isChange = false;
-    // printSkyline(_upSkyline);
-    // printSkyline(_downSkyline);
-    // printSkyline(answerList);
+    cerr << "upSkyline" << endl;
+    printSkyline(_upSkyline);
+    cerr << "downSkyline" << endl;
+    printSkyline(_downSkyline);
+    cerr << "answerList" << endl;
+    printSkyline(answerList);
     if (!(_upSkyline[entryId]->IsStart()) && velocity(_upSkyline[entryId]->getBehind(), ra_radius) * (_upSkyline[entryId]->getStartTime() - answerList[entryId]->getStartTime()) < ra_safety_margin) 
         return false; 
     for (int i = entryId; i != exitId; i = (i+1)%sa_size)
